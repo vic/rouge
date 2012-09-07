@@ -21,6 +21,12 @@ describe Reader do
       Reader.read("!ruby!").should eq(:"!ruby!")
     end
 
+    it "should read special values" do
+      Reader.read("nil").should be_nil
+      Reader.read("true").should be_true
+      Reader.read("false").should be_false
+    end
+
     describe "strings" do
       it "should read plain strings" do
         Reader.read("\"akashi yo\"").should eq("akashi yo")

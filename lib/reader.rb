@@ -41,7 +41,17 @@ class Reader
   end
 
   def symbol
-    slurp(SYMBOL).intern
+    s = slurp(SYMBOL).intern
+    case s
+    when :true
+      true
+    when :false
+      false
+    when :nil
+      nil
+    else
+      s
+    end
   end
 
   def string
