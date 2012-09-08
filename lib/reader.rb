@@ -28,10 +28,12 @@ class Reader
         symbol
       when /:/
         keyword
-      when /["']/
+      when /"/
         string
       when /\(/
         list
+      when /'/
+        quotation
       else
         raise UnexpectedCharacterError, "#{peek} in #lex"
       end
@@ -55,7 +57,7 @@ class Reader
 
   def keyword
     begin
-      slurp /:['"]/
+      slurp /:"/
       @n -= 1
       s = string
       s.intern.to_keyword
@@ -117,6 +119,11 @@ class Reader
 
     consume
     r
+  end
+
+  def quotation
+    consume
+    [:quote, lex(true)]
   end
 
   def slurp re

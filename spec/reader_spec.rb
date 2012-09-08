@@ -67,11 +67,20 @@ describe Reader do
         Reader.read("(1 2 3)").should eq [1, 2, 3]
         Reader.read("(true () \"no\")").should eq [:true, [], "no"]
       end
+
+      it "should read nested lists" do
+        Reader.read("(((3) (())) 9 ((8) (8)))").should eq \
+          [[[3], [[]]], 9, [[8], [8]]]
+      end
     end
 
     describe "quotations" do
       it "should read 'X as (QUOTE X)" do
-        Reader.read("'x").should eq [Keyword[:quote], Keyword[:x]]
+        Reader.read("'x").should eq [:quote, :x]
+      end
+
+      it "should read ''('X) as (QUOTE (QUOTE ((QUOTE X))))" do
+        Reader.read("''('x)").should eq [:quote, [:quote, [[:quote, :x]]]]
       end
     end
   end
