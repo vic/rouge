@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-class Keyword
+class RL::Keyword
   def initialize(symbol)
     @symbol = symbol
   end
@@ -10,16 +10,10 @@ class Keyword
   end
 
   def ==(keyword)
-    keyword.is_a?(Keyword) and keyword.symbol == @symbol
+    keyword.is_a?(RL::Keyword) and keyword.symbol == @symbol
   end
 
   attr_reader :symbol
-end
-
-class Symbol
-  def to_keyword
-    Keyword.new self
-  end
 end
 
 # vim: set sw=2 et cc=80:

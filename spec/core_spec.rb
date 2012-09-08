@@ -1,29 +1,21 @@
 # encoding: utf-8
 require 'spec_helper'
-require 'core'
+require 'rl'
 
-describe Keyword do
+describe RL::Keyword do
   describe "the constructor" do
     it "should return a new keyword" do
-      Keyword.new(:abc).should be_an_instance_of Keyword
+      RL::Keyword.new(:abc).should be_an_instance_of RL::Keyword
     end
 
     it "should function with the alternate form" do
-      Keyword[:aoeu].should eq Keyword.new(:aoeu)
+      RL::Keyword[:aoeu].should eq RL::Keyword.new(:aoeu)
     end
   end
 
   describe "keyword equality" do
     it "should be true for two keyword with the same underlying symbol" do
-      Keyword.new(:xyz).should eq Keyword.new(:xyz)
-    end
-  end
-end
-
-describe Symbol do
-  describe "the to_keyword method" do
-    it "should return a keyword for the given symbol" do
-      :abc.to_keyword.should eq Keyword.new(:abc)
+      RL::Keyword.new(:xyz).should eq RL::Keyword.new(:xyz)
     end
   end
 end

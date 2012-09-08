@@ -1,7 +1,7 @@
 # encoding: utf-8
-require 'core'
+require 'rl/core'
 
-class Reader
+class RL::Reader
   class UnexpectedCharacterError < StandardError; end
   class TrailingDataError < StandardError; end
   class EndOfDataError < StandardError; end
@@ -62,9 +62,9 @@ class Reader
       slurp /:"/
       @n -= 1
       s = string
-      s.intern.to_keyword
+      RL::Keyword[s.intern]
     rescue UnexpectedCharacterError
-      slurp(/^:[a-zA-Z0-9\-_!\?\*\/]+/)[1..-1].intern.to_keyword
+      RL::Keyword[slurp(/^:[a-zA-Z0-9\-_!\?\*\/]+/)[1..-1].intern]
     end
   end
 

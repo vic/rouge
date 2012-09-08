@@ -1,16 +1,16 @@
 # encoding: utf-8
-require 'core'
+require 'rl/core'
 
-module Eval; end
+module RL::Eval; end
 
-class << Eval
+class << RL::Eval
   def eval(form)
     case form
     when Integer
       form
     when String
       form
-    when Keyword
+    when RL::Keyword
       form
     when Symbol
       raise "TODO"

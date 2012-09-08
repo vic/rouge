@@ -1,16 +1,16 @@
 # encoding: utf-8
-require 'core'
+require 'rl/core'
 
-module Printer; end
+module RL::Printer; end
 
-class << Printer
+class << RL::Printer
   def print(input)
     case input
     when Integer
       input.to_s
     when Symbol
       input.to_s
-    when Keyword
+    when RL::Keyword
       input.symbol.inspect
     when String
       input.inspect
