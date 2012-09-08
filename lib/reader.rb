@@ -16,7 +16,7 @@ class Reader
   end
 
   def lex sub=false
-    while peek =~ /\s/
+    while peek =~ /[\s,]/
       consume
     end
 
@@ -34,6 +34,8 @@ class Reader
         list
       when /'/
         quotation
+      when /{/
+        map
       else
         raise UnexpectedCharacterError, "#{peek} in #lex"
       end
@@ -124,6 +126,23 @@ class Reader
   def quotation
     consume
     [:quote, lex(true)]
+  end
+
+  def map
+    consume
+    r = {}
+
+    while true
+      if peek == '}'
+        break
+      end
+      k = lex(true)
+      v = lex(true)
+      r[k] = v
+    end
+
+    consume
+    r
   end
 
   def slurp re

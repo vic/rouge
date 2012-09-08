@@ -83,6 +83,30 @@ describe Reader do
         Reader.read("''('x)").should eq [:quote, [:quote, [[:quote, :x]]]]
       end
     end
+
+    describe "maps" do
+      it "should read the empty map" do
+        Reader.read("{}").should eq({})
+      end
+
+      it "should read one-element maps" do
+        Reader.read("{a 1}").should eq({:a => 1})
+        Reader.read("{\"quux\" (lambast)}").should eq({"quux" => [:lambast]})
+      end
+
+      it "should read multiple-element maps" do
+        Reader.read("{a 1 b 2}").should eq({:a => 1, :b => 2})
+        Reader.read("{f f, y y\nz z}").should eq(
+          {:f => :f, :y => :y, :z => :z})
+      end
+
+      it "should read nested maps" do
+        Reader.read("{a {z 9} b {q :q}}").should eq(
+          {:a => {:z => 9}, :b => {:q => Keyword[:q]}})
+        Reader.read("{{9 7} 5}").should eq(
+          {{9 => 7} => 5})
+      end
+    end
   end
 end
 
