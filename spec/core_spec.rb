@@ -5,7 +5,11 @@ require 'core'
 describe Keyword do
   describe "the constructor" do
     it "should return a new keyword" do
-      Keyword.new(:abc).should be_an_instance_of(Keyword)
+      Keyword.new(:abc).should be_an_instance_of Keyword
+    end
+
+    it "should function with the alternate form" do
+      Keyword[:aoeu].should eq Keyword.new(:aoeu)
     end
   end
 

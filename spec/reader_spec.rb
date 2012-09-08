@@ -6,50 +6,72 @@ describe Reader do
   describe "the read method" do
     describe "reading numbers" do
       it "should read plain numbers" do
-        Reader.read("12755").should eq(12755)
+        Reader.read("12755").should eq 12755
       end
 
       it "should read separated numbers" do
-        Reader.read("2_50_9").should eq(2509)
+        Reader.read("2_50_9").should eq 2509
       end
     end
 
     it "should read symbols" do
-      Reader.read("loki").should eq(:loki)
-      Reader.read("/").should eq(:/)
-      Reader.read("wah?").should eq(:wah?)
-      Reader.read("!ruby!").should eq(:"!ruby!")
-      Reader.read("nil").should eq(:nil)
-      Reader.read("true").should eq(:true)
-      Reader.read("false").should eq(:false)
+      Reader.read("loki").should eq :loki
+      Reader.read("/").should eq :/
+      Reader.read("wah?").should eq :wah?
+      Reader.read("!ruby!").should eq :"!ruby!"
+      Reader.read("nil").should eq :nil
+      Reader.read("true").should eq :true
+      Reader.read("false").should eq :false
     end
 
     describe "keywords" do
       it "should read plain keywords" do
-        Reader.read(":loki").should eq(:loki.to_keyword)
-        Reader.read(":/").should eq(:/.to_keyword)
-        Reader.read(":wah?").should eq(:wah?.to_keyword)
-        Reader.read(":nil").should eq(:nil.to_keyword)
-        Reader.read(":true").should eq(:true.to_keyword)
-        Reader.read(":false").should eq(:false.to_keyword)
+        Reader.read(":loki").should eq Keyword[:loki]
+        Reader.read(":/").should eq Keyword[:/]
+        Reader.read(":wah?").should eq Keyword[:wah?]
+        Reader.read(":nil").should eq Keyword[:nil]
+        Reader.read(":true").should eq Keyword[:true]
+        Reader.read(":false").should eq Keyword[:false]
       end
 
       it "should read string-symbols" do
-        Reader.read(":\"!ruby!\"").should eq(:"!ruby!".to_keyword)
+        Reader.read(":\"!ruby!\"").should eq Keyword[:"!ruby!"]
       end
     end
 
     describe "strings" do
       it "should read plain strings" do
-        Reader.read("\"akashi yo\"").should eq("akashi yo")
-        Reader.read("\"akashi \n woah!\"").should eq("akashi \n woah!")
+        Reader.read("\"akashi yo\"").should eq "akashi yo"
+        Reader.read("\"akashi \n woah!\"").should eq "akashi \n woah!"
       end
 
       it "should read escape sequences" do
-        Reader.read("\"here \\\" goes\"").should eq("here \" goes")
-        Reader.read("\"here \\\\ goes\"").should eq("here \\ goes")
-        Reader.read("\"\\a\\b\\e\\f\\n\\r\"").should eq("\a\b\e\f\n\r")
-        Reader.read("\"\\s\\t\\v\"").should eq("\s\t\v")
+        Reader.read("\"here \\\" goes\"").should eq "here \" goes"
+        Reader.read("\"here \\\\ goes\"").should eq "here \\ goes"
+        Reader.read("\"\\a\\b\\e\\f\\n\\r\"").should eq "\a\b\e\f\n\r"
+        Reader.read("\"\\s\\t\\v\"").should eq "\s\t\v"
+      end
+    end
+
+    describe "lists" do
+      it "should read the empty list" do
+        Reader.read("()").should eq []
+      end
+
+      it "should read one-element lists" do
+        Reader.read("(tiffany)").should eq [:tiffany]
+        Reader.read("(:raaaaash)").should eq [Keyword[:raaaaash]]
+      end
+
+      it "should read multiple-element lists" do
+        Reader.read("(1 2 3)").should eq [1, 2, 3]
+        Reader.read("(true () \"no\")").should eq [:true, [], "no"]
+      end
+    end
+
+    describe "quotations" do
+      it "should read 'X as (QUOTE X)" do
+        Reader.read("'x").should eq [Keyword[:quote], Keyword[:x]]
       end
     end
   end

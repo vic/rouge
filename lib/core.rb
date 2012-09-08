@@ -5,6 +5,10 @@ class Keyword
     @symbol = symbol
   end
 
+  def self.[](symbol)
+    new symbol
+  end
+
   def ==(keyword)
     keyword.is_a?(Keyword) and keyword.symbol == @symbol
   end

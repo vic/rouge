@@ -15,24 +15,28 @@ class Reader
     @n = 0
   end
 
-  def lex
+  def lex sub=false
+    while peek =~ /\s/
+      consume
+    end
+
     r = 
       case peek
       when NUMBER
         number
       when SYMBOL
         symbol
-      when KEYWORD_OPEN
+      when /:/
         keyword
-      when SPECIAL_OPEN
-        special
-      when STRING_OPEN
+      when /["']/
         string
+      when /\(/
+        list
       else
         raise UnexpectedCharacterError, "#{peek} in #lex"
       end
 
-    unless @n == @src.length
+    unless sub or @n == @src.length
       raise TrailingDataError, "remaining in #lex: #{@src[@n..-1]}"
     end
 
@@ -51,28 +55,12 @@ class Reader
 
   def keyword
     begin
-      slurp(KEYWORD_STRING_OPEN)
+      slurp /:['"]/
       @n -= 1
       s = string
       s.intern.to_keyword
     rescue UnexpectedCharacterError
-      slurp(KEYWORD)[1..-1].intern.to_keyword
-    end
-  end
-
-  def special
-    consume
-    case c = consume
-    when ?t
-      true
-    when ?f
-      false
-    when ?n
-      nil
-    when nil
-      raise EndOfDataError, "in #special"
-    else
-      raise UnexpectedCharacterError, "#{c} in special"
+      slurp(/^:[a-zA-Z0-9\-_!\?\*\/]+/)[1..-1].intern.to_keyword
     end
   end
 
@@ -116,6 +104,21 @@ class Reader
     s
   end
 
+  def list
+    consume
+    r = []
+
+    while true
+      if peek == ')'
+        break
+      end
+      r << lex(true)
+    end
+
+    consume
+    r
+  end
+
   def slurp re
     @src[@n..-1] =~ re
     raise UnexpectedCharacterError, "#{@src[@n]} in #slurp #{re}" if !$&
@@ -135,11 +138,6 @@ class Reader
 
   NUMBER = /^[0-9][0-9_]*/
   SYMBOL = /^[a-zA-Z0-9\-_!\?\*\/]+/
-  KEYWORD_OPEN = /^:/
-  KEYWORD = /^:[a-zA-Z0-9\-_!\?\*\/]+/
-  KEYWORD_STRING_OPEN = /^:["']/
-  SPECIAL_OPEN = /^#/
-  STRING_OPEN = /^['"]/
 end
 
 # vim: set sw=2 et cc=80:
