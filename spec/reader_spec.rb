@@ -14,28 +14,28 @@ describe Reader do
       end
     end
 
-    it "should read atoms" do
-      Reader.read("loki").should eq(:loki.atom)
-      Reader.read("/").should eq(:/.atom)
-      Reader.read("wah?").should eq(:wah?.atom)
-      Reader.read("!ruby!").should eq(:"!ruby!".atom)
-      Reader.read("nil").should eq(:nil.atom)
-      Reader.read("true").should eq(:true.atom)
-      Reader.read("false").should eq(:false.atom)
+    it "should read symbols" do
+      Reader.read("loki").should eq(:loki)
+      Reader.read("/").should eq(:/)
+      Reader.read("wah?").should eq(:wah?)
+      Reader.read("!ruby!").should eq(:"!ruby!")
+      Reader.read("nil").should eq(:nil)
+      Reader.read("true").should eq(:true)
+      Reader.read("false").should eq(:false)
     end
 
-    describe "symbols" do
-      it "should read plain symbols" do
-        Reader.read(":loki").should eq(:loki)
-        Reader.read(":/").should eq(:/)
-        Reader.read(":wah?").should eq(:wah?)
-        Reader.read(":nil").should eq(:nil)
-        Reader.read(":true").should eq(:true)
-        Reader.read(":false").should eq(:false)
+    describe "keywords" do
+      it "should read plain keywords" do
+        Reader.read(":loki").should eq(:loki.to_keyword)
+        Reader.read(":/").should eq(:/.to_keyword)
+        Reader.read(":wah?").should eq(:wah?.to_keyword)
+        Reader.read(":nil").should eq(:nil.to_keyword)
+        Reader.read(":true").should eq(:true.to_keyword)
+        Reader.read(":false").should eq(:false.to_keyword)
       end
 
       it "should read string-symbols" do
-        Reader.read(":\"!ruby!\"").should eq(:"!ruby!")
+        Reader.read(":\"!ruby!\"").should eq(:"!ruby!".to_keyword)
       end
     end
 

@@ -20,10 +20,10 @@ class Reader
       case peek
       when NUMBER
         number
-      when ATOM
-        atom
-      when SYMBOL_OPEN
+      when SYMBOL
         symbol
+      when KEYWORD_OPEN
+        keyword
       when SPECIAL_OPEN
         special
       when STRING_OPEN
@@ -45,12 +45,19 @@ class Reader
     slurp(NUMBER).gsub(/\D+/, '').to_i
   end
 
-  def atom
-    slurp(ATOM).intern.atom
+  def symbol
+    slurp(SYMBOL).intern
   end
 
-  def symbol
-    slurp(SYMBOL)[1..-1].intern
+  def keyword
+    begin
+      slurp(KEYWORD_STRING_OPEN)
+      @n -= 1
+      s = string
+      s.intern.to_keyword
+    rescue UnexpectedCharacterError
+      slurp(KEYWORD)[1..-1].intern.to_keyword
+    end
   end
 
   def special
@@ -110,7 +117,8 @@ class Reader
   end
 
   def slurp re
-    @src =~ re
+    @src[@n..-1] =~ re
+    raise UnexpectedCharacterError, "#{@src[@n]} in #slurp #{re}" if !$&
     @n += $&.length
     $&
   end
@@ -126,10 +134,10 @@ class Reader
   end
 
   NUMBER = /^[0-9][0-9_]*/
-  ATOM = /^[a-zA-Z0-9\-_!\?\*\/]+/
-  SYMBOL_OPEN = /^:/
-  SYMBOL = /^:[a-zA-Z0-9\-_!\?\*\/]+/
-  SYMBOL_STRING_OPEN = /^:["']/
+  SYMBOL = /^[a-zA-Z0-9\-_!\?\*\/]+/
+  KEYWORD_OPEN = /^:/
+  KEYWORD = /^:[a-zA-Z0-9\-_!\?\*\/]+/
+  KEYWORD_STRING_OPEN = /^:["']/
   SPECIAL_OPEN = /^#/
   STRING_OPEN = /^['"]/
 end

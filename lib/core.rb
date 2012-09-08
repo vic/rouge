@@ -1,20 +1,20 @@
 # encoding: utf-8
 
-class Atom
-  def initialize(sym)
-    @sym = sym
+class Keyword
+  def initialize(symbol)
+    @symbol = symbol
   end
 
-  def ==(atom)
-    atom.is_a?(Atom) and atom.sym == @sym
+  def ==(keyword)
+    keyword.is_a?(Keyword) and keyword.symbol == @symbol
   end
 
-  attr_reader :sym
+  attr_reader :symbol
 end
 
 class Symbol
-  def atom
-    Atom.new self
+  def to_keyword
+    Keyword.new self
   end
 end
 

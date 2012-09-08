@@ -2,24 +2,24 @@
 require 'spec_helper'
 require 'core'
 
-describe Atom do
+describe Keyword do
   describe "the constructor" do
-    it "should return a new atom" do
-      Atom.new(:abc).should be_an_instance_of(Atom)
+    it "should return a new keyword" do
+      Keyword.new(:abc).should be_an_instance_of(Keyword)
     end
   end
 
-  describe "atom equality" do
-    it "should be true for two atoms with the same underlying symbol" do
-      Atom.new(:xyz).should eq Atom.new(:xyz)
+  describe "keyword equality" do
+    it "should be true for two keyword with the same underlying symbol" do
+      Keyword.new(:xyz).should eq Keyword.new(:xyz)
     end
   end
 end
 
 describe Symbol do
-  describe "the atom method" do
-    it "should return an atom for the given symbol" do
-      :abc.atom.should eq Atom.new(:abc)
+  describe "the to_keyword method" do
+    it "should return a keyword for the given symbol" do
+      :abc.to_keyword.should eq Keyword.new(:abc)
     end
   end
 end
