@@ -21,6 +21,8 @@ class Reader
         number
       when SYMBOL
         symbol
+      when SPECIAL_OPEN
+        special
       when STRING_OPEN
         string
       else
@@ -41,16 +43,22 @@ class Reader
   end
 
   def symbol
-    s = slurp(SYMBOL).intern
-    case s
-    when :true
+    slurp(SYMBOL).intern
+  end
+
+  def special
+    consume
+    case c = consume
+    when ?t
       true
-    when :false
+    when ?f
       false
-    when :nil
+    when ?n
       nil
+    when nil
+      raise EndOfDataError, "in #special"
     else
-      s
+      raise UnexpectedCharacterError, "#{c} in special"
     end
   end
 
@@ -112,6 +120,7 @@ class Reader
 
   NUMBER = /^[0-9][0-9_]*/
   SYMBOL = /^[a-zA-Z0-9\-_!\?\*\/]+/
+  SPECIAL_OPEN = /^#/
   STRING_OPEN = /^['"]/
 end
 

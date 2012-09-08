@@ -19,12 +19,15 @@ describe Reader do
       Reader.read("/").should eq(:/)
       Reader.read("wah?").should eq(:wah?)
       Reader.read("!ruby!").should eq(:"!ruby!")
+      Reader.read("nil").should eq(:nil)
+      Reader.read("true").should eq(:true)
+      Reader.read("false").should eq(:false)
     end
 
     it "should read special values" do
-      Reader.read("nil").should be_nil
-      Reader.read("true").should be_true
-      Reader.read("false").should be_false
+      Reader.read("#n").should be_nil
+      Reader.read("#t").should be_true
+      Reader.read("#f").should be_false
     end
 
     describe "strings" do

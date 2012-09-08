@@ -1,0 +1,10 @@
+''x is really just (quote (quote x))
+or is it (quote x)?
+
+Compare with Clojure reader.
+
+Should the RL x be Ruby :x or should RL :x? (should we even bother with RL :x or can we do stuff with namespaces? e.g. RL x can be :*ns*/x where *ns* is the current NS?)
+
+--
+
+We can try using #t #f #n for now, and only have Ruby syms.  Not Clojurish, but Rubyish.  May want to just bite the bullets and have a distinct "atom" concept though, because otherwise we have no keywords that evaluate .. yeah.
