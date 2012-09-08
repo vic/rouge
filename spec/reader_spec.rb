@@ -105,6 +105,20 @@ describe RL::Reader do
         RL.read("{{9 7} 5}").should eq({{9 => 7} => 5})
       end
     end
+
+    describe "trailing-character behaviour" do
+      it "should fail with trailing non-whitespace" do
+        lambda {
+          RL.read("hello joe")
+        }.should raise_exception(RL::Reader::TrailingDataError)
+      end
+
+      it "should not fail with trailing whitespace" do
+        lambda {
+          RL.read("hello    \n\n\t\t  ").should eq :hello
+        }.should_not raise_exception
+      end
+    end
   end
 end
 

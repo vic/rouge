@@ -40,8 +40,13 @@ class RL::Reader
         raise UnexpectedCharacterError, "#{peek} in #lex"
       end
 
-    unless sub or @n == @src.length
-      raise TrailingDataError, "remaining in #lex: #{@src[@n..-1]}"
+    if not sub
+      while peek =~ /[\s,]/
+        consume
+      end
+      if @n < @src.length
+        raise TrailingDataError, "remaining in #lex: #{@src[@n..-1]}"
+      end
     end
 
     r

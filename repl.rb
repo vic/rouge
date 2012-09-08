@@ -15,9 +15,10 @@ while true
     break
   end
 
-
-
-  p input
+  form = RL.read(input)
+  STDOUT.puts "read: #{RL.print form}   == #{form}"
+  result = RL.eval(form)
+  STDOUT.puts "eval: #{RL.print result}   == #{result}"
 end
 
 # vim: set sw=2 et cc=80:
