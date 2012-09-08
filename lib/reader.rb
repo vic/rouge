@@ -1,4 +1,5 @@
 # encoding: utf-8
+require 'core'
 
 class Reader
   class UnexpectedCharacterError < StandardError; end
@@ -19,7 +20,9 @@ class Reader
       case peek
       when NUMBER
         number
-      when SYMBOL
+      when ATOM
+        atom
+      when SYMBOL_OPEN
         symbol
       when SPECIAL_OPEN
         special
@@ -42,8 +45,12 @@ class Reader
     slurp(NUMBER).gsub(/\D+/, '').to_i
   end
 
+  def atom
+    slurp(ATOM).intern.atom
+  end
+
   def symbol
-    slurp(SYMBOL).intern
+    slurp(SYMBOL)[1..-1].intern
   end
 
   def special
@@ -119,7 +126,10 @@ class Reader
   end
 
   NUMBER = /^[0-9][0-9_]*/
-  SYMBOL = /^[a-zA-Z0-9\-_!\?\*\/]+/
+  ATOM = /^[a-zA-Z0-9\-_!\?\*\/]+/
+  SYMBOL_OPEN = /^:/
+  SYMBOL = /^:[a-zA-Z0-9\-_!\?\*\/]+/
+  SYMBOL_STRING_OPEN = /^:["']/
   SPECIAL_OPEN = /^#/
   STRING_OPEN = /^['"]/
 end

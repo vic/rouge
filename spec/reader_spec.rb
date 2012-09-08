@@ -14,20 +14,29 @@ describe Reader do
       end
     end
 
-    it "should read symbols" do
-      Reader.read("loki").should eq(:loki)
-      Reader.read("/").should eq(:/)
-      Reader.read("wah?").should eq(:wah?)
-      Reader.read("!ruby!").should eq(:"!ruby!")
-      Reader.read("nil").should eq(:nil)
-      Reader.read("true").should eq(:true)
-      Reader.read("false").should eq(:false)
+    it "should read atoms" do
+      Reader.read("loki").should eq(:loki.atom)
+      Reader.read("/").should eq(:/.atom)
+      Reader.read("wah?").should eq(:wah?.atom)
+      Reader.read("!ruby!").should eq(:"!ruby!".atom)
+      Reader.read("nil").should eq(:nil.atom)
+      Reader.read("true").should eq(:true.atom)
+      Reader.read("false").should eq(:false.atom)
     end
 
-    it "should read special values" do
-      Reader.read("#n").should be_nil
-      Reader.read("#t").should be_true
-      Reader.read("#f").should be_false
+    describe "symbols" do
+      it "should read plain symbols" do
+        Reader.read(":loki").should eq(:loki)
+        Reader.read(":/").should eq(:/)
+        Reader.read(":wah?").should eq(:wah?)
+        Reader.read(":nil").should eq(:nil)
+        Reader.read(":true").should eq(:true)
+        Reader.read(":false").should eq(:false)
+      end
+
+      it "should read string-symbols" do
+        Reader.read(":\"!ruby!\"").should eq(:"!ruby!")
+      end
     end
 
     describe "strings" do
