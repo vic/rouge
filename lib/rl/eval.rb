@@ -9,10 +9,11 @@ module RL::Eval
     when Symbol
       context[form]
     when Array
-      if form.length == 2 and form[0] == :quote
-        form[1]
+      fun = eval form[0], context
+      if fun.is_a? RL::Macro
+        eval fun.lamda.call(*form[1..-1]), context
       else
-        eval(form[0], context).call *form[1..-1].map {|f| eval(f, context)}
+        fun.call *form[1..-1].map {|f| eval f, context}
       end
     else
       form
