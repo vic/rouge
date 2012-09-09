@@ -76,6 +76,18 @@ describe RL::Eval::Builtins do
       end
     end
   end
+
+  describe "def" do
+    it "should make a binding" do
+      RL.eval(@context, [:def, :barge, [:quote, :a]]).should eq :barge
+    end
+
+    it "should always make a binding at the top of the namespace" do
+      subcontext = RL::Eval::Context.new @context
+      RL.eval(subcontext, [:def, :sarge, [:quote, :b]]).should eq :sarge
+      RL.eval(@context, :sarge).should eq :b
+    end
+  end
 end
 
 # vim: set sw=2 et cc=80:

@@ -52,6 +52,11 @@ class << RL::Eval::Builtins
       RL.eval context, *body
     }
   end
+
+  def def(context, name, form)
+    RL::Eval::Context.toplevel.set_here name, RL.eval(context, form)
+    name
+  end
 end
 
 # vim: set sw=2 et cc=80:
