@@ -68,6 +68,12 @@ describe RL::Eval::Builtins do
         RL.eval(@context, [:fn, [:a, :b], [:list, :a, :b]]).
             call(:daria, :morgendorffer).should eq [:daria, :morgendorffer]
       end
+
+      it "should bind rest arguments correctly" do
+        RL.eval(@context, [:fn, [:y, :z, :&, :rest], [:list, :y, :z, :rest]]).
+            call("where", "is", "mordialloc", "gosh").should eq \
+            ["where", "is", ["mordialloc", "gosh"]]
+      end
     end
   end
 end

@@ -30,10 +30,20 @@ class << RL::Eval::Builtins
     end
 
     lambda {|*args|
-      if !rest and argv.length != args.length
+      if !rest ? (args.length != argv.length) : (args.length < argv.length)
         raise ArgumentError,
             "wrong number of arguments (#{args.length} for #{argv.length})"
       end
+
+      (0...argv.length).each do |i|
+        context.set_here argv[i], args[i]
+      end
+
+      if rest
+        context.set_here rest, args[argv.length..-1]
+      end
+
+      RL.eval context, *body
     }
   end
 end
