@@ -4,28 +4,18 @@ require 'rl/core'
 module RL::Eval
   require 'rl/eval/context'
 
-  class UnknownFormError < StandardError; end
-
   def self.eval(form, context)
     case form
-    when Integer
-      form
-    when String
-      form
-    when RL::Keyword
-      form
     when Symbol
       context[form]
     when Array
       if form.length == 2 and form[0] == :quote
         form[1]
       else
-        raise "TODO: funcall" # TODO
+        eval(form[0], context).call *form[1..-1].map {|f| eval(f, context)}
       end
-    when Hash
-      form
     else
-      raise UnknownFormError, "unknown form: #{form.inspect}"
+      form
     end
   end
 end
