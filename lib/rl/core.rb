@@ -1,6 +1,5 @@
 # encoding: utf-8
 
-# TODO: possibly move.
 [:Keyword, :Macro, :Builtin].each do |name|
   RL.const_set name, Class.new {
     def initialize(inner)
