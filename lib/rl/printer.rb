@@ -11,7 +11,7 @@ module RL::Printer
     when Symbol
       form.to_s
     when RL::Keyword
-      form.symbol.inspect
+      form.inner.inspect
     when String
       form.inspect
     when Array
