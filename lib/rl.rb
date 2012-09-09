@@ -1,22 +1,20 @@
 # encoding: utf-8
 
-module RL; end
+module RL
+  require 'rl/core'
+  require 'rl/reader'
+  require 'rl/printer'
+  require 'rl/eval'
 
-require 'rl/core'
-require 'rl/reader'
-require 'rl/printer'
-require 'rl/eval'
-
-class << RL
-  def read(input)
+  def self.read(input)
     RL::Reader.read input
   end
 
-  def eval(form)
+  def self.eval(form)
     RL::Eval.eval form
   end
 
-  def print(form)
+  def self.print(form)
     RL::Printer.print form
   end
 end

@@ -2,6 +2,8 @@
 require 'rl/core'
 
 module RL::Eval
+  require 'rl/eval/context'
+
   class UnknownFormError < StandardError; end
 
   def self.eval(form)
