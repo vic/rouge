@@ -1,7 +1,18 @@
 # encoding: utf-8
 
 class RL::Eval::Context
+  require 'rl/eval/builtins'
+
   class BindingNotFoundError < StandardError; end
+
+  def self.toplevel
+    return @toplevel if @toplevel
+    @toplevel = new nil
+    RL::Eval::Builtins.methods(false).each do |m|
+      @toplevel.set_here m, RL::Builtin[RL::Eval::Builtins.method(m)]
+    end
+    @toplevel
+  end
 
   def initialize(parent)
     @parent = parent

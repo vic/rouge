@@ -4,28 +4,30 @@ require 'rl/core'
 module RL::Eval
   require 'rl/eval/context'
 
-  module Builtins
-    def self.let(context, bindings, *body)
-      context = RL::Eval::Context.new context
-      bindings.each_slice(2) do |k, v|
-        context.set_here k, RL::Eval.eval(v, context)
-      end
-    end
-  end
+  def self.eval(context, *forms)
+    return nil if forms.length.zero?
 
-  def self.eval(form, context)
-    case form
-    when Symbol
-      context[form]
-    when Array
-      fun = eval form[0], context
-      if fun.is_a? RL::Macro
-        eval fun.call(context, *form[1..-1]), context
-      else
-        fun.call *form[1..-1].map {|f| eval f, context}
-      end
-    else
-      form
+    while true
+      form = forms.shift
+      r =
+        case form
+        when Symbol
+          context[form]
+        when Array
+          fun = eval context, form[0]
+          case fun
+          when RL::Builtin
+            fun.inner.call context, *form[1..-1]
+          when RL::Macro
+            eval context, fun.call(context, *form[1..-1])
+          else
+            fun.call *form[1..-1].map {|f| eval context, f}
+          end
+        else
+          form
+        end
+
+      return r if forms.length.zero?
     end
   end
 end

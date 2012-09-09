@@ -14,6 +14,17 @@ describe RL::Eval::Context do
     @ac.set_here :non, 50
   end
 
+  describe "the toplevel context" do
+    it "should contain elements from RL::Eval::Builtins" do
+      context = RL::Eval::Context.toplevel
+
+      lambda {
+        context[:let]
+        context[:quote]
+      }.should_not raise_exception
+    end
+  end
+
   describe "the [] method" do
     it "should get the closest binding" do
       @a[:root].should eq 42
