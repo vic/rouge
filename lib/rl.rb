@@ -10,8 +10,8 @@ module RL
     RL::Reader.read input
   end
 
-  def self.eval(form)
-    RL::Eval.eval form
+  def self.eval(form, context)
+    RL::Eval.eval form, context
   end
 
   def self.print(form)

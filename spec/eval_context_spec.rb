@@ -4,7 +4,7 @@ require 'rl'
 
 describe RL::Eval::Context do
   before do
-    @a = RL::Eval::Context.new
+    @a = RL::Eval::Context.new nil
     @ab = RL::Eval::Context.new @a
     @abb = RL::Eval::Context.new @ab
     @ac = RL::Eval::Context.new @a

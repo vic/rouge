@@ -6,7 +6,7 @@ module RL::Eval
 
   class UnknownFormError < StandardError; end
 
-  def self.eval(form)
+  def self.eval(form, context)
     case form
     when Integer
       form

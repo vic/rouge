@@ -3,7 +3,7 @@
 class RL::Eval::Context
   class BindingNotFoundError < StandardError; end
 
-  def initialize(parent=nil)
+  def initialize(parent)
     @parent = parent
     @table = {}
   end
