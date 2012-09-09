@@ -14,6 +14,28 @@ class << RL::Eval::Builtins
   def quote(context, form)
     form
   end
+
+  def list(context, *elements)
+    elements.map {|f| RL.eval context, f}
+  end
+
+  def fn(context, argv, *body)
+    context = RL::Eval::Context.new context
+
+    if argv[-2] == :&
+      rest = argv[-1]
+      argv = argv[0...-2]
+    else
+      rest = nil
+    end
+
+    lambda {|*args|
+      if !rest and argv.length != args.length
+        raise ArgumentError,
+            "wrong number of arguments (#{args.length} for #{argv.length})"
+      end
+    }
+  end
 end
 
 # vim: set sw=2 et cc=80:
