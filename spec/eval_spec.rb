@@ -29,8 +29,6 @@ describe RL::Eval do
     end
 
     it "should evaluate macro calls" do
-      return pending
-
       macro = RL::Macro[lambda {|n, body|
         [:let, [n, "example"],
           *body]

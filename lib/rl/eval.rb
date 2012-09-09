@@ -19,7 +19,7 @@ module RL::Eval
           when RL::Builtin
             fun.inner.call context, *form[1..-1]
           when RL::Macro
-            eval context, fun.call(context, *form[1..-1])
+            eval context, fun.inner.call(*form[1..-1])
           else
             fun.call *form[1..-1].map {|f| eval context, f}
           end
