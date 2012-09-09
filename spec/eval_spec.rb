@@ -38,7 +38,12 @@ describe RL::Eval do
     end
 
     it "should evaluate symbols to the object within their context" do
-      RL.eval(:wut, @context).should eq "TODO"
+      @context.set_here :vitamin_b, "vegemite"
+      RL.eval(:vitamin_b, @context).should eq "vegemite"
+
+      subcontext = RL::Eval::Context.new @context
+      subcontext.set_here :joy, [:yes]
+      RL.eval(:joy, subcontext).should eq [:yes]
     end
 
     it "should evaluate function calls" do

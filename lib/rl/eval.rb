@@ -15,7 +15,7 @@ module RL::Eval
     when RL::Keyword
       form
     when Symbol
-      raise "TODO: symbol"
+      context[form]
     when Array
       if form.length == 2 and form[0] == :quote
         form[1]
