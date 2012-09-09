@@ -1,6 +1,12 @@
 # encoding: utf-8
 
-module RL::Eval::Builtins; end
+module RL::Eval::Builtins
+  SYMBOLS = {
+    :nil => nil,
+    :true => true,
+    :false => false,
+  }
+end
 
 class << RL::Eval::Builtins
   def let(context, bindings, *body)

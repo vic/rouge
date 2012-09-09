@@ -15,13 +15,19 @@ describe RL::Eval::Context do
   end
 
   describe "the toplevel context" do
-    it "should contain elements from RL::Eval::Builtins" do
-      context = RL::Eval::Context.toplevel
+    before do
+      @context = RL::Eval::Context.toplevel
+    end
 
-      lambda {
-        context[:let]
-        context[:quote]
-      }.should_not raise_exception
+    it "should contain elements from RL::Eval::Builtins" do
+      @context[:let].should be_an_instance_of RL::Builtin
+      @context[:quote].should be_an_instance_of RL::Builtin
+    end
+
+    it "should contain fundamental objects" do
+      @context[:nil].should eq nil
+      @context[:true].should eq true
+      @context[:false].should eq false
     end
   end
 

@@ -22,8 +22,14 @@ module RL::Printer
       end
     when Hash
       "{#{form.map {|k,v| print(k) + " " + print(v)}.join ", "}}"
+    when NilClass
+      "nil"
+    when TrueClass
+      "true"
+    when FalseClass
+      "false"
     else
-      raise UnknownFormError, "unknown form: #{form.inspect}"
+      form.inspect
     end
   end
 end

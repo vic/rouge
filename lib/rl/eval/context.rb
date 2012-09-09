@@ -11,6 +11,9 @@ class RL::Eval::Context
     RL::Eval::Builtins.methods(false).each do |m|
       @toplevel.set_here m, RL::Builtin[RL::Eval::Builtins.method(m)]
     end
+    RL::Eval::Builtins::SYMBOLS.each do |name, val|
+      @toplevel.set_here name, val
+    end
     @toplevel
   end
 

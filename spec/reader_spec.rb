@@ -22,6 +22,7 @@ describe RL::Reader do
       RL.read("nil").should eq :nil
       RL.read("true").should eq :true
       RL.read("false").should eq :false
+      RL.read("&").should eq :&
     end
 
     describe "keywords" do

@@ -4,6 +4,8 @@ $: << "./lib"
 
 require 'rl'
 
+context = RL::Eval::Context.toplevel
+
 while true
   STDOUT.print "rl=> "
   STDOUT.flush
@@ -16,9 +18,8 @@ while true
   end
 
   form = RL.read(input)
-  STDOUT.puts "read: #{RL.print form}   == #{form}"
-  result = RL.eval(form)
-  STDOUT.puts "eval: #{RL.print result}   == #{result}"
+  result = RL.eval(context, form)
+  STDOUT.puts RL.print(result)
 end
 
 # vim: set sw=2 et cc=80:

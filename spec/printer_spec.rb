@@ -102,11 +102,16 @@ describe RL::Printer do
       end
     end
 
+    it "should print the fundamental objects" do
+      RL.print(nil).should eq "nil"
+      RL.print(true).should eq "true"
+      RL.print(false).should eq "false"
+    end
+
     describe "unknown form behaviour" do
-      it "should raise an exception with an unknown form" do
-        lambda {
-          RL.print(lambda {})
-        }.should raise_exception(RL::Printer::UnknownFormError)
+      it "should print the Ruby inspection of unknown forms" do
+        l = lambda {}
+        RL.print(l).should eq l.inspect
       end
     end
   end
