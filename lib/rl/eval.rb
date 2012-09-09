@@ -1,10 +1,10 @@
 # encoding: utf-8
 require 'rl/core'
 
-module RL::Eval; end
+module RL::Eval
+  class UnknownFormError < StandardError; end
 
-class << RL::Eval
-  def eval(form)
+  def self.eval(form)
     case form
     when Integer
       form
@@ -13,15 +13,17 @@ class << RL::Eval
     when RL::Keyword
       form
     when Symbol
-      raise "TODO"
+      raise "TODO: symbol"
     when Array
       if form.length == 2 and form[0] == :quote
         form[1]
       else
-        raise "TODO" # TODO
+        raise "TODO: funcall" # TODO
       end
+    when Hash
+      form
     else
-      raise "TODO" # TODO: error
+      raise UnknownFormError, "unknown form: #{form.inspect}"
     end
   end
 end

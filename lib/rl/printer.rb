@@ -1,27 +1,29 @@
 # encoding: utf-8
 require 'rl/core'
 
-module RL::Printer; end
+module RL::Printer
+  class UnknownFormError < StandardError; end
 
-class << RL::Printer
-  def print(input)
-    case input
+  def self.print(form)
+    case form
     when Integer
-      input.to_s
+      form.to_s
     when Symbol
-      input.to_s
+      form.to_s
     when RL::Keyword
-      input.symbol.inspect
+      form.symbol.inspect
     when String
-      input.inspect
+      form.inspect
     when Array
-      if input.length == 2 and input[0] == :quote
-        "'#{print input[1]}"
+      if form.length == 2 and form[0] == :quote
+        "'#{print form[1]}"
       else
-        "(#{input.map {|e| print e}.join " "})"
+        "(#{form.map {|e| print e}.join " "})"
       end
     when Hash
-      "{#{input.map {|k,v| print(k) + " " + print(v)}.join ", "}}"
+      "{#{form.map {|k,v| print(k) + " " + print(v)}.join ", "}}"
+    else
+      raise UnknownFormError, "unknown form: #{form.inspect}"
     end
   end
 end

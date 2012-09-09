@@ -101,6 +101,14 @@ describe RL::Printer do
         RL.print({{9 => 7} => 5}).should eq "{{9 7} 5}"
       end
     end
+
+    describe "unknown form behaviour" do
+      it "should raise an exception with an unknown form" do
+        lambda {
+          RL.print(lambda {})
+        }.should raise_exception(RL::Printer::UnknownFormError)
+      end
+    end
   end
 end
 
