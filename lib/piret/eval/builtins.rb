@@ -28,14 +28,24 @@ class << Piret::Eval::Builtins
   def fn(context, argv, *body)
     context = Piret::Eval::Context.new context
 
-    if argv[-2] == :&
+    if argv[-2] == :*
       rest = argv[-1]
       argv = argv[0...-2]
+    elsif argv[-4] == :* and argv[-2] == :&
+      rest = argv[-3]
+      argv = argv[0...-4] + argv[-2..-1]
     else
       rest = nil
     end
 
-    lambda {|*args|
+    if argv[-2] == :&
+      block = argv[-1]
+      argv = argv[0...-2]
+    else
+      block = nil
+    end
+
+    lambda {|*args, &blockgiven|
       if !rest ? (args.length != argv.length) : (args.length < argv.length)
         raise ArgumentError,
             "wrong number of arguments (#{args.length} for #{argv.length})"
@@ -47,6 +57,10 @@ class << Piret::Eval::Builtins
 
       if rest
         context.set_here rest, Piret::Cons[*args[argv.length..-1]]
+      end
+
+      if block
+        context.set_here block, blockgiven
       end
 
       Piret.eval context, *body

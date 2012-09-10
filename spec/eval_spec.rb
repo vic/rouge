@@ -56,8 +56,13 @@ describe Piret::Eval do
     Piret.eval(@context, "bleep bloop").should eq "bleep bloop"
     Piret.eval(@context, Piret::Keyword[:"nom it"]).
         should eq Piret::Keyword[:"nom it"]
-    Piret.eval(@context, {"z" => 92, :x => Piret::Cons[:quote, 5]}).should eq(
-        {"z" => 92, :x => Piret::Cons[:quote, 5]})
+    Piret.eval(@context, {"z" => 92, :x => Piret::Cons[:quote, 5]}).
+        should eq({"z" => 92, :x => 5})
+
+    subcontext = Piret::Eval::Context.new @context
+    subcontext.set_here :lolwut, "off"
+    Piret.eval(@context, {:lolwut => [:lolwut]}).
+        should eq({"off" => ["off"]})
 
     l = lambda {}
     Piret.eval(@context, l).should eq l

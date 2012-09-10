@@ -60,10 +60,10 @@ describe Piret::Eval::Builtins do
           ArgumentError, "wrong number of arguments (2 for 3)")
 
       lambda {
-        Piret.eval(@context, Piret.read('(fn [& rest])')).call()
-        Piret.eval(@context, Piret.read('(fn [& rest])')).call(1)
-        Piret.eval(@context, Piret.read('(fn [& rest])')).call(1, 2, 3)
-        Piret.eval(@context, Piret.read('(fn [& rest])')).call(*(1..10000))
+        Piret.eval(@context, Piret.read('(fn [* rest])')).call()
+        Piret.eval(@context, Piret.read('(fn [* rest])')).call(1)
+        Piret.eval(@context, Piret.read('(fn [* rest])')).call(1, 2, 3)
+        Piret.eval(@context, Piret.read('(fn [* rest])')).call(*(1..10000))
       }.should_not raise_exception
     end
 
@@ -77,10 +77,17 @@ describe Piret::Eval::Builtins do
       end
 
       it "should bind rest arguments correctly" do
-        Piret.eval(@context, Piret.read('(fn (y z & rest) (list y z rest))')).
+        Piret.eval(@context, Piret.read('(fn (y z * rest) (list y z rest))')).
             call("where", "is", "mordialloc", "gosh").
             should eq Piret::Cons["where", "is",
                                   Piret::Cons["mordialloc", "gosh"]]
+      end
+
+      it "should bind block arguments correctly" do
+        l = lambda {}
+        Piret.eval(@context, Piret.read('(fn (a & b) (list a b))')).
+            call("hello", &l).
+            should eq Piret::Cons["hello", l]
       end
     end
   end
