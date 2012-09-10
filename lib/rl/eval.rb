@@ -12,7 +12,24 @@ module RL::Eval
       r =
         case form
         when Symbol
-          context[form]
+          parts = form.to_s.split("/").map(&:intern)
+
+          my_context = context
+
+          if parts.length > 1 and parts[0] == :r
+            my_context = Kernel
+            parts.shift
+          end
+
+          while parts.length > 0
+            if my_context.is_a?(Hash) or my_context.is_a?(RL::Eval::Context)
+              my_context = my_context[parts.shift]
+            elsif parts[0].to_s[0].chr =~ /[A-Z]/
+              my_context = my_context.const_get parts.shift
+            end
+          end
+
+          my_context
         when Array
           fun = eval context, form[0]
           case fun

@@ -14,13 +14,20 @@ describe RL::Eval do
           [:quote, RL::Keyword[:zzy]]
     end
 
-    it "should evaluate symbols to the object within their context" do
-      @context.set_here :vitamin_b, "vegemite"
-      RL.eval(@context, :vitamin_b).should eq "vegemite"
+    describe "symbols" do
+      it "should evaluate symbols to the object within their context" do
+        @context.set_here :vitamin_b, "vegemite"
+        RL.eval(@context, :vitamin_b).should eq "vegemite"
 
-      subcontext = RL::Eval::Context.new @context
-      subcontext.set_here :joy, [:yes]
-      RL.eval(subcontext, :joy).should eq [:yes]
+        subcontext = RL::Eval::Context.new @context
+        subcontext.set_here :joy, [:yes]
+        RL.eval(subcontext, :joy).should eq [:yes]
+      end
+
+      it "should evaluate symbols in the R namespace to Ruby objects" do
+        RL.eval(@context, :"r/Object").should eq Object
+        RL.eval(@context, :"r/RL/Eval/Context").should eq RL::Eval::Context
+      end
     end
 
     it "should evaluate function calls" do

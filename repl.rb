@@ -17,9 +17,14 @@ while true
     break
   end
 
-  form = RL.read(input)
-  result = RL.eval(context, form)
-  STDOUT.puts RL.print(result)
+  begin
+    form = RL.read(input)
+    result = RL.eval(context, form)
+    STDOUT.puts RL.print(result)
+  rescue => e
+    STDOUT.puts "!! #{e.class}: #{e.message}"
+    STDOUT.puts "#{e.backtrace.join "\n"}"
+  end
 end
 
 # vim: set sw=2 et cc=80:
