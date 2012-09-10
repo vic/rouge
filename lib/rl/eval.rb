@@ -4,6 +4,8 @@ require 'rl/core'
 module RL::Eval
   require 'rl/eval/context'
   require 'rl/eval/namespace'
+
+  class BindingNotFoundError < StandardError; end
 end
 
 class << RL::Eval
@@ -15,19 +17,24 @@ class << RL::Eval
       r =
         case form
         when Symbol
-          parts = form.to_s.split("/").map(&:intern)
+          parts = form.to_s.split("/")
 
-          my_context = context
-
-          if parts.length > 1
-            my_context = RL::Eval::Namespace[parts.shift]
+          if parts.length == 1
+            sub = context
+          elsif parts.length == 2
+            sub = RL::Eval::Namespace[parts.shift.intern]
+          else
+            raise "parts.length not in 1, 2" # TODO
           end
 
-          while parts.length > 0
-            my_context = traverse my_context, parts.shift
+          lookups = parts[0].split('.')
+          sub = sub[lookups.shift.intern]
+
+          while lookups.length > 0
+            sub = sub.const_get(lookups.shift.intern)
           end
 
-          my_context
+          sub
         when Array
           fun = eval context, form[0]
           case fun
@@ -43,15 +50,6 @@ class << RL::Eval
         end
 
       return r if forms.length.zero?
-    end
-  end
-
-  def traverse(ns, name)
-    case ns
-    when RL::Eval::Context, RL::Eval::Namespace
-      ns = ns[name]
-    when Class, Module
-      ns = ns.const_get name
     end
   end
 end

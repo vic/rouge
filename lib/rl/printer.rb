@@ -30,7 +30,7 @@ module RL::Printer
       "false"
     when Class, Module
       if form.name
-        "r/#{form.name.split('::').join('/')}"
+        "r/#{form.name.split('::').join('.')}"
       else
         form.inspect
       end

@@ -111,7 +111,7 @@ describe RL::Printer do
     it "should print Ruby classes in their namespace" do
       RL.print(Object).should eq "r/Object"
       RL.print(Class).should eq "r/Class"
-      RL.print(RL::Eval).should eq "r/RL/Eval"
+      RL.print(RL::Eval).should eq "r/RL.Eval"
       anon = Class.new
       RL.print(anon).should eq anon.inspect
     end

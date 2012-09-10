@@ -3,6 +3,19 @@ require 'spec_helper'
 require 'rl'
 
 describe RL::Eval::Namespace do
+  describe "the refers method" do
+    it "should cause items in one namespace to be locatable from the other" do
+      abc = RL::Eval::Namespace.new :abc
+      xyz = RL::Eval::Namespace.new :xyz
+
+      xyz.refers abc
+
+      abc.set_here :hello, :wow
+      xyz[:hello].should eq :wow
+    end
+  end
+
+
   describe "the rl namespace" do
     before do
       @ns = RL::Eval::Namespace[:rl]
@@ -17,6 +30,11 @@ describe RL::Eval::Namespace do
       @ns[:nil].should eq nil
       @ns[:true].should eq true
       @ns[:false].should eq false
+    end
+
+    it "should find objects from R" do
+      @ns[:Float].should eq Float
+      @ns[:String].should eq String
     end
 
     it "should have a name" do

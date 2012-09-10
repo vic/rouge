@@ -1,8 +1,6 @@
 # encoding: utf-8
 
 class RL::Eval::Context
-  class BindingNotFoundError < StandardError; end
-
   def initialize(parent_or_ns)
     case parent_or_ns
     when RL::Eval::Namespace
@@ -22,7 +20,7 @@ class RL::Eval::Context
     elsif @ns
       @ns[key]
     else
-      raise RL::Eval::Context::BindingNotFoundError, key
+      raise RL::Eval::BindingNotFoundError, key
     end
   end
 
@@ -36,7 +34,7 @@ class RL::Eval::Context
     elsif @parent
       @parent.set_lexical key, value
     else
-      raise RL::Eval::Context::BindingNotFoundError,
+      raise RL::Eval::BindingNotFoundError,
           "setting #{key} to #{value.inspect}"
     end
   end

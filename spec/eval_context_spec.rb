@@ -28,7 +28,7 @@ describe RL::Eval::Context do
     it "should raise an exception if a binding is not found" do
       lambda {
         @a[:non]
-      }.should raise_exception(RL::Eval::Context::BindingNotFoundError)
+      }.should raise_exception(RL::Eval::BindingNotFoundError)
     end
   end
 
@@ -66,7 +66,7 @@ describe RL::Eval::Context do
     it "should raise an exception if a closest binding is not found" do
       lambda {
         @abb.set_lexical :non, 10
-      }.should raise_exception(RL::Eval::Context::BindingNotFoundError)
+      }.should raise_exception(RL::Eval::BindingNotFoundError)
     end
   end
 end

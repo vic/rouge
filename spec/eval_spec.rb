@@ -26,7 +26,7 @@ describe RL::Eval do
 
       it "should evaluate symbols in the R namespace to Ruby objects" do
         RL.eval(@context, :"r/Object").should eq Object
-        RL.eval(@context, :"r/RL/Eval/Context").should eq RL::Eval::Context
+        RL.eval(@context, :"r/RL.Eval.Context").should eq RL::Eval::Context
       end
     end
 
@@ -58,28 +58,6 @@ describe RL::Eval do
 
       o = Object.new
       RL.eval(@context, o).should eq o
-    end
-  end
-
-  describe "the traverse method" do
-    it "should traverse RL::Eval::Namespaces" do
-      RL::Eval.traverse(RL::Eval::Namespace[:rl], :let).
-          should be_an_instance_of RL::Builtin
-    end
-
-    it "should traverse RL::Eval::Contexts" do
-      @context.set_here :abc, :Zzz
-      RL::Eval.traverse(@context, :abc).should eq :Zzz
-    end
-
-    it "should traverse Classes" do
-      RL::Eval.traverse(RL::Reader, :EndOfDataError).should eq \
-          RL::Reader::EndOfDataError
-    end
-
-    it "should traverse Modules" do
-      RL::Eval.traverse(RL::Printer, :UnknownFormError).should eq \
-          RL::Printer::UnknownFormError
     end
   end
 end
