@@ -55,7 +55,7 @@ class << RL::Eval::Builtins
 
   def def(context, name, form)
     context.ns.set_here name, RL.eval(context, form)
-    name
+    :"#{context.ns.name}/#{name}"
   end
 end
 

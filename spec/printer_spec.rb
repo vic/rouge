@@ -116,6 +116,11 @@ describe RL::Printer do
       RL.print(anon).should eq anon.inspect
     end
 
+    it "should print builtin forms in their namespace" do
+      RL.print(RL::Builtin[RL::Eval::Builtins.method(:let)]).should eq "rl/let"
+      RL.print(RL::Builtin[RL::Eval::Builtins.method(:def)]).should eq "rl/def"
+    end
+
     describe "unknown form behaviour" do
       it "should print the Ruby inspection of unknown forms" do
         l = lambda {}

@@ -34,6 +34,8 @@ module RL::Printer
       else
         form.inspect
       end
+    when RL::Builtin
+      "rl/#{form.inner.name}"
     else
       form.inspect
     end

@@ -5,7 +5,9 @@ $: << "./lib"
 require 'readline'
 require 'rl'
 
-context = RL::Eval::Context.new RL::Eval::Namespace[:rl]
+ns = RL::Eval::Namespace.new :user
+ns.refers RL::Eval::Namespace[:rl]
+context = RL::Eval::Context.new ns
 
 while true
   input = Readline.readline("#{context.ns.name}=> ", true)

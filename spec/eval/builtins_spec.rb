@@ -4,7 +4,9 @@ require 'rl'
 
 describe RL::Eval::Builtins do
   before do
-    @context = RL::Eval::Context.new RL::Eval::Namespace[:rl]
+    @ns = RL::Eval::Namespace.new :"user.spec"
+    @ns.refers RL::Eval::Namespace[:rl]
+    @context = RL::Eval::Context.new @ns
   end
 
   describe "let" do
@@ -79,12 +81,14 @@ describe RL::Eval::Builtins do
 
   describe "def" do
     it "should make a binding" do
-      RL.eval(@context, [:def, :barge, [:quote, :a]]).should eq :barge
+      RL.eval(@context, [:def, :barge, [:quote, :a]]).should eq \
+        :"user.spec/barge"
     end
 
     it "should always make a binding at the top of the namespace" do
       subcontext = RL::Eval::Context.new @context
-      RL.eval(subcontext, [:def, :sarge, [:quote, :b]]).should eq :sarge
+      RL.eval(subcontext, [:def, :sarge, [:quote, :b]]).should eq \
+        :"user.spec/sarge"
       RL.eval(@context, :sarge).should eq :b
     end
   end
