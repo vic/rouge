@@ -5,8 +5,29 @@ require 'rl/eval/builtins'
 class RL::Eval::Namespace < RL::Eval::Context
   @@namespaces = {}
 
+  def initialize(name)
+    @name = name
+    super nil
+  end
+
   undef set_lexical
   undef ns
+
+  attr_reader :name
+end
+
+class RL::Eval::Namespace::R < RL::Eval::Namespace
+  def initialize
+    super :r
+  end
+
+  def [](name)
+    Kernel.const_get name
+  end
+
+  def set_here(name, value)
+    Kernel.const_set name, value
+  end
 end
 
 class << RL::Eval::Namespace
@@ -28,7 +49,7 @@ class << RL::Eval::Namespace
   private
 
   def vivify_rl
-    ns = new nil
+    ns = new :rl
     RL::Eval::Builtins.methods(false).each do |m|
       ns.set_here m, RL::Builtin[RL::Eval::Builtins.method(m)]
     end
@@ -39,7 +60,7 @@ class << RL::Eval::Namespace
   end
 
   def vivify_r
-    Kernel
+    RL::Eval::Namespace::R.new
   end
 end
 

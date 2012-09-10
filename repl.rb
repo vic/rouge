@@ -7,7 +7,7 @@ require 'rl'
 context = RL::Eval::Context.new RL::Eval::Namespace[:rl]
 
 while true
-  STDOUT.print "rl=> "
+  STDOUT.print "#{context.ns.name}=> "
   STDOUT.flush
 
   begin

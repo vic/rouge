@@ -18,6 +18,10 @@ describe RL::Eval::Namespace do
       @ns[:true].should eq true
       @ns[:false].should eq false
     end
+
+    it "should have a name" do
+      @ns.name.should eq :rl
+    end
   end
 
   describe "the r namespace" do
@@ -25,8 +29,13 @@ describe RL::Eval::Namespace do
       @ns = RL::Eval::Namespace[:r]
     end
 
-    it "should be Kernel" do
-      @ns.should be Kernel
+    it "should contain elements from Kernel" do
+      @ns[:Hash].should eq Hash
+      @ns[:Fixnum].should eq Fixnum
+    end
+
+    it "should have a name" do
+      @ns.name.should eq :r
     end
   end
 end
