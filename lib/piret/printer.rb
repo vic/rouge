@@ -1,7 +1,7 @@
 # encoding: utf-8
-require 'rl/core'
+require 'piret/core'
 
-module RL::Printer
+module Piret::Printer
   class UnknownFormError < StandardError; end
 
   def self.print(form)
@@ -10,13 +10,13 @@ module RL::Printer
       form.to_s
     when Symbol
       form.to_s
-    when RL::Keyword
+    when Piret::Keyword
       form.inner.inspect
     when String
       form.inspect
     when Array
       "[#{form.map {|e| print e}.join " "}]"
-    when RL::Cons
+    when Piret::Cons
       if form.length == 2 and form[0] == :quote
         "'#{print form[1]}"
       else
@@ -32,12 +32,12 @@ module RL::Printer
       "false"
     when Class, Module
       if form.name
-        "r/#{form.name.split('::').join('.')}"
+        "ruby/#{form.name.split('::').join('.')}"
       else
         form.inspect
       end
-    when RL::Builtin
-      "rl/#{form.inner.name}"
+    when Piret::Builtin
+      "piret/#{form.inner.name}"
     else
       form.inspect
     end

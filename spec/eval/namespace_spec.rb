@@ -1,21 +1,21 @@
 # encoding: utf-8
 require 'spec_helper'
-require 'rl'
+require 'piret'
 
-describe RL::Eval::Namespace do
+describe Piret::Eval::Namespace do
   describe "the [] method" do
     it "should vivify non-extant namespaces" do
-      RL::Eval::Namespace.exists?(:vivify_test).should eq false
-      RL::Eval::Namespace[:vivify_test].should be_an_instance_of \
-          RL::Eval::Namespace
-      RL::Eval::Namespace.exists?(:vivify_test).should eq true
+      Piret::Eval::Namespace.exists?(:vivify_test).should eq false
+      Piret::Eval::Namespace[:vivify_test].should be_an_instance_of \
+          Piret::Eval::Namespace
+      Piret::Eval::Namespace.exists?(:vivify_test).should eq true
     end
   end
 
   describe "the refers method" do
     it "should cause items in one namespace to be locatable from the other" do
-      abc = RL::Eval::Namespace.new :abc
-      xyz = RL::Eval::Namespace.new :xyz
+      abc = Piret::Eval::Namespace.new :abc
+      xyz = Piret::Eval::Namespace.new :xyz
 
       xyz.refers abc
 
@@ -24,14 +24,14 @@ describe RL::Eval::Namespace do
     end
   end
 
-  describe "the rl namespace" do
+  describe "the piret namespace" do
     before do
-      @ns = RL::Eval::Namespace[:rl]
+      @ns = Piret::Eval::Namespace[:piret]
     end
 
-    it "should contain elements from RL::Eval::Builtins" do
-      @ns[:let].should be_an_instance_of RL::Builtin
-      @ns[:quote].should be_an_instance_of RL::Builtin
+    it "should contain elements from Piret::Eval::Builtins" do
+      @ns[:let].should be_an_instance_of Piret::Builtin
+      @ns[:quote].should be_an_instance_of Piret::Builtin
     end
 
     it "should contain fundamental objects" do
@@ -40,19 +40,19 @@ describe RL::Eval::Namespace do
       @ns[:false].should eq false
     end
 
-    it "should find objects from R" do
+    it "should find objects from ruby" do
       @ns[:Float].should eq Float
       @ns[:String].should eq String
     end
 
     it "should have a name" do
-      @ns.name.should eq :rl
+      @ns.name.should eq :piret
     end
   end
 
-  describe "the r namespace" do
+  describe "the ruby namespace" do
     before do
-      @ns = RL::Eval::Namespace[:r]
+      @ns = Piret::Eval::Namespace[:ruby]
     end
 
     it "should contain elements from Kernel" do
@@ -61,7 +61,7 @@ describe RL::Eval::Namespace do
     end
 
     it "should have a name" do
-      @ns.name.should eq :r
+      @ns.name.should eq :ruby
     end
   end
 end

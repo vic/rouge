@@ -1,8 +1,8 @@
 # encoding: utf-8
 require 'spec_helper'
-require 'rl'
+require 'piret'
 
-describe [RL::Keyword, RL::Macro, RL::Builtin] do
+describe [Piret::Keyword, Piret::Macro, Piret::Builtin] do
   describe "the constructor" do
     it "should return a new wrapper" do
       described_class.each do |klass|
@@ -36,7 +36,7 @@ describe [RL::Keyword, RL::Macro, RL::Builtin] do
   end
 end
 
-describe RL::Cons do
+describe Piret::Cons do
   describe "the multi-constructor" do
     it "should create a Cons for each element" do
       # TODO

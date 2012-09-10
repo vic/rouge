@@ -1,78 +1,79 @@
 # encoding: utf-8
 require 'spec_helper'
-require 'rl'
+require 'piret'
 
-describe RL::Eval::Builtins do
+describe Piret::Eval::Builtins do
   before do
-    @ns = RL::Eval::Namespace.new :"user.spec"
-    @ns.refers RL::Eval::Namespace[:rl]
-    @context = RL::Eval::Context.new @ns
+    @ns = Piret::Eval::Namespace.new :"user.spec"
+    @ns.refers Piret::Eval::Namespace[:piret]
+    @context = Piret::Eval::Context.new @ns
   end
 
   describe "let" do
     it "should make local bindings" do
-      RL.eval(@context, [:let, [:a, 42], :a]).should eq 42
-      RL.eval(@context, [:let, [:a, 1, :a, 2], :a]).should eq 2
+      Piret.eval(@context, [:let, [:a, 42], :a]).should eq 42
+      Piret.eval(@context, [:let, [:a, 1, :a, 2], :a]).should eq 2
     end
   end
 
   describe "quote" do
     it "should prevent evaluation" do
-      RL.eval(@context, [:quote, :lmnop]).should eq :lmnop
+      Piret.eval(@context, [:quote, :lmnop]).should eq :lmnop
     end
   end
 
   describe "list" do
     it "should create the empty list" do
-      RL.eval(@context, [:list]).should eq []
+      Piret.eval(@context, [:list]).should eq []
     end
 
     it "should create a unary list" do
-      RL.eval(@context, [:list, "trent"]).should eq ["trent"]
-      RL.eval(@context, [:list, true]).should eq [true]
+      Piret.eval(@context, [:list, "trent"]).should eq ["trent"]
+      Piret.eval(@context, [:list, true]).should eq [true]
     end
 
     it "should create an n-ary list" do
-      RL.eval(@context, [:list, *(1..50)]).should eq [*(1..50)]
+      Piret.eval(@context, [:list, *(1..50)]).should eq [*(1..50)]
     end
   end
 
   describe "fn" do
     it "should create a new lambda function" do
-      l = RL.eval(@context, [:fn, [], "Mystik Spiral"])
+      l = Piret.eval(@context, [:fn, [], "Mystik Spiral"])
       l.should be_an_instance_of Proc
       l.call.should eq "Mystik Spiral"
-      RL.eval(@context, [l]).should eq "Mystik Spiral"
+      Piret.eval(@context, [l]).should eq "Mystik Spiral"
     end
 
     it "should create functions of correct arity" do
       lambda {
-        RL.eval(@context, [:fn, []]).call(true)
+        Piret.eval(@context, [:fn, []]).call(true)
       }.should raise_exception(
           ArgumentError, "wrong number of arguments (1 for 0)")
 
       lambda {
-        RL.eval(@context, [:fn, [:a, :b, :c]]).call(:x, :y)
+        Piret.eval(@context, [:fn, [:a, :b, :c]]).call(:x, :y)
       }.should raise_exception(
           ArgumentError, "wrong number of arguments (2 for 3)")
 
       lambda {
-        RL.eval(@context, [:fn, [:&, :rest]]).call()
-        RL.eval(@context, [:fn, [:&, :rest]]).call(1)
-        RL.eval(@context, [:fn, [:&, :rest]]).call(1, 2, 3)
-        RL.eval(@context, [:fn, [:&, :rest]]).call(*(1..10000))
+        Piret.eval(@context, [:fn, [:&, :rest]]).call()
+        Piret.eval(@context, [:fn, [:&, :rest]]).call(1)
+        Piret.eval(@context, [:fn, [:&, :rest]]).call(1, 2, 3)
+        Piret.eval(@context, [:fn, [:&, :rest]]).call(*(1..10000))
       }.should_not raise_exception
     end
 
     describe "argument binding" do
       it "should bind place arguments correctly" do
-        RL.eval(@context, [:fn, [:a], :a]).call(:zzz).should eq :zzz
-        RL.eval(@context, [:fn, [:a, :b], [:list, :a, :b]]).
+        Piret.eval(@context, [:fn, [:a], :a]).call(:zzz).should eq :zzz
+        Piret.eval(@context, [:fn, [:a, :b], [:list, :a, :b]]).
             call(:daria, :morgendorffer).should eq [:daria, :morgendorffer]
       end
 
       it "should bind rest arguments correctly" do
-        RL.eval(@context, [:fn, [:y, :z, :&, :rest], [:list, :y, :z, :rest]]).
+        Piret.eval(@context,
+                   [:fn, [:y, :z, :&, :rest], [:list, :y, :z, :rest]]).
             call("where", "is", "mordialloc", "gosh").should eq \
             ["where", "is", ["mordialloc", "gosh"]]
       end
@@ -81,15 +82,15 @@ describe RL::Eval::Builtins do
 
   describe "def" do
     it "should make a binding" do
-      RL.eval(@context, [:def, :barge, [:quote, :a]]).should eq \
+      Piret.eval(@context, [:def, :barge, [:quote, :a]]).should eq \
         :"user.spec/barge"
     end
 
     it "should always make a binding at the top of the namespace" do
-      subcontext = RL::Eval::Context.new @context
-      RL.eval(subcontext, [:def, :sarge, [:quote, :b]]).should eq \
+      subcontext = Piret::Eval::Context.new @context
+      Piret.eval(subcontext, [:def, :sarge, [:quote, :b]]).should eq \
         :"user.spec/sarge"
-      RL.eval(@context, :sarge).should eq :b
+      Piret.eval(@context, :sarge).should eq :b
     end
   end
 end

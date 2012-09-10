@@ -1,14 +1,14 @@
 # encoding: utf-8
-require 'rl/core'
+require 'piret/core'
 
-module RL::Eval
-  require 'rl/eval/context'
-  require 'rl/eval/namespace'
+module Piret::Eval
+  require 'piret/eval/context'
+  require 'piret/eval/namespace'
 
   class BindingNotFoundError < StandardError; end
 end
 
-class << RL::Eval
+class << Piret::Eval
   def eval(context, *forms)
     return nil if forms.length.zero?
 
@@ -35,7 +35,7 @@ class << RL::Eval
             if parts.length == 1
               sub = context
             elsif parts.length == 2
-              sub = RL::Eval::Namespace[parts.shift.intern]
+              sub = Piret::Eval::Namespace[parts.shift.intern]
             else
               raise "parts.length not in 1, 2" # TODO
             end
@@ -56,9 +56,9 @@ class << RL::Eval
         when Array
           fun = eval context, form[0]
           case fun
-          when RL::Builtin
+          when Piret::Builtin
             fun.inner.call context, *form[1..-1]
-          when RL::Macro
+          when Piret::Macro
             eval context, fun.inner.call(*form[1..-1])
           else
             fun.call *form[1..-1].map {|f| eval context, f}

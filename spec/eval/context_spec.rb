@@ -1,15 +1,15 @@
 # encoding: utf-8
 require 'spec_helper'
-require 'rl'
+require 'piret'
 
-describe RL::Eval::Context do
+describe Piret::Eval::Context do
   before do
-    @a = RL::Eval::Context.new nil
-    @ab = RL::Eval::Context.new @a
-    @abb = RL::Eval::Context.new @ab
-    @ac = RL::Eval::Context.new @a
-    @in_rl = RL::Eval::Context.new RL::Eval::Namespace[:rl]
-    @in_rl_nested = RL::Eval::Context.new @in_rl
+    @a = Piret::Eval::Context.new nil
+    @ab = Piret::Eval::Context.new @a
+    @abb = Piret::Eval::Context.new @ab
+    @ac = Piret::Eval::Context.new @a
+    @in_rl = Piret::Eval::Context.new Piret::Eval::Namespace[:piret]
+    @in_rl_nested = Piret::Eval::Context.new @in_rl
 
     @a.set_here :root, 42
     @ab.set_here :root, 80
@@ -22,23 +22,23 @@ describe RL::Eval::Context do
       @ab[:root].should eq 80
       @abb[:root].should eq 80
       @ac[:root].should eq 42
-      @in_rl[:let].should be_an_instance_of RL::Builtin
+      @in_rl[:let].should be_an_instance_of Piret::Builtin
     end
 
     it "should raise an exception if a binding is not found" do
       lambda {
         @a[:non]
-      }.should raise_exception(RL::Eval::BindingNotFoundError)
+      }.should raise_exception(Piret::Eval::BindingNotFoundError)
     end
   end
 
   describe "the ns method" do
     it "should get the namespace of a context that has one" do
-      @in_rl.ns.should eq RL::Eval::Namespace[:rl]
+      @in_rl.ns.should eq Piret::Eval::Namespace[:piret]
     end
 
     it "should get the namespace of a nested context that has one" do
-      @in_rl_nested.ns.should eq RL::Eval::Namespace[:rl]
+      @in_rl_nested.ns.should eq Piret::Eval::Namespace[:piret]
     end
 
     it "should return nil if a context has none" do
@@ -66,7 +66,7 @@ describe RL::Eval::Context do
     it "should raise an exception if a closest binding is not found" do
       lambda {
         @abb.set_lexical :non, 10
-      }.should raise_exception(RL::Eval::BindingNotFoundError)
+      }.should raise_exception(Piret::Eval::BindingNotFoundError)
     end
   end
 end

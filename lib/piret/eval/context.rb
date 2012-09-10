@@ -1,11 +1,11 @@
 # encoding: utf-8
 
-class RL::Eval::Context
+class Piret::Eval::Context
   def initialize(parent_or_ns)
     case parent_or_ns
-    when RL::Eval::Namespace
+    when Piret::Eval::Namespace
       @ns = parent_or_ns
-    when RL::Eval::Context
+    when Piret::Eval::Context
       @parent = parent_or_ns
       @ns = @parent.ns
     end
@@ -20,7 +20,7 @@ class RL::Eval::Context
     elsif @ns
       @ns[key]
     else
-      raise RL::Eval::BindingNotFoundError, key
+      raise Piret::Eval::BindingNotFoundError, key
     end
   end
 
@@ -34,7 +34,7 @@ class RL::Eval::Context
     elsif @parent
       @parent.set_lexical key, value
     else
-      raise RL::Eval::BindingNotFoundError,
+      raise Piret::Eval::BindingNotFoundError,
           "setting #{key} to #{value.inspect}"
     end
   end

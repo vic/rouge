@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-module RL::Eval::Builtins
+module Piret::Eval::Builtins
   SYMBOLS = {
     :nil => nil,
     :true => true,
@@ -8,13 +8,13 @@ module RL::Eval::Builtins
   }
 end
 
-class << RL::Eval::Builtins
+class << Piret::Eval::Builtins
   def let(context, bindings, *body)
-    context = RL::Eval::Context.new context
+    context = Piret::Eval::Context.new context
     bindings.each_slice(2) do |k, v|
-      context.set_here k, RL::Eval.eval(context, v)
+      context.set_here k, Piret::Eval.eval(context, v)
     end
-    RL.eval context, *body
+    Piret.eval context, *body
   end
 
   def quote(context, form)
@@ -22,11 +22,11 @@ class << RL::Eval::Builtins
   end
 
   def list(context, *elements)
-    elements.map {|f| RL.eval context, f}
+    elements.map {|f| Piret.eval context, f}
   end
 
   def fn(context, argv, *body)
-    context = RL::Eval::Context.new context
+    context = Piret::Eval::Context.new context
 
     if argv[-2] == :&
       rest = argv[-1]
@@ -49,12 +49,12 @@ class << RL::Eval::Builtins
         context.set_here rest, args[argv.length..-1]
       end
 
-      RL.eval context, *body
+      Piret.eval context, *body
     }
   end
 
   def def(context, name, form)
-    context.ns.set_here name, RL.eval(context, form)
+    context.ns.set_here name, Piret.eval(context, form)
     :"#{context.ns.name}/#{name}"
   end
 end

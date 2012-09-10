@@ -1,7 +1,7 @@
 # encoding: utf-8
-require 'rl/core'
+require 'piret/core'
 
-class RL::Reader
+class Piret::Reader
   class UnexpectedCharacterError < StandardError; end
   class TrailingDataError < StandardError; end
   class EndOfDataError < StandardError; end
@@ -31,7 +31,7 @@ class RL::Reader
       when /"/
         string
       when /\(/
-        RL::Cons[*list(')')]
+        Piret::Cons[*list(')')]
       when /\[/
         list ']'
       when /'/
@@ -69,9 +69,9 @@ class RL::Reader
       slurp /:"/
       @n -= 1
       s = string
-      RL::Keyword[s.intern]
+      Piret::Keyword[s.intern]
     rescue UnexpectedCharacterError
-      RL::Keyword[slurp(/^:[a-zA-Z0-9\-_!\?\*\/]+/)[1..-1].intern]
+      Piret::Keyword[slurp(/^:[a-zA-Z0-9\-_!\?\*\/]+/)[1..-1].intern]
     end
   end
 

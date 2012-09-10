@@ -3,11 +3,11 @@
 $: << "./lib"
 
 require 'readline'
-require 'rl'
+require 'piret'
 
-ns = RL::Eval::Namespace[:user]
-ns.refers RL::Eval::Namespace[:rl]
-context = RL::Eval::Context.new ns
+ns = Piret::Eval::Namespace[:user]
+ns.refers Piret::Eval::Namespace[:piret]
+context = Piret::Eval::Context.new ns
 
 while true
   input = Readline.readline("#{context.ns.name}=> ", true)
@@ -17,9 +17,9 @@ while true
   end
 
   begin
-    form = RL.read(input)
-    result = RL.eval(context, form)
-    STDOUT.puts RL.print(result)
+    form = Piret.read(input)
+    result = Piret.eval(context, form)
+    STDOUT.puts Piret.print(result)
   rescue => e
     STDOUT.puts "!! #{e.class}: #{e.message}"
     STDOUT.puts "#{e.backtrace.join "\n"}"

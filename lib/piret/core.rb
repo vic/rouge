@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 [:Keyword, :Macro, :Builtin].each do |name|
-  RL.const_set name, Class.new {
+  Piret.const_set name, Class.new {
     def initialize(inner)
       @inner = inner
     end
@@ -18,10 +18,10 @@
   }
 end
 
-class RL::Cons
+class Piret::Cons
   def new(head, tail)
-    if tail != nil and !tail.is_a?(RL::Cons)
-      raise ArgumentError, "RL::Cons tail should be RL::Cons or nil, not #{tail}"
+    if tail != nil and !tail.is_a?(Piret::Cons)
+      raise ArgumentError, "Piret::Cons tail should be Piret::Cons or nil, not #{tail}"
     end
 
     @head, @tail = head, tail
