@@ -96,11 +96,12 @@ describe Piret::Printer do
 
     describe "quotations" do
       it "should print 'X as (QUOTE X)" do
-        Piret.print([:quote, :x]).should eq "'x"
+        Piret.print(Piret::Cons[:quote, :x]).should eq "'x"
       end
 
       it "should print ''('X) as (QUOTE (QUOTE ((QUOTE X))))" do
-        Piret.print([:quote, [:quote, [[:quote, :x]]]]).should eq "''('x)"
+        Piret.print(Piret::Cons[:quote, Piret::Cons[:quote, \
+                    Piret::Cons[Piret::Cons[:quote, :x]]]]).should eq "''('x)"
       end
     end
 

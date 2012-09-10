@@ -39,8 +39,14 @@ end
 describe Piret::Cons do
   describe "the multi-constructor" do
     it "should create a Cons for each element" do
-      # TODO
-      pending
+      Piret::Cons[].should eq Piret::Cons::Empty
+      Piret::Cons[1].should eq Piret::Cons.new(1, Piret::Cons::Empty)
+      Piret::Cons[1, 2].should eq \
+          Piret::Cons.new(1, Piret::Cons.new(2, Piret::Cons::Empty))
+      Piret::Cons[1, 2, 3].should eq \
+          Piret::Cons.new(1, \
+          Piret::Cons.new(2, \
+          Piret::Cons.new(3, Piret::Cons::Empty)))
     end
   end
 end

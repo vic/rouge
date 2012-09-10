@@ -8,9 +8,10 @@ describe Piret::Eval do
   end
 
   it "should evaluate quotations to their unquoted form" do
-    Piret.eval(@context, [:quote, :x]).should eq :x
-    Piret.eval(@context, [:quote, [:quote, Piret::Keyword[:zzy]]]).should eq \
-        [:quote, Piret::Keyword[:zzy]]
+    Piret.eval(@context, Piret::Cons[:quote, :x]).should eq :x
+    Piret.eval(@context, Piret::Cons[:quote, Piret::Cons[:quote, \
+               Piret::Keyword[:zzy]]]).should eq \
+        Piret::Cons[:quote, Piret::Keyword[:zzy]]
   end
 
   describe "symbols" do
@@ -55,8 +56,8 @@ describe Piret::Eval do
     Piret.eval(@context, "bleep bloop").should eq "bleep bloop"
     Piret.eval(@context, Piret::Keyword[:"nom it"]).should eq \
         Piret::Keyword[:"nom it"]
-    Piret.eval(@context, {"z" => 92, :x => [:quote, 5]}).should eq(
-        {"z" => 92, :x => [:quote, 5]})
+    Piret.eval(@context, {"z" => 92, :x => Piret::Cons[:quote, 5]}).should eq(
+        {"z" => 92, :x => Piret::Cons[:quote, 5]})
 
     l = lambda {}
     Piret.eval(@context, l).should eq l
@@ -73,7 +74,8 @@ describe Piret::Eval do
 
         subcontext = Piret::Eval::Context.new @context
         subcontext.set_here :klass, klass
-        Piret.eval(subcontext, [:"klass.", [:quote, :a]]).should eq :b
+        Piret.eval(subcontext, [:"klass.", Piret::Cons[:quote, :a]]).should \
+            eq :b
       end
     end
 
@@ -84,7 +86,8 @@ describe Piret::Eval do
 
         subcontext = Piret::Eval::Context.new @context
         subcontext.set_here :x, x
-        Piret.eval(subcontext, [:".y", :x, [:quote, :z]]).should eq :tada
+        Piret.eval(subcontext, [:".y", :x, Piret::Cons[:quote, :z]]).should eq \
+            :tada
       end
     end
   end

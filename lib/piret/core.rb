@@ -19,17 +19,24 @@
 end
 
 class Piret::Cons
+  Empty = Object.new
+
   def new(head, tail)
-    if tail != nil and !tail.is_a?(Piret::Cons)
-      raise ArgumentError, "Piret::Cons tail should be Piret::Cons or nil, not #{tail}"
+    if tail != Empty and !tail.is_a?(Piret::Cons)
+      raise ArgumentError,
+        "tail should be a Piret::Cons or Tail, not #{tail}"
     end
 
     @head, @tail = head, tail
   end
 
   def self.[](*elements)
-    # TODO
-    raise "TODO"
+    head = Empty
+    (elements.length - 1).downto(0).each do |i|
+      head = new(elements[i], head)
+    end
+
+    head
   end
 
   def each(&block)

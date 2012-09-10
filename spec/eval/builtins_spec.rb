@@ -18,7 +18,7 @@ describe Piret::Eval::Builtins do
 
   describe "quote" do
     it "should prevent evaluation" do
-      Piret.eval(@context, [:quote, :lmnop]).should eq :lmnop
+      Piret.eval(@context, Piret::Cons[:quote, :lmnop]).should eq :lmnop
     end
   end
 
@@ -82,14 +82,14 @@ describe Piret::Eval::Builtins do
 
   describe "def" do
     it "should make a binding" do
-      Piret.eval(@context, [:def, :barge, [:quote, :a]]).should eq \
+      Piret.eval(@context, [:def, :barge, Piret::Cons[:quote, :a]]).should eq \
         :"user.spec/barge"
     end
 
     it "should always make a binding at the top of the namespace" do
       subcontext = Piret::Eval::Context.new @context
-      Piret.eval(subcontext, [:def, :sarge, [:quote, :b]]).should eq \
-        :"user.spec/sarge"
+      Piret.eval(subcontext, [:def, :sarge, Piret::Cons[:quote, :b]]).should \
+        eq :"user.spec/sarge"
       Piret.eval(@context, :sarge).should eq :b
     end
   end

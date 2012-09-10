@@ -103,11 +103,12 @@ describe Piret::Reader do
 
     describe "quotations" do
       it "should read 'X as (QUOTE X)" do
-        Piret.read("'x").should eq [:quote, :x]
+        Piret.read("'x").should eq Piret::Cons[:quote, :x]
       end
 
       it "should read ''('X) as (QUOTE (QUOTE ((QUOTE X))))" do
-        Piret.read("''('x)").should eq [:quote, [:quote, [[:quote, :x]]]]
+        Piret.read("''('x)").should eq Piret::Cons[:quote, \
+            Piret::Cons[:quote, Piret::Cons[Piret::Cons[:quote, :x]]]]
       end
     end
 

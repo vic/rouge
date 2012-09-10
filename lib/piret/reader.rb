@@ -132,7 +132,7 @@ class Piret::Reader
 
   def quotation
     consume
-    [:quote, lex(true)]
+    Piret::Cons[:quote, lex(true)]
   end
 
   def map
