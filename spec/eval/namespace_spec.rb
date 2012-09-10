@@ -3,6 +3,15 @@ require 'spec_helper'
 require 'rl'
 
 describe RL::Eval::Namespace do
+  describe "the [] method" do
+    it "should vivify non-extant namespaces" do
+      RL::Eval::Namespace.exists?(:vivify_test).should eq false
+      RL::Eval::Namespace[:vivify_test].should be_an_instance_of \
+          RL::Eval::Namespace
+      RL::Eval::Namespace.exists?(:vivify_test).should eq true
+    end
+  end
+
   describe "the refers method" do
     it "should cause items in one namespace to be locatable from the other" do
       abc = RL::Eval::Namespace.new :abc

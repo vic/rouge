@@ -39,19 +39,19 @@ class RL::Eval::Namespace
 end
 
 class << RL::Eval::Namespace
+  def exists?(ns)
+    RL::Eval::Namespace.class_variable_get('@@namespaces').include? ns
+  end
+
   def [](ns)
     r = RL::Eval::Namespace.class_variable_get('@@namespaces')[ns]
     return r if r
 
     if not self.respond_to?(:"vivify_#{ns}", true)
-      return nil
+      RL::Eval::Namespace.class_variable_get('@@namespaces')[ns] = new(ns)
+    else
+      RL::Eval::Namespace.class_variable_get('@@namespaces')[ns] = send(:"vivify_#{ns}")
     end
-
-    self[ns] = send(:"vivify_#{ns}")
-  end
-
-  def []=(ns, value)
-    RL::Eval::Namespace.class_variable_get('@@namespaces')[ns] = value
   end
 
   private

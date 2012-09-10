@@ -5,7 +5,7 @@ $: << "./lib"
 require 'readline'
 require 'rl'
 
-ns = RL::Eval::Namespace.new :user
+ns = RL::Eval::Namespace[:user]
 ns.refers RL::Eval::Namespace[:rl]
 context = RL::Eval::Context.new ns
 
