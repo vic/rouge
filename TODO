@@ -1,0 +1,3 @@
+- vectors (syntax, semantics, etc.)
+  - these should probably be ruby Arrays
+  - and lists should probably new actual cons-lists (RL::Cons)
