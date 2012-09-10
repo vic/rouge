@@ -26,7 +26,7 @@ describe Piret::Eval::Namespace do
 
   describe "the piret namespace" do
     before do
-      @ns = Piret::Eval::Namespace[:piret]
+      @ns = Piret[:piret]
     end
 
     it "should contain elements from Piret::Eval::Builtins" do
@@ -40,9 +40,13 @@ describe Piret::Eval::Namespace do
       @ns[:false].should eq false
     end
 
-    it "should find objects from ruby" do
-      @ns[:Float].should eq Float
-      @ns[:String].should eq String
+    it "should not find objects from ruby" do
+      lambda {
+        @ns[:Float]
+      }.should raise_exception(Piret::Eval::BindingNotFoundError)
+      lambda {
+        @ns[:String]
+      }.should raise_exception(Piret::Eval::BindingNotFoundError)
     end
 
     it "should have a name" do

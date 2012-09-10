@@ -47,7 +47,6 @@ module Piret::Eval::Namespace::Vivifiers
     Piret::Eval::Builtins::SYMBOLS.each do |name, val|
       ns.set_here name, val
     end
-    ns.refers Piret::Eval::Namespace[:ruby]
     ns
   end
 

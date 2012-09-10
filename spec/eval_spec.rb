@@ -4,7 +4,7 @@ require 'piret'
 
 describe Piret::Eval do
   before do
-    @context = Piret::Eval::Context.new Piret::Eval::Namespace[:piret]
+    @context = Piret::Eval::Context.new Piret[:piret]
   end
 
   it "should evaluate quotations to their unquoted form" do
@@ -27,10 +27,10 @@ describe Piret::Eval do
       Piret.eval(@context, :"ruby/Exception").should eq Exception
     end
 
-    it "should evaluate nested objects (in local and foreign namespaces)" do
+    it "should evaluate nested objects" do
       Piret.eval(@context, :"ruby/Piret.Eval.Context").
           should eq Piret::Eval::Context
-      Piret.eval(@context, :"Errno.EAGAIN").should eq Errno::EAGAIN
+      Piret.eval(@context, :"ruby/Errno.EAGAIN").should eq Errno::EAGAIN
     end
   end
 
