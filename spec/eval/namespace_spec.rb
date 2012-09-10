@@ -15,7 +15,6 @@ describe RL::Eval::Namespace do
     end
   end
 
-
   describe "the rl namespace" do
     before do
       @ns = RL::Eval::Namespace[:rl]
