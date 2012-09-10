@@ -75,6 +75,8 @@ class << Piret::Cons::Empty
   def to_a; []; end
   def inspect; "Piret::Cons[]"; end
   def to_s; inspect; end
+
+  include Enumerable
 end
 
 # vim: set sw=2 et cc=80:

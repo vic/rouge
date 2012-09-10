@@ -170,7 +170,7 @@ class Piret::Reader
   end
 
   NUMBER = /^[0-9][0-9_]*/
-  SYMBOL = /^[a-zA-Z0-9\-_!&\?\*\/\.]+/
+  SYMBOL = /^[a-zA-Z0-9\-_!&\?\*\/\.\+]+/
 end
 
 # vim: set sw=2 et cc=80:

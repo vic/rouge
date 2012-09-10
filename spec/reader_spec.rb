@@ -16,13 +16,16 @@ describe Piret::Reader do
 
     it "should read symbols" do
       Piret.read("loki").should eq :loki
-      Piret.read("/").should eq :/
       Piret.read("wah?").should eq :wah?
       Piret.read("!ruby!").should eq :"!ruby!"
       Piret.read("nil").should eq :nil
       Piret.read("true").should eq :true
       Piret.read("false").should eq :false
       Piret.read("&").should eq :&
+      Piret.read("*").should eq :*
+      Piret.read("-").should eq :-
+      Piret.read("+").should eq :+
+      Piret.read("/").should eq :/
     end
 
     describe "keywords" do
