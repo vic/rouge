@@ -22,7 +22,7 @@ class << Piret::Eval::Builtins
   end
 
   def list(context, *elements)
-    elements.map {|f| Piret.eval context, f}
+    Piret::Cons[*elements.map {|f| Piret.eval context, f}]
   end
 
   def fn(context, argv, *body)
@@ -46,7 +46,7 @@ class << Piret::Eval::Builtins
       end
 
       if rest
-        context.set_here rest, args[argv.length..-1]
+        context.set_here rest, Piret::Cons[*args[argv.length..-1]]
       end
 
       Piret.eval context, *body

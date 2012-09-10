@@ -6,8 +6,8 @@ describe Piret::Eval::Namespace do
   describe "the [] method" do
     it "should vivify non-extant namespaces" do
       Piret::Eval::Namespace.exists?(:vivify_test).should eq false
-      Piret::Eval::Namespace[:vivify_test].should be_an_instance_of \
-          Piret::Eval::Namespace
+      Piret::Eval::Namespace[:vivify_test].
+          should be_an_instance_of Piret::Eval::Namespace
       Piret::Eval::Namespace.exists?(:vivify_test).should eq true
     end
   end

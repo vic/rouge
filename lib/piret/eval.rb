@@ -53,15 +53,15 @@ class << Piret::Eval
               sub
             end
           end
-        when Array
+        when Piret::Cons
           fun = eval context, form[0]
           case fun
           when Piret::Builtin
-            fun.inner.call context, *form[1..-1]
+            fun.inner.call context, *form.to_a[1..-1]
           when Piret::Macro
-            eval context, fun.inner.call(*form[1..-1])
+            eval context, fun.inner.call(*form.to_a[1..-1])
           else
-            fun.call *form[1..-1].map {|f| eval context, f}
+            fun.call *form.to_a[1..-1].map {|f| eval context, f}
           end
         else
           form

@@ -19,9 +19,7 @@
 end
 
 class Piret::Cons
-  Empty = Object.new
-
-  def new(head, tail)
+  def initialize(head, tail)
     if tail != Empty and !tail.is_a?(Piret::Cons)
       raise ArgumentError,
         "tail should be a Piret::Cons or Tail, not #{tail}"
@@ -29,6 +27,12 @@ class Piret::Cons
 
     @head, @tail = head, tail
   end
+
+  def inspect
+    "Piret::Cons[#{to_a.map(&:inspect).join ", "}]"
+  end
+
+  def to_s; inspect; end
 
   def self.[](*elements)
     head = Empty
@@ -46,7 +50,31 @@ class Piret::Cons
     end
   end
 
+  def ==(cons)
+    cons.is_a?(Piret::Cons) and to_a == cons.to_a
+  end
+
+  def length
+    to_a.length
+  end
+
+  def [](i)
+    to_a[i]
+  end
+
+  attr_reader :head, :tail
+
   include Enumerable
+end
+
+Piret::Cons::Empty = Object.new
+class << Piret::Cons::Empty
+  def each(&block); end
+  def length; 0; end
+  def [](i); nil; end
+  def to_a; []; end
+  def inspect; "Piret::Cons[]"; end
+  def to_s; inspect; end
 end
 
 # vim: set sw=2 et cc=80:

@@ -16,6 +16,8 @@ module Piret::Printer
       form.inspect
     when Array
       "[#{form.map {|e| print e}.join " "}]"
+    when Piret::Cons::Empty
+      "()"
     when Piret::Cons
       if form.length == 2 and form[0] == :quote
         "'#{print form[1]}"

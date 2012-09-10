@@ -8,10 +8,8 @@ describe Piret::Eval do
   end
 
   it "should evaluate quotations to their unquoted form" do
-    Piret.eval(@context, Piret::Cons[:quote, :x]).should eq :x
-    Piret.eval(@context, Piret::Cons[:quote, Piret::Cons[:quote, \
-               Piret::Keyword[:zzy]]]).should eq \
-        Piret::Cons[:quote, Piret::Keyword[:zzy]]
+    Piret.eval(@context, Piret.read("'x")).should eq :x
+    Piret.eval(@context, Piret.read("'':zzy")).should eq Piret.read("':zzy")
   end
 
   describe "symbols" do
@@ -30,32 +28,34 @@ describe Piret::Eval do
     end
 
     it "should evaluate nested objects (in local and foreign namespaces)" do
-      Piret.eval(@context, :"ruby/Piret.Eval.Context").should eq \
-          Piret::Eval::Context
+      Piret.eval(@context, :"ruby/Piret.Eval.Context").
+          should eq Piret::Eval::Context
       Piret.eval(@context, :"Errno.EAGAIN").should eq Errno::EAGAIN
     end
   end
 
   it "should evaluate function calls" do
-    Piret.eval(@context, [lambda {|x| "hello #{x}"}, "world"]).should eq \
-      "hello world"
+    Piret.eval(@context, Piret::Cons[lambda {|x| "hello #{x}"}, "world"]).
+        should eq "hello world"
   end
 
   it "should evaluate macro calls" do
     macro = Piret::Macro[lambda {|n, body|
-      [:let, [n, "example"],
+      Piret::Cons[:let, Piret::Cons[n, "example"],
         *body]
     }]
 
-    Piret.eval(@context, [macro, :bar, [[lambda {|x,y| x + y}, :bar, :bar]]]).
+    Piret.eval(@context,
+               Piret::Cons[macro, :bar,
+                 Piret::Cons[Piret::Cons[lambda {|x,y| x + y}, :bar, :bar]]]).
       should eq "exampleexample"
   end
 
   it "should evaluate other things to themselves" do
     Piret.eval(@context, 4).should eq 4
     Piret.eval(@context, "bleep bloop").should eq "bleep bloop"
-    Piret.eval(@context, Piret::Keyword[:"nom it"]).should eq \
-        Piret::Keyword[:"nom it"]
+    Piret.eval(@context, Piret::Keyword[:"nom it"]).
+        should eq Piret::Keyword[:"nom it"]
     Piret.eval(@context, {"z" => 92, :x => Piret::Cons[:quote, 5]}).should eq(
         {"z" => 92, :x => Piret::Cons[:quote, 5]})
 
@@ -74,8 +74,7 @@ describe Piret::Eval do
 
         subcontext = Piret::Eval::Context.new @context
         subcontext.set_here :klass, klass
-        Piret.eval(subcontext, [:"klass.", Piret::Cons[:quote, :a]]).should \
-            eq :b
+        Piret.eval(subcontext, Piret.read("(klass. 'a)")).should eq :b
       end
     end
 
@@ -86,8 +85,7 @@ describe Piret::Eval do
 
         subcontext = Piret::Eval::Context.new @context
         subcontext.set_here :x, x
-        Piret.eval(subcontext, [:".y", :x, Piret::Cons[:quote, :z]]).should eq \
-            :tada
+        Piret.eval(subcontext, Piret.read("(.y x 'z)")).should eq :tada
       end
     end
   end

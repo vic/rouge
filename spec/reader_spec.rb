@@ -61,20 +61,20 @@ describe Piret::Reader do
 
       it "should read one-element lists" do
         Piret.read("(tiffany)").should eq Piret::Cons[:tiffany]
-        Piret.read("(:raaaaash)").should eq \
-            Piret::Cons[Piret::Keyword[:raaaaash]]
+        Piret.read("(:raaaaash)").
+            should eq Piret::Cons[Piret::Keyword[:raaaaash]]
       end
 
       it "should read multiple-element lists" do
         Piret.read("(1 2 3)").should eq Piret::Cons[1, 2, 3]
-        Piret.read("(true () [] \"no\")").should eq \
-            Piret::Cons[:true, Piret::Cons[], [], "no"]
+        Piret.read("(true () [] \"no\")").
+            should eq Piret::Cons[:true, Piret::Cons[], [], "no"]
       end
 
       it "should read nested lists" do
-        Piret.read("(((3) (())) 9 ((8) (8)))").should eq \
-            Piret::Cons[Piret::Cons[Piret::Cons[3], \
-            Piret::Cons[Piret::Cons[]]], 9, \
+        Piret.read("(((3) (())) 9 ((8) (8)))").
+            should eq Piret::Cons[Piret::Cons[Piret::Cons[3],
+            Piret::Cons[Piret::Cons[]]], 9,
             Piret::Cons[Piret::Cons[8], Piret::Cons[8]]]
       end
     end
@@ -91,13 +91,13 @@ describe Piret::Reader do
 
       it "should read multiple-element vectors" do
         Piret.read("[1 2 3]").should eq [1, 2, 3]
-        Piret.read("[true () [] \"no\"]").should eq \
-            [:true, Piret::Cons[], [], "no"]
+        Piret.read("[true () [] \"no\"]").
+            should eq [:true, Piret::Cons[], [], "no"]
       end
 
       it "should read nested vectors" do
-        Piret.read("[[[3] [[]]] 9 [[8] [8]]]").should eq \
-          [[[3], [[]]], 9, [[8], [8]]]
+        Piret.read("[[[3] [[]]] 9 [[8] [8]]]").
+            should eq [[[3], [[]]], 9, [[8], [8]]]
       end
     end
 
@@ -107,7 +107,7 @@ describe Piret::Reader do
       end
 
       it "should read ''('X) as (QUOTE (QUOTE ((QUOTE X))))" do
-        Piret.read("''('x)").should eq Piret::Cons[:quote, \
+        Piret.read("''('x)").should eq Piret::Cons[:quote,
             Piret::Cons[:quote, Piret::Cons[Piret::Cons[:quote, :x]]]]
       end
     end
@@ -119,7 +119,7 @@ describe Piret::Reader do
 
       it "should read one-element maps" do
         Piret.read("{a 1}").should eq({:a => 1})
-        Piret.read("{\"quux\" (lambast)}").should eq({"quux" => [:lambast]})
+        Piret.read("{\"quux\" [lambast]}").should eq({"quux" => [:lambast]})
       end
 
       it "should read multiple-element maps" do
