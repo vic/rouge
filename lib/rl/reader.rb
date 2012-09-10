@@ -31,7 +31,9 @@ class RL::Reader
       when /"/
         string
       when /\(/
-        list
+        RL::Cons[*list(')')]
+      when /\[/
+        list ']'
       when /'/
         quotation
       when /{/
@@ -113,12 +115,12 @@ class RL::Reader
     s
   end
 
-  def list
+  def list(ending)
     consume
     r = []
 
     while true
-      if peek == ')'
+      if peek == ending
         break
       end
       r << lex(true)

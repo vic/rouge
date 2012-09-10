@@ -56,21 +56,44 @@ describe RL::Reader do
 
     describe "lists" do
       it "should read the empty list" do
-        RL.read("()").should eq []
+        RL.read("()").should eq RL::Cons[]
       end
 
       it "should read one-element lists" do
-        RL.read("(tiffany)").should eq [:tiffany]
-        RL.read("(:raaaaash)").should eq [RL::Keyword[:raaaaash]]
+        RL.read("(tiffany)").should eq RL::Cons[:tiffany]
+        RL.read("(:raaaaash)").should eq RL::Cons[RL::Keyword[:raaaaash]]
       end
 
       it "should read multiple-element lists" do
-        RL.read("(1 2 3)").should eq [1, 2, 3]
-        RL.read("(true () \"no\")").should eq [:true, [], "no"]
+        RL.read("(1 2 3)").should eq RL::Cons[1, 2, 3]
+        RL.read("(true () [] \"no\")").should eq \
+            RL::Cons[:true, RL::Cons[], [], "no"]
       end
 
       it "should read nested lists" do
         RL.read("(((3) (())) 9 ((8) (8)))").should eq \
+            RL::Cons[RL::Cons[RL::Cons[3], \
+            RL::Cons[RL::Cons[]]], 9, RL::Cons[RL::Cons[8], RL::Cons[8]]]
+      end
+    end
+
+    describe "vectors" do
+      it "should read the empty vector" do
+        RL.read("[]").should eq []
+      end
+
+      it "should read one-element vectors" do
+        RL.read("[tiffany]").should eq [:tiffany]
+        RL.read("[:raaaaash]").should eq [RL::Keyword[:raaaaash]]
+      end
+
+      it "should read multiple-element vectors" do
+        RL.read("[1 2 3]").should eq [1, 2, 3]
+        RL.read("[true () [] \"no\"]").should eq [:true, RL::Cons[], [], "no"]
+      end
+
+      it "should read nested vectors" do
+        RL.read("[[[3] [[]]] 9 [[8] [8]]]").should eq \
           [[[3], [[]]], 9, [[8], [8]]]
       end
     end

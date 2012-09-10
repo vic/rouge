@@ -15,6 +15,8 @@ module RL::Printer
     when String
       form.inspect
     when Array
+      "[#{form.map {|e| print e}.join " "}]"
+    when RL::Cons
       if form.length == 2 and form[0] == :quote
         "'#{print form[1]}"
       else

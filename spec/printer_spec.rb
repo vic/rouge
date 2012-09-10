@@ -49,22 +49,45 @@ describe RL::Printer do
 
     describe "lists" do
       it "should print the empty list" do
-        RL.print([]).should eq "()"
+        RL.print(RL::Cons[]).should eq "()"
       end
 
       it "should print one-element lists" do
-        RL.print([:tiffany]).should eq "(tiffany)"
-        RL.print([RL::Keyword[:raaaaash]]).should eq "(:raaaaash)"
+        RL.print(RL::Cons[:tiffany]).should eq "(tiffany)"
+        RL.print(RL::Cons[RL::Keyword[:raaaaash]]).should eq "(:raaaaash)"
       end
 
       it "should print multiple-element lists" do
-        RL.print([1, 2, 3]).should eq "(1 2 3)"
-        RL.print([:true, [], "no"]).should eq "(true () \"no\")"
+        RL.print(RL::Cons[1, 2, 3]).should eq "(1 2 3)"
+        RL.print(RL::Cons[:true, RL::Cons[], [], "no"]).should eq \
+            "(true () [] \"no\")"
       end
 
       it "should print nested lists" do
-        RL.print([[[3], [[]]], 9, [[8], [8]]]).should eq \
+        RL.print(RL::Cons[RL::Cons[RL::Cons[3], RL::Cons[RL::Cons[]]], 9, \
+                 RL::Cons[RL::Cons[8], RL::Cons[8]]]).should eq \
             "(((3) (())) 9 ((8) (8)))"
+      end
+    end
+
+    describe "vectors" do
+      it "should print the empty vector" do
+        RL.print([]).should eq "[]"
+      end
+
+      it "should print one-element vectors" do
+        RL.print([:tiffany]).should eq "[tiffany]"
+        RL.print([RL::Keyword[:raaaaash]]).should eq "[:raaaaash]"
+      end
+
+      it "should print multiple-element vectors" do
+        RL.print([1, 2, 3]).should eq "[1 2 3]"
+        RL.print([:true, RL::Cons[], [], "no"]).should eq "[true () [] \"no\"]"
+      end
+
+      it "should print nested vectors" do
+        RL.print([[[3], [[]]], 9, [[8], [8]]]).should eq \
+            "[[[3] [[]]] 9 [[8] [8]]]"
       end
     end
 

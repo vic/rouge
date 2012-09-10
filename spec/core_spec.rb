@@ -36,4 +36,13 @@ describe [RL::Keyword, RL::Macro, RL::Builtin] do
   end
 end
 
+describe RL::Cons do
+  describe "the multi-constructor" do
+    it "should create a Cons for each element" do
+      # TODO
+      pending
+    end
+  end
+end
+
 # vim: set sw=2 et cc=80:
