@@ -1,3 +1,1 @@
-- vectors (syntax, semantics, etc.)
-  - these should probably be ruby Arrays
-  - and lists should probably new actual cons-lists (RL::Cons)
+- really want to keep & as the splat.  what to do for blocks?

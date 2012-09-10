@@ -55,6 +55,7 @@ class << Piret::Eval
           end
         when Piret::Cons
           fun = eval context, form[0]
+          remainder = form[1..-1]
           case fun
           when Piret::Builtin
             fun.inner.call context, *form.to_a[1..-1]

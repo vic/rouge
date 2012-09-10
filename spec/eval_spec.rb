@@ -34,23 +34,6 @@ describe Piret::Eval do
     end
   end
 
-  it "should evaluate function calls" do
-    Piret.eval(@context, Piret::Cons[lambda {|x| "hello #{x}"}, "world"]).
-        should eq "hello world"
-  end
-
-  it "should evaluate macro calls" do
-    macro = Piret::Macro[lambda {|n, body|
-      Piret::Cons[:let, Piret::Cons[n, "example"],
-        *body]
-    }]
-
-    Piret.eval(@context,
-               Piret::Cons[macro, :bar,
-                 Piret::Cons[Piret::Cons[lambda {|x,y| x + y}, :bar, :bar]]]).
-      should eq "exampleexample"
-  end
-
   it "should evaluate other things to themselves" do
     Piret.eval(@context, 4).should eq 4
     Piret.eval(@context, "bleep bloop").should eq "bleep bloop"
@@ -76,26 +59,60 @@ describe Piret::Eval do
         should eq({"off" => ["off"]})
   end
 
-  describe "Ruby interop" do
-    describe "new object creation" do
-      it "should call X.new with (X.)" do
-        klass = double("klass")
-        klass.should_receive(:new).with(:a).and_return(:b)
-
-        subcontext = Piret::Eval::Context.new @context
-        subcontext.set_here :klass, klass
-        Piret.eval(subcontext, Piret.read("(klass. 'a)")).should eq :b
-      end
+  describe "function calls" do
+    it "should evaluate function calls" do
+      Piret.eval(@context, Piret::Cons[lambda {|x| "hello #{x}"}, "world"]).
+          should eq "hello world"
     end
 
-    describe "generic method calls" do
-      it "should call x.y(z) with (.y x)" do
-        x = double("x")
-        x.should_receive(:y).with(:z).and_return(:tada)
+    it "should evaluate macro calls" do
+      macro = Piret::Macro[lambda {|n, body|
+        Piret::Cons[:let, Piret::Cons[n, "example"],
+          *body]
+      }]
 
-        subcontext = Piret::Eval::Context.new @context
-        subcontext.set_here :x, x
-        Piret.eval(subcontext, Piret.read("(.y x 'z)")).should eq :tada
+      Piret.eval(@context,
+                 Piret::Cons[macro, :bar,
+                 Piret::Cons[
+                 Piret::Cons[lambda {|x,y| x + y}, :bar, :bar]]]).
+        should eq "exampleexample"
+    end
+
+
+
+    describe "Ruby interop" do
+      describe "new object creation" do
+        it "should call X.new with (X.)" do
+          klass = double("klass")
+          klass.should_receive(:new).with(:a).and_return(:b)
+
+          subcontext = Piret::Eval::Context.new @context
+          subcontext.set_here :klass, klass
+          Piret.eval(subcontext, Piret.read("(klass. 'a)")).should eq :b
+        end
+      end
+
+      describe "generic method calls" do
+        it "should call x.y(z) with (.y x)" do
+          x = double("x")
+          x.should_receive(:y).with(:z).and_return(:tada)
+
+          subcontext = Piret::Eval::Context.new @context
+          subcontext.set_here :x, x
+          Piret.eval(subcontext, Piret.read("(.y x 'z)")).should eq :tada
+        end
+
+        it "should call q.r(s, &t) with (.r q 's & t)" do
+          q = double("q")
+          t = lambda {}
+          q.should_receive(:r).with(:s, &t).and_return(:success)
+
+          subcontext = Piret::Eval::Context.new @context
+          subcontext.set_here :q, q
+          subcontext.set_here :t, t
+          Piret.eval(subcontext, Piret.read("(.r q 's & t)")).
+              should eq :success
+        end
       end
     end
   end
