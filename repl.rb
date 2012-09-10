@@ -4,7 +4,7 @@ $: << "./lib"
 
 require 'rl'
 
-context = RL::Eval::Context.toplevel
+context = RL::Eval::Context.new RL::Eval::Namespace[:rl]
 
 while true
   STDOUT.print "rl=> "
