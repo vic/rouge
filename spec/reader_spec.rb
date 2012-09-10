@@ -149,6 +149,13 @@ describe Piret::Reader do
           Piret.read("hello    \n\n\t\t  ").should eq :hello
         }.should_not raise_exception
       end
+
+      it "should deal with whitespace in strange places" do
+        lambda {
+          Piret.read("[1 ]").should eq [1]
+          Piret.read(" [   2 ] ").should eq [2]
+        }.should_not raise_exception
+      end
     end
   end
 end

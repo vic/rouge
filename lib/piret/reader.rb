@@ -16,10 +16,6 @@ class Piret::Reader
   end
 
   def lex sub=false
-    while peek =~ /[\s,]/
-      consume
-    end
-
     r = 
       case peek
       when NUMBER
@@ -79,11 +75,13 @@ class Piret::Reader
     s = ""
     t = consume
     while true
-      c = consume
+      c = @src[@n]
 
       if c.nil?
         raise EndOfDataError, "in string, got: #{s}"
       end
+
+      @n += 1
 
       if c == t
         break
@@ -160,6 +158,10 @@ class Piret::Reader
   end
 
   def peek
+    while @src[@n] =~ /[\s,]/
+      @n += 1
+    end
+
     @src[@n]
   end
 
