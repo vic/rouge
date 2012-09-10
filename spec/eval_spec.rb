@@ -56,19 +56,24 @@ describe Piret::Eval do
     Piret.eval(@context, "bleep bloop").should eq "bleep bloop"
     Piret.eval(@context, Piret::Keyword[:"nom it"]).
         should eq Piret::Keyword[:"nom it"]
-    Piret.eval(@context, {"z" => 92, :x => Piret::Cons[:quote, 5]}).
-        should eq({"z" => 92, :x => 5})
-
-    subcontext = Piret::Eval::Context.new @context
-    subcontext.set_here :lolwut, "off"
-    Piret.eval(@context, {:lolwut => [:lolwut]}).
-        should eq({"off" => ["off"]})
+    Piret.eval(@context, Piret.read("{:a :b, 1 2}")).to_s.
+        should eq({Piret::Keyword[:a] => Piret::Keyword[:b], 1 => 2}.to_s)
 
     l = lambda {}
     Piret.eval(@context, l).should eq l
 
     o = Object.new
     Piret.eval(@context, o).should eq o
+  end
+
+  it "should evaluate hash and vector arguments" do
+    Piret.eval(@context, Piret.read("{\"z\" 92, 'x ''5}")).
+        should eq({"z" => 92, :x => Piret::Cons[:quote, 5]})
+
+    subcontext = Piret::Eval::Context.new @context
+    subcontext.set_here :lolwut, "off"
+    Piret.eval(subcontext, {:lolwut => [:lolwut]}).
+        should eq({"off" => ["off"]})
   end
 
   describe "Ruby interop" do

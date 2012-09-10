@@ -63,6 +63,11 @@ class << Piret::Eval
           else
             fun.call *form.to_a[1..-1].map {|f| eval context, f}
           end
+        when Hash
+          Hash[*
+              form.map {|k,v| [eval(context, k), eval(context, v)]}.flatten(1)]
+        when Array
+          form.map {|f| eval context, f}
         else
           form
         end

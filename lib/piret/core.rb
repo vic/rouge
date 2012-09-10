@@ -10,6 +10,12 @@
       new inner
     end
 
+    def inspect
+      "#{self.class.name}[#{@inner.inspect}]"
+    end
+
+    def to_s; inspect; end
+
     def ==(right)
       right.is_a?(self.class) and right.inner == @inner
     end

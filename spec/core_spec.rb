@@ -34,6 +34,14 @@ describe [Piret::Keyword, Piret::Macro, Piret::Builtin] do
       end
     end
   end
+
+  describe "the Puby pretty-printing" do
+    it "should resemble the [] constructor" do
+      described_class.each do |klass|
+        klass[:hello].inspect.should eq "#{klass.name}[:hello]"
+      end
+    end
+  end
 end
 
 describe Piret::Cons do
