@@ -3,8 +3,11 @@ require 'rl/core'
 
 module RL::Eval
   require 'rl/eval/context'
+  require 'rl/eval/namespace'
+end
 
-  def self.eval(context, *forms)
+class << RL::Eval
+  def eval(context, *forms)
     return nil if forms.length.zero?
 
     while true
@@ -16,17 +19,12 @@ module RL::Eval
 
           my_context = context
 
-          if parts.length > 1 and parts[0] == :r
-            my_context = Kernel
-            parts.shift
+          if parts.length > 1
+            my_context = RL::Eval::Namespace[parts.shift]
           end
 
           while parts.length > 0
-            if my_context.is_a?(Hash) or my_context.is_a?(RL::Eval::Context)
-              my_context = my_context[parts.shift]
-            elsif parts[0].to_s[0].chr =~ /[A-Z]/
-              my_context = my_context.const_get parts.shift
-            end
+            my_context = traverse my_context, parts.shift
           end
 
           my_context
@@ -45,6 +43,15 @@ module RL::Eval
         end
 
       return r if forms.length.zero?
+    end
+  end
+
+  def traverse(ns, name)
+    case ns
+    when RL::Eval::Context, RL::Eval::Namespace
+      ns = ns[name]
+    when Class, Module
+      ns = ns.const_get name
     end
   end
 end

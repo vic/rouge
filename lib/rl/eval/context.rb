@@ -1,24 +1,16 @@
 # encoding: utf-8
 
 class RL::Eval::Context
-  require 'rl/eval/builtins'
-
   class BindingNotFoundError < StandardError; end
 
-  def self.toplevel
-    return @toplevel if @toplevel
-    @toplevel = new nil
-    RL::Eval::Builtins.methods(false).each do |m|
-      @toplevel.set_here m, RL::Builtin[RL::Eval::Builtins.method(m)]
+  def initialize(parent_or_ns)
+    case parent_or_ns
+    when RL::Eval::Namespace
+      @ns = parent_or_ns
+    when RL::Eval::Context
+      @parent = parent_or_ns
+      @ns = @parent.ns
     end
-    RL::Eval::Builtins::SYMBOLS.each do |name, val|
-      @toplevel.set_here name, val
-    end
-    @toplevel
-  end
-
-  def initialize(parent)
-    @parent = parent
     @table = {}
   end
 
@@ -27,8 +19,10 @@ class RL::Eval::Context
       @table[key]
     elsif @parent
       @parent[key]
+    elsif @ns
+      @ns[key]
     else
-      raise BindingNotFoundError, key
+      raise RL::Eval::Context::BindingNotFoundError, key
     end
   end
 
@@ -42,9 +36,12 @@ class RL::Eval::Context
     elsif @parent
       @parent.set_lexical key, value
     else
-      raise BindingNotFoundError, "setting #{key} to #{value.inspect}"
+      raise RL::Eval::Context::BindingNotFoundError,
+          "setting #{key} to #{value.inspect}"
     end
   end
+
+  attr_reader :ns
 end
 
 # vim: set sw=2 et cc=80:

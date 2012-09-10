@@ -54,7 +54,7 @@ class << RL::Eval::Builtins
   end
 
   def def(context, name, form)
-    RL::Eval::Context.toplevel.set_here name, RL.eval(context, form)
+    context.ns.set_here name, RL.eval(context, form)
     name
   end
 end

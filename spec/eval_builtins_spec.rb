@@ -4,7 +4,7 @@ require 'rl'
 
 describe RL::Eval::Builtins do
   before do
-    @context = RL::Eval::Context.toplevel
+    @context = RL::Eval::Context.new RL::Eval::Namespace[:rl]
   end
 
   describe "let" do
