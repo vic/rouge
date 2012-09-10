@@ -17,7 +17,11 @@ class << RL::Eval
       r =
         case form
         when Symbol
-          parts = form.to_s.split("/")
+          form = form.to_s
+          will_new = form[-1] == ?.
+          form = form[0..-2] if will_new
+
+          parts = form.split("/")
 
           if parts.length == 1
             sub = context
@@ -27,14 +31,18 @@ class << RL::Eval
             raise "parts.length not in 1, 2" # TODO
           end
 
-          lookups = parts[0].split('.')
+          lookups = parts[0].split(/(?<=.)\.(?=.)/)
           sub = sub[lookups.shift.intern]
 
           while lookups.length > 0
             sub = sub.const_get(lookups.shift.intern)
           end
 
-          sub
+          if will_new
+            sub.method(:new)
+          else
+            sub
+          end
         when Array
           fun = eval context, form[0]
           case fun
