@@ -18,30 +18,40 @@ class << RL::Eval
         case form
         when Symbol
           form = form.to_s
-          will_new = form[-1] == ?.
-          form = form[0..-2] if will_new
-
-          parts = form.split("/")
-
-          if parts.length == 1
-            sub = context
-          elsif parts.length == 2
-            sub = RL::Eval::Namespace[parts.shift.intern]
+          if form[0] == ?.
+            form = form[1..-1]
+            lambda {|receiver, *args|
+              receiver.send(form, *args)
+            }
           else
-            raise "parts.length not in 1, 2" # TODO
-          end
+            will_new =
+              if form[-1] == ?.
+                form = form[0..-2]
+                true
+              end
 
-          lookups = parts[0].split(/(?<=.)\.(?=.)/)
-          sub = sub[lookups.shift.intern]
+            parts = form.split("/")
 
-          while lookups.length > 0
-            sub = sub.const_get(lookups.shift.intern)
-          end
+            if parts.length == 1
+              sub = context
+            elsif parts.length == 2
+              sub = RL::Eval::Namespace[parts.shift.intern]
+            else
+              raise "parts.length not in 1, 2" # TODO
+            end
 
-          if will_new
-            sub.method(:new)
-          else
-            sub
+            lookups = parts[0].split(/(?<=.)\.(?=.)/)
+            sub = sub[lookups.shift.intern]
+
+            while lookups.length > 0
+              sub = sub.const_get(lookups.shift.intern)
+            end
+
+            if will_new
+              sub.method(:new)
+            else
+              sub
+            end
           end
         when Array
           fun = eval context, form[0]
