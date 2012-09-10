@@ -2,17 +2,14 @@
 
 $: << "./lib"
 
+require 'readline'
 require 'rl'
 
 context = RL::Eval::Context.new RL::Eval::Namespace[:rl]
 
 while true
-  STDOUT.print "#{context.ns.name}=> "
-  STDOUT.flush
-
-  begin
-    input = STDIN.readline
-  rescue EOFError
+  input = Readline.readline("#{context.ns.name}=> ", true)
+  if input.nil?
     STDOUT.print "\n"
     break
   end
