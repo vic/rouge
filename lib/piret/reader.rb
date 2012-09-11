@@ -20,8 +20,6 @@ class Piret::Reader
       case peek
       when NUMBER
         number
-      when SYMBOL
-        symbol
       when /:/
         keyword
       when /"/
@@ -30,6 +28,9 @@ class Piret::Reader
         Piret::Cons[*list(')')]
       when /\[/
         list ']'
+      when SYMBOL
+        # SYMBOL after \[, because it includes \[
+        symbol
       when /'/
         quotation
       when /{/
@@ -180,7 +181,7 @@ class Piret::Reader
   end
 
   NUMBER = /^[0-9][0-9_]*/
-  SYMBOL = /^[a-zA-Z0-9\-_!&\?\*\/\.\+\|]+/
+  SYMBOL = /^(\.\[\])|([a-zA-Z0-9\-_!&\?\*\/\.\+\|]+)/
 end
 
 # vim: set sw=2 et cc=80:

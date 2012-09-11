@@ -98,7 +98,17 @@ class << Piret::Builtins
         Piret::Macro[Piret.eval(
             context,
             Piret::Cons[Piret::Symbol[:fn], args, *body])]
+
     Piret::Symbol[:"#{context.ns.name}/#{name.inner}"]
+  end
+
+  def apply(context, fun, *args)
+    args =
+        args[0..-2].map {|f| Piret.eval context, f} +
+        Piret.eval(context, args[-1]).to_a
+    # This is a terrible hack.
+    Piret.eval(context,
+        Piret::Cons[fun, *args.map {|a| Piret::Cons[Piret::Symbol[:quote], a]}])
   end
 end
 

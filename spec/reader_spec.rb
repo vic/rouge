@@ -26,6 +26,8 @@ describe Piret::Reader do
     Piret.read("+").should eq Piret::Symbol[:+]
     Piret.read("/").should eq Piret::Symbol[:/]
     Piret.read("|").should eq Piret::Symbol[:|]
+    Piret.read(".").should eq Piret::Symbol[:"."]
+    Piret.read(".[]").should eq Piret::Symbol[:".[]"]
   end
 
   describe "keywords" do

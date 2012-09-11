@@ -36,6 +36,8 @@ class << Piret::REPL
       rescue Piret::Reader::EndOfDataError
         chaining = true
         next
+      rescue Piret::Reader::TrailingDataError
+        STDOUT.puts "!! REPL too stupid to deal with trailing data."
       end
 
       chaining = false

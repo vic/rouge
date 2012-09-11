@@ -161,7 +161,67 @@ describe Piret::Builtins do
   end
 
   describe "defmacro" do
-    pending
+    it "should return a reference to the created macro" do
+      Piret.eval(@context, Piret.read("(defmacro a [] 'b)")).
+          should eq Piret::Symbol[:"user.spec/a"]
+    end
+
+    it "should evaluate in the defining context" do
+      # XXX: normal Clojure behaviour would be to fail immediately here.  This
+      # is contrary to Ruby's own lambdas, however.  Careful thought required;
+      # we may need a more thorough compilation stage which expands macros and
+      # then does a once-over to detect for symbols without bindings.
+      # v-- start surprising (non-Clojurish)
+      Piret.eval(@context, Piret.read("(defmacro a [] b)"))
+
+      lambda {
+        Piret.eval(@context, Piret.read('(a)'))
+      }.should raise_exception(Piret::Eval::BindingNotFoundError, "b")
+
+      lambda {
+        Piret.eval(@context, Piret.read('(let [b 4] (a))'))
+      }.should raise_exception(Piret::Eval::BindingNotFoundError, "b")
+      # ^-- end surprising
+
+      Piret.eval(@context, Piret.read("(def b 'c)"))
+
+      lambda {
+        Piret.eval(@context, Piret.read("(defmacro a [] b)"))
+      }.should_not raise_exception
+    end
+
+    it "should expand in the calling context" do
+      Piret.eval(@context, Piret.read("(def b 'c)"))
+      Piret.eval(@context, Piret.read("(defmacro a [] b)"))
+
+      lambda {
+        Piret.eval(@context, Piret.read("(a)"))
+      }.should raise_exception(Piret::Eval::BindingNotFoundError, "c")
+
+      Piret.eval(@context, Piret.read("(let [c 9] (a))")).should eq 9
+    end
+  end
+
+  describe "apply" do
+    before do
+      @a = lambda {|*args| args}
+      @subcontext = Piret::Context.new @context
+      @subcontext.set_here :a, @a
+    end
+
+    it "should call a function with the argument list" do
+      Piret.eval(@subcontext, Piret.read("(apply a [1 2 3])")).
+          should eq [1, 2, 3]
+      Piret.eval(@subcontext, Piret.read("(apply a '(1 2 3))")).
+          should eq [1, 2, 3]
+    end
+
+    it "should call a function with intermediate arguments" do
+      Piret.eval(@subcontext, Piret.read("(apply a 8 9 [1 2 3])")).
+          should eq [8, 9, 1, 2, 3]
+      Piret.eval(@subcontext, Piret.read("(apply a 8 9 '(1 2 3))")).
+          should eq [8, 9, 1, 2, 3]
+    end
   end
 end
 
