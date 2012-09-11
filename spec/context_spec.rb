@@ -2,14 +2,14 @@
 require 'spec_helper'
 require 'piret'
 
-describe Piret::Eval::Context do
+describe Piret::Context do
   before do
-    @a = Piret::Eval::Context.new nil
-    @ab = Piret::Eval::Context.new @a
-    @abb = Piret::Eval::Context.new @ab
-    @ac = Piret::Eval::Context.new @a
-    @in_rl = Piret::Eval::Context.new Piret::Eval::Namespace[:"piret.builtin"]
-    @in_rl_nested = Piret::Eval::Context.new @in_rl
+    @a = Piret::Context.new nil
+    @ab = Piret::Context.new @a
+    @abb = Piret::Context.new @ab
+    @ac = Piret::Context.new @a
+    @in_rl = Piret::Context.new Piret::Namespace[:"piret.builtin"]
+    @in_rl_nested = Piret::Context.new @in_rl
 
     @a.set_here :root, 42
     @ab.set_here :root, 80
@@ -34,11 +34,11 @@ describe Piret::Eval::Context do
 
   describe "the ns method" do
     it "should get the namespace of a context that has one" do
-      @in_rl.ns.should eq Piret::Eval::Namespace[:"piret.builtin"]
+      @in_rl.ns.should eq Piret::Namespace[:"piret.builtin"]
     end
 
     it "should get the namespace of a nested context that has one" do
-      @in_rl_nested.ns.should eq Piret::Eval::Namespace[:"piret.builtin"]
+      @in_rl_nested.ns.should eq Piret::Namespace[:"piret.builtin"]
     end
 
     it "should return nil if a context has none" do

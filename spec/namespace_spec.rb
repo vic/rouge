@@ -2,27 +2,26 @@
 require 'spec_helper'
 require 'piret'
 
-describe Piret::Eval::Namespace do
+describe Piret::Namespace do
   describe "the [] method" do
     it "should vivify non-extant namespaces" do
-      Piret::Eval::Namespace.exists?(:vivify_test).should eq false
-      Piret::Eval::Namespace[:vivify_test].
-          should be_an_instance_of Piret::Eval::Namespace
-      Piret::Eval::Namespace.exists?(:vivify_test).should eq true
+      Piret::Namespace.exists?(:vivify_test).should eq false
+      Piret::Namespace[:vivify_test].should be_an_instance_of Piret::Namespace
+      Piret::Namespace.exists?(:vivify_test).should eq true
     end
   end
 
   describe "the Piret[] shortcut" do
     it "should directly call the [] method" do
-      Piret::Eval::Namespace.should_receive(:[]).with(:trazzle)
+      Piret::Namespace.should_receive(:[]).with(:trazzle)
       Piret[:trazzle]
     end
   end
 
   describe "the refer method" do
     it "should cause items in one namespace to be locatable from the other" do
-      abc = Piret::Eval::Namespace.new :abc
-      xyz = Piret::Eval::Namespace.new :xyz
+      abc = Piret::Namespace.new :abc
+      xyz = Piret::Namespace.new :xyz
 
       xyz.refer abc
 
@@ -36,7 +35,7 @@ describe Piret::Eval::Namespace do
       @ns = Piret[:"piret.builtin"]
     end
 
-    it "should contain elements from Piret::Eval::Builtins" do
+    it "should contain elements from Piret::Builtins" do
       @ns[:let].should be_an_instance_of Piret::Builtin
       @ns[:quote].should be_an_instance_of Piret::Builtin
     end
@@ -63,7 +62,7 @@ describe Piret::Eval::Namespace do
 
   describe "the ruby namespace" do
     before do
-      @ns = Piret::Eval::Namespace[:ruby]
+      @ns = Piret::Namespace[:ruby]
     end
 
     it "should contain elements from Kernel" do

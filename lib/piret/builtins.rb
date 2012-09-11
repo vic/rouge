@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-module Piret::Eval::Builtins
+module Piret::Builtins
   SYMBOLS = {
     :nil => nil,
     :true => true,
@@ -8,9 +8,9 @@ module Piret::Eval::Builtins
   }
 end
 
-class << Piret::Eval::Builtins
+class << Piret::Builtins
   def let(context, bindings, *body)
-    context = Piret::Eval::Context.new context
+    context = Piret::Context.new context
     bindings.each_slice(2) do |k, v|
       context.set_here k.inner, Piret::Eval.eval(context, v)
     end
@@ -26,7 +26,7 @@ class << Piret::Eval::Builtins
   end
 
   def fn(context, argv, *body)
-    context = Piret::Eval::Context.new context
+    context = Piret::Context.new context
 
     if argv[-2] == Piret::Symbol[:&]
       rest = argv[-1]

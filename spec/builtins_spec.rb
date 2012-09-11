@@ -2,11 +2,11 @@
 require 'spec_helper'
 require 'piret'
 
-describe Piret::Eval::Builtins do
+describe Piret::Builtins do
   before do
-    @ns = Piret::Eval::Namespace.new :"user.spec"
-    @ns.refer Piret::Eval::Namespace[:"piret.builtin"]
-    @context = Piret::Eval::Context.new @ns
+    @ns = Piret::Namespace.new :"user.spec"
+    @ns.refer Piret::Namespace[:"piret.builtin"]
+    @context = Piret::Context.new @ns
   end
 
   describe "let" do
@@ -99,7 +99,7 @@ describe Piret::Eval::Builtins do
     end
 
     it "should always make a binding at the top of the namespace" do
-      subcontext = Piret::Eval::Context.new @context
+      subcontext = Piret::Context.new @context
       Piret.eval(subcontext, Piret.read("(def sarge 'b)")).
           should eq Piret.read('user.spec/sarge')
       Piret.eval(@context, Piret.read('sarge')).should eq Piret.read('b')
@@ -112,7 +112,7 @@ describe Piret::Eval::Builtins do
       b = mock("b")
       a.should_receive(:call).with(any_args)
       b.should_not_receive(:call).with(any_args)
-      subcontext = Piret::Eval::Context.new @context
+      subcontext = Piret::Context.new @context
       subcontext.set_here :a, a
       subcontext.set_here :b, b
       Piret.eval(subcontext, Piret.read('(if true (a) (b))'))

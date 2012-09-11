@@ -60,7 +60,7 @@ class << Piret::REPL
     ns = Piret[:user]
     ns.refer Piret[:"piret.builtin"]
     ns.refer Piret[:ruby]
-    Piret::Eval::Context.new ns
+    Piret::Context.new ns
   end
 end
 

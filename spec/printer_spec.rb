@@ -153,9 +153,9 @@ describe Piret::Printer do
     end
 
     it "should print builtin forms in their namespace" do
-      Piret.print(Piret::Builtin[Piret::Eval::Builtins.method(:let)]).
+      Piret.print(Piret::Builtin[Piret::Builtins.method(:let)]).
           should eq "piret.builtin/let"
-      Piret.print(Piret::Builtin[Piret::Eval::Builtins.method(:def)]).
+      Piret.print(Piret::Builtin[Piret::Builtins.method(:def)]).
           should eq "piret.builtin/def"
     end
 

@@ -4,7 +4,7 @@ require 'piret'
 
 describe Piret::Eval do
   before do
-    @context = Piret::Eval::Context.new Piret[:"piret.builtin"]
+    @context = Piret::Context.new Piret[:"piret.builtin"]
   end
 
   it "should evaluate quotations to their unquoted form" do
@@ -17,7 +17,7 @@ describe Piret::Eval do
       @context.set_here :vitamin_b, "vegemite"
       Piret.eval(@context, Piret.read("vitamin_b")).should eq "vegemite"
 
-      subcontext = Piret::Eval::Context.new @context
+      subcontext = Piret::Context.new @context
       subcontext.set_here :joy, [:yes]
       Piret.eval(subcontext, Piret.read("joy")).should eq [:yes]
     end
@@ -28,8 +28,8 @@ describe Piret::Eval do
     end
 
     it "should evaluate nested objects" do
-      Piret.eval(@context, Piret.read("ruby/Piret.Eval.Context")).
-          should eq Piret::Eval::Context
+      Piret.eval(@context, Piret.read("ruby/Piret.Context")).
+          should eq Piret::Context
       Piret.eval(@context, Piret.read("ruby/Errno.EAGAIN")).
           should eq Errno::EAGAIN
     end
@@ -53,7 +53,7 @@ describe Piret::Eval do
     Piret.eval(@context, Piret.read("{\"z\" 92, 'x ''5}")).
         should eq Piret.read("{\"z\" 92, x '5}")
 
-    subcontext = Piret::Eval::Context.new @context
+    subcontext = Piret::Context.new @context
     subcontext.set_here :lolwut, "off"
     Piret.eval(subcontext, Piret.read("{lolwut [lolwut]}")).
         should eq Piret.read('{"off" ["off"]}')
@@ -61,7 +61,7 @@ describe Piret::Eval do
 
   describe "function calls" do
     it "should evaluate function calls" do
-      subcontext = Piret::Eval::Context.new @context
+      subcontext = Piret::Context.new @context
       subcontext.set_here :f, lambda {|x| "hello #{x}"}
       Piret.eval(subcontext, Piret.read('(f "world")')).
           should eq "hello world"
@@ -73,7 +73,7 @@ describe Piret::Eval do
           *body]
       }]
 
-      subcontext = Piret::Eval::Context.new @context
+      subcontext = Piret::Context.new @context
       subcontext.set_here :macro, macro
       subcontext.set_here :f, lambda {|x,y| x + y}
       Piret.eval(subcontext, Piret.read('(macro bar (f bar bar))')).
@@ -109,7 +109,7 @@ describe Piret::Eval do
           klass = double("klass")
           klass.should_receive(:new).with(Piret.read('a')).and_return(:b)
 
-          subcontext = Piret::Eval::Context.new @context
+          subcontext = Piret::Context.new @context
           subcontext.set_here :klass, klass
           Piret.eval(subcontext, Piret.read("(klass. 'a)")).should eq :b
         end
@@ -120,7 +120,7 @@ describe Piret::Eval do
           x = double("x")
           x.should_receive(:y).with(Piret.read('z')).and_return(:tada)
 
-          subcontext = Piret::Eval::Context.new @context
+          subcontext = Piret::Context.new @context
           subcontext.set_here :x, x
           Piret.eval(subcontext, Piret.read("(.y x 'z)")).should eq :tada
         end
@@ -130,7 +130,7 @@ describe Piret::Eval do
           h = [1, 9]
           f.should_receive(:e).with(Piret.read('g'), *h).and_return(:yada)
 
-          subcontext = Piret::Eval::Context.new @context
+          subcontext = Piret::Context.new @context
           subcontext.set_here :f, f
           subcontext.set_here :h, h
           Piret.eval(subcontext, Piret.read("(.e f 'g & h)")).should eq :yada
@@ -141,7 +141,7 @@ describe Piret::Eval do
           t = lambda {}
           q.should_receive(:r).with(Piret.read('s'), &t).and_return(:bop)
 
-          subcontext = Piret::Eval::Context.new @context
+          subcontext = Piret::Context.new @context
           subcontext.set_here :q, q
           subcontext.set_here :t, t
           Piret.eval(subcontext, Piret.read("(.r q 's | t)")).should eq :bop
@@ -157,7 +157,7 @@ describe Piret::Eval do
             :ok
           end
 
-          subcontext = Piret::Eval::Context.new @context
+          subcontext = Piret::Context.new @context
           subcontext.set_here :a, a
           Piret.eval(subcontext, Piret.read("(.b a 'c | [d] (.+ d 1))")).
               should eq :ok

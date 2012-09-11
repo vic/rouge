@@ -2,8 +2,8 @@
 require 'piret/core'
 
 module Piret::Eval
-  require 'piret/eval/context'
-  require 'piret/eval/namespace'
+  require 'piret/context'
+  require 'piret/namespace'
 
   class BindingNotFoundError < StandardError; end
 end
@@ -35,7 +35,7 @@ class << Piret::Eval
             if parts.length == 1
               sub = context
             elsif parts.length == 2
-              sub = Piret::Eval::Namespace[parts.shift.intern]
+              sub = Piret::Namespace[parts.shift.intern]
             else
               raise "parts.length not in 1, 2" # TODO
             end

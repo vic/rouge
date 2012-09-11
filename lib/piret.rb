@@ -22,7 +22,7 @@ class << Piret
   end
 
   def [](ns)
-    Piret::Eval::Namespace[ns]
+    Piret::Namespace[ns]
   end
 
   def repl(argv)

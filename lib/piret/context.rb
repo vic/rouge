@@ -1,11 +1,11 @@
 # encoding: utf-8
 
-class Piret::Eval::Context
+class Piret::Context
   def initialize(parent_or_ns)
     case parent_or_ns
-    when Piret::Eval::Namespace
+    when Piret::Namespace
       @ns = parent_or_ns
-    when Piret::Eval::Context
+    when Piret::Context
       @parent = parent_or_ns
       @ns = @parent.ns
     end

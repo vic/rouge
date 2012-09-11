@@ -5,7 +5,6 @@ miscellaeny
 - `piret' binary, `ipiret'
 - package as a gem?
 - readline autocomplete
-- move stuff out of ::Eval::
 
 core lang
 ---------
