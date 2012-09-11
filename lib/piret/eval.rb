@@ -63,19 +63,25 @@ class << Piret::Eval
           else
             args = form.to_a[1..-1]
 
-            if args[-2] == :&
-              rest = eval context, args[-1]
-              args = args[0...-2]
-            elsif args[-4] == :& and args[-2] == :|
-              rest = eval context, args[-3]
-              args = args[0...-4] + args[-2..-1]
+            if args.include? :&
+              index = args.index :&
+              rest = eval context, args[index + 1]
+              args = args[0...index] + args[index + 2..-1]
             else
               rest = nil
             end
 
-            if args[-2] == :|
-              block = eval context, args[-1]
-              args = args[0...-2]
+            if args.include? :|
+              index = args.index :|
+              if args.length == index + 2
+                # Function.
+                block = eval context, args[index + 1]
+              else
+                # Inline block.
+                block = eval context,
+                    Piret::Cons[:fn, args[index + 1], *args[index + 2..-1]]
+              end
+              args = args[0...index]
             else
               block = nil
             end
