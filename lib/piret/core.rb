@@ -24,6 +24,17 @@
   }
 end
 
+class Piret::Symbol
+  @@cache = {}
+
+  def self.[](inner)
+    sym = Piret::Symbol.class_variable_get('@@cache')[inner]
+    return sym if sym
+
+    Piret::Symbol.class_variable_get('@@cache')[inner] = new inner
+  end
+end
+
 class Piret::Cons
   def initialize(head, tail)
     if tail != Empty and !tail.is_a?(Piret::Cons)

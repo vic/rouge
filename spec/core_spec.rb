@@ -44,6 +44,14 @@ describe [Piret::Symbol, Piret::Macro, Piret::Builtin] do
   end
 end
 
+describe Piret::Symbol do
+  describe "the cache" do
+    it "should return the same Piret::Symbol for the same inner symbol" do
+      Piret::Symbol[:x].should be Piret::Symbol[:x]
+    end
+  end
+end
+
 describe Piret::Cons do
   describe "the multi-constructor" do
     it "should create a Cons for each element" do

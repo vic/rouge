@@ -8,10 +8,10 @@ module Piret::Printer
     case form
     when Integer
       form.to_s
+    when Piret::Symbol
+      form.inner.to_s
     when Symbol
-      form.to_s
-    when Piret::Keyword
-      form.inner.inspect
+      form.inspect
     when String
       form.inspect
     when Array
@@ -19,7 +19,7 @@ module Piret::Printer
     when Piret::Cons::Empty
       "()"
     when Piret::Cons
-      if form.length == 2 and form[0] == :quote
+      if form.length == 2 and form[0] == Piret::Symbol[:quote]
         "'#{print form[1]}"
       else
         "(#{form.map {|e| print e}.join " "})"

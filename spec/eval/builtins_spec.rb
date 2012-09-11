@@ -19,7 +19,7 @@ describe Piret::Eval::Builtins do
   describe "quote" do
     it "should prevent evaluation" do
       Piret.eval(@context, Piret.read("(quote lmnop)")).
-          jshould eq Piret::Symbol[:lmnop]
+          should eq Piret::Symbol[:lmnop]
     end
   end
 
@@ -103,7 +103,7 @@ describe Piret::Eval::Builtins do
       subcontext = Piret::Eval::Context.new @context
       Piret.eval(subcontext, Piret.read("(def sarge 'b)")).
           should eq Piret::Symbol[:"user.spec/sarge"]
-      Piret.eval(@context, :sarge).should eq Piret::Symbol[:b]
+      Piret.eval(@context, Piret::Symbol[:sarge]).should eq Piret::Symbol[:b]
     end
   end
 

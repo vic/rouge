@@ -12,7 +12,7 @@ class << Piret::Eval::Builtins
   def let(context, bindings, *body)
     context = Piret::Eval::Context.new context
     bindings.each_slice(2) do |k, v|
-      context.set_here k, Piret::Eval.eval(context, v)
+      context.set_here k.inner, Piret::Eval.eval(context, v)
     end
     Piret.eval context, *body
   end
@@ -28,17 +28,17 @@ class << Piret::Eval::Builtins
   def fn(context, argv, *body)
     context = Piret::Eval::Context.new context
 
-    if argv[-2] == :&
+    if argv[-2] == Piret::Symbol[:&]
       rest = argv[-1]
       argv = argv[0...-2]
-    elsif argv[-4] == :& and argv[-2] == :|
+    elsif argv[-4] == Piret::Symbol[:&] and argv[-2] == Piret::Symbol[:|]
       rest = argv[-3]
       argv = argv[0...-4] + argv[-2..-1]
     else
       rest = nil
     end
 
-    if argv[-2] == :|
+    if argv[-2] == Piret::Symbol[:|]
       block = argv[-1]
       argv = argv[0...-2]
     else
@@ -52,15 +52,15 @@ class << Piret::Eval::Builtins
       end
 
       (0...argv.length).each do |i|
-        context.set_here argv[i], args[i]
+        context.set_here argv[i].inner, args[i]
       end
 
       if rest
-        context.set_here rest, Piret::Cons[*args[argv.length..-1]]
+        context.set_here rest.inner, Piret::Cons[*args[argv.length..-1]]
       end
 
       if block
-        context.set_here block, blockgiven
+        context.set_here block.inner, blockgiven
       end
 
       Piret.eval context, *body
@@ -68,8 +68,8 @@ class << Piret::Eval::Builtins
   end
 
   def def(context, name, form)
-    context.ns.set_here name, Piret.eval(context, form)
-    :"#{context.ns.name}/#{name}"
+    context.ns.set_here name.inner, Piret.eval(context, form)
+    Piret::Symbol[:"#{context.ns.name}/#{name.inner}"]
   end
 
   def if(context, test, if_true, if_false=nil)

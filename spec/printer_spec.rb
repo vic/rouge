@@ -53,14 +53,16 @@ describe Piret::Printer do
       end
 
       it "should print one-element lists" do
-        Piret.print(Piret::Cons[:tiffany]).should eq "(tiffany)"
-        Piret.print(Piret::Cons[Piret::Keyword[:raaaaash]]).
+        Piret.print(Piret::Cons[Piret::Symbol[:tiffany]]).
+            should eq "(tiffany)"
+        Piret.print(Piret::Cons[:raaaaash]).
             should eq "(:raaaaash)"
       end
 
       it "should print multiple-element lists" do
         Piret.print(Piret::Cons[1, 2, 3]).should eq "(1 2 3)"
-        Piret.print(Piret::Cons[:true, Piret::Cons[], [], "no"]).
+        Piret.print(Piret::Cons[Piret::Symbol[:true],
+                                Piret::Cons[], [], "no"]).
             should eq "(true () [] \"no\")"
       end
 

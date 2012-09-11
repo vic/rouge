@@ -59,7 +59,7 @@ class Piret::Reader
   end
 
   def symbol
-    slurp(SYMBOL).intern
+    Piret::Symbol[slurp(SYMBOL).intern]
   end
 
   def keyword
@@ -67,9 +67,9 @@ class Piret::Reader
       slurp /:"/
       @n -= 1
       s = string
-      Piret::Keyword[s.intern]
+      s.intern
     rescue UnexpectedCharacterError
-      Piret::Keyword[slurp(/^:[a-zA-Z0-9\-_!\?\*\/]+/)[1..-1].intern]
+      slurp(/^:[a-zA-Z0-9\-_!\?\*\/]+/)[1..-1].intern
     end
   end
 
@@ -132,7 +132,7 @@ class Piret::Reader
 
   def quotation
     consume
-    Piret::Cons[:quote, lex(true)]
+    Piret::Cons[Piret::Symbol[:quote], lex(true)]
   end
 
   def map

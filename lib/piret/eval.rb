@@ -16,8 +16,8 @@ class << Piret::Eval
       form = forms.shift
       r =
         case form
-        when Symbol
-          form = form.to_s
+        when Piret::Symbol
+          form = form.inner.to_s
           if form[0] == ?.
             form = form[1..-1]
             lambda {|receiver, *args, &block|
@@ -63,23 +63,25 @@ class << Piret::Eval
           else
             args = form.to_a[1..-1]
 
-            if args.include? :&
-              index = args.index :&
+            if args.include? Piret::Symbol[:&]
+              index = args.index Piret::Symbol[:&]
               rest = eval context, args[index + 1]
               args = args[0...index] + args[index + 2..-1]
             else
               rest = nil
             end
 
-            if args.include? :|
-              index = args.index :|
+            if args.include? Piret::Symbol[:|]
+              index = args.index Piret::Symbol[:|]
               if args.length == index + 2
                 # Function.
                 block = eval context, args[index + 1]
               else
                 # Inline block.
                 block = eval context,
-                    Piret::Cons[:fn, args[index + 1], *args[index + 2..-1]]
+                    Piret::Cons[Piret::Symbol[:fn],
+                                args[index + 1],
+                                *args[index + 2..-1]]
               end
               args = args[0...index]
             else
