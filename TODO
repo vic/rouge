@@ -1,12 +1,5 @@
-- really want to keep & as the splat.  what to do for blocks?
-    (fn [& args | block]
-      .. )
-
-    (blah 1 2 3 | [x y] x y)
-    (.each [1 2 3] | [e] e)
-
 - seqs
 - vars
 - freeze vectors, lists where approriate
 - (. x y)
-- defmacro
+- defmacro (then implement defn, etc. in macros)
