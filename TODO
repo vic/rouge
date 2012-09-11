@@ -3,3 +3,6 @@
 - freeze vectors, lists where approriate
 - (. x y)
 - defmacro (then implement defn, etc. in macros)
+- #(puts %)
+- (a & '()) -- shouldn't error
+- DESTRUCTURING
