@@ -34,8 +34,10 @@ class Piret::Reader
         quotation
       when /{/
         map
+      when nil
+        raise EndOfDataError, "in #lex"
       else
-        raise UnexpectedCharacterError, "#{peek} in #lex"
+        raise UnexpectedCharacterError, "#{peek.inspect} in #lex"
       end
 
     if not sub
@@ -158,8 +160,14 @@ class Piret::Reader
   end
 
   def peek
-    while @src[@n] =~ /[\s,]/
-      @n += 1
+    while @src[@n] =~ /[\s,;]/
+      if $& == ";"
+        while @src[@n] =~ /[^\n]/
+          @n += 1
+        end
+      else
+        @n += 1
+      end
     end
 
     @src[@n]

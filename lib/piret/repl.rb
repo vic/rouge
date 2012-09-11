@@ -9,8 +9,16 @@ module Piret::REPL
     count = 0
 
     require 'readline'
+    chaining = false
     while true
-      input = Readline.readline("#{context.ns.name}=> ", true)
+      if not chaining
+        prompt = "#{context.ns.name}=> "
+        input = Readline.readline(prompt, true)
+      else
+        prompt = "#{" " * [0, context.ns.name.length - 2].max}#_=> "
+        input += "\n" + Readline.readline(prompt, true)
+      end
+
       if input.nil?
         STDOUT.print "\n"
         break
@@ -18,6 +26,13 @@ module Piret::REPL
 
       begin
         form = Piret.read(input)
+      rescue Piret::Reader::EndOfDataError
+        chaining = true
+        next
+      end
+
+      chaining = false
+      begin
         result = Piret.eval(context, form)
         STDOUT.puts Piret.print(result)
 
