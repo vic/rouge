@@ -5,7 +5,7 @@ require 'piret'
 describe Piret::Eval::Builtins do
   before do
     @ns = Piret::Eval::Namespace.new :"user.spec"
-    @ns.refers Piret::Eval::Namespace[:"piret.builtin"]
+    @ns.refer Piret::Eval::Namespace[:"piret.builtin"]
     @context = Piret::Eval::Context.new @ns
   end
 

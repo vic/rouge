@@ -1,14 +1,22 @@
 # encoding: utf-8
+require 'readline'
 
-module Piret::REPL
-  def self.repl
-    ns = Piret[:user]
-    ns.refers Piret[:"piret.builtin"]
-    ns.refers Piret[:ruby]
-    context = Piret::Eval::Context.new ns
+module Piret::REPL; end
+
+class << Piret::REPL
+  def repl(argv)
+    context = self.context
+
+    if argv.length == 1
+      form = Piret.read("(do #{File.read(argv[0])})")
+      Piret.eval(context, form)
+      exit(0)
+    elsif argv.length > 1
+      STDERR.puts "!! usage: #$0 [FILE]"
+      exit(1)
+    end
+
     count = 0
-
-    require 'readline'
     chaining = false
     while true
       if not chaining
@@ -46,6 +54,13 @@ module Piret::REPL
         STDOUT.puts "#{e.backtrace.join "\n"}"
       end
     end
+  end
+
+  def context
+    ns = Piret[:user]
+    ns.refer Piret[:"piret.builtin"]
+    ns.refer Piret[:ruby]
+    Piret::Eval::Context.new ns
   end
 end
 

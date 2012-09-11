@@ -25,8 +25,8 @@ class << Piret
     Piret::Eval::Namespace[ns]
   end
 
-  def repl
-    Piret::REPL.repl
+  def repl(argv)
+    Piret::REPL.repl(argv)
   end
 end
 

@@ -19,12 +19,12 @@ describe Piret::Eval::Namespace do
     end
   end
 
-  describe "the refers method" do
+  describe "the refer method" do
     it "should cause items in one namespace to be locatable from the other" do
       abc = Piret::Eval::Namespace.new :abc
       xyz = Piret::Eval::Namespace.new :xyz
 
-      xyz.refers abc
+      xyz.refer abc
 
       abc.set_here :hello, :wow
       xyz[:hello].should eq :wow

@@ -11,7 +11,7 @@ class Piret::Eval::Namespace
     @refers = []
   end
 
-  def refers(ns)
+  def refer(ns)
     @refers << ns if not @refers.include? ns
   end
 
@@ -35,7 +35,7 @@ class Piret::Eval::Namespace
     @table[key] = value
   end
 
-  attr_reader :name
+  attr_reader :name, :refers
 end
 
 class << Piret::Eval::Namespace
