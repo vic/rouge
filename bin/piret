@@ -1,2 +1,0 @@
-#!/bin/sh
-ruby -I"`dirname $0`/../lib" -rpiret -e'Piret.repl(ARGV)' "$@"

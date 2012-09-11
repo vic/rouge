@@ -1,14 +1,14 @@
 # encoding: utf-8
 require 'readline'
 
-module Piret::REPL; end
+module Rouge::REPL; end
 
-class << Piret::REPL
+class << Rouge::REPL
   def repl(argv)
-    context = Piret::Context.new Piret[:user]
+    context = Rouge::Context.new Rouge[:user]
 
     if argv.length == 1
-      Piret.eval(context, *Piret.read("[#{File.read(argv[0])}]"))
+      Rouge.eval(context, *Rouge.read("[#{File.read(argv[0])}]"))
       exit(0)
     elsif argv.length > 1
       STDERR.puts "!! usage: #$0 [FILE]"
@@ -32,18 +32,18 @@ class << Piret::REPL
       end
 
       begin
-        form = Piret.read(input)
-      rescue Piret::Reader::EndOfDataError
+        form = Rouge.read(input)
+      rescue Rouge::Reader::EndOfDataError
         chaining = true
         next
-      rescue Piret::Reader::TrailingDataError
+      rescue Rouge::Reader::TrailingDataError
         STDOUT.puts "!! REPL too stupid to deal with trailing data."
       end
 
       chaining = false
       begin
-        result = Piret.eval(context, form)
-        STDOUT.puts Piret.print(result)
+        result = Rouge.eval(context, form)
+        STDOUT.puts Rouge.print(result)
 
         count += 1 if count < 10
         count.downto(2) do |i|

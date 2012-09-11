@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-module Piret::Builtins
+module Rouge::Builtins
   SYMBOLS = {
     :nil => nil,
     :true => true,
@@ -8,13 +8,13 @@ module Piret::Builtins
   }
 end
 
-class << Piret::Builtins
+class << Rouge::Builtins
   def let(context, bindings, *body)
-    context = Piret::Context.new context
+    context = Rouge::Context.new context
     bindings.each_slice(2) do |k, v|
-      context.set_here k.inner, Piret::Eval.eval(context, v)
+      context.set_here k.inner, Rouge::Eval.eval(context, v)
     end
-    Piret.eval context, *body
+    Rouge.eval context, *body
   end
 
   def quote(context, form)
@@ -22,23 +22,23 @@ class << Piret::Builtins
   end
 
   def list(context, *elements)
-    Piret::Cons[*elements.map {|f| Piret.eval context, f}]
+    Rouge::Cons[*elements.map {|f| Rouge.eval context, f}]
   end
 
   def fn(context, argv, *body)
-    context = Piret::Context.new context
+    context = Rouge::Context.new context
 
-    if argv[-2] == Piret::Symbol[:&]
+    if argv[-2] == Rouge::Symbol[:&]
       rest = argv[-1]
       argv = argv[0...-2]
-    elsif argv[-4] == Piret::Symbol[:&] and argv[-2] == Piret::Symbol[:|]
+    elsif argv[-4] == Rouge::Symbol[:&] and argv[-2] == Rouge::Symbol[:|]
       rest = argv[-3]
       argv = argv[0...-4] + argv[-2..-1]
     else
       rest = nil
     end
 
-    if argv[-2] == Piret::Symbol[:|]
+    if argv[-2] == Rouge::Symbol[:|]
       block = argv[-1]
       argv = argv[0...-2]
     else
@@ -56,59 +56,59 @@ class << Piret::Builtins
       end
 
       if rest
-        context.set_here rest.inner, Piret::Cons[*args[argv.length..-1]]
+        context.set_here rest.inner, Rouge::Cons[*args[argv.length..-1]]
       end
 
       if block
         context.set_here block.inner, blockgiven
       end
 
-      Piret.eval context, *body
+      Rouge.eval context, *body
     }
   end
 
   def def(context, name, form)
-    context.ns.set_here name.inner, Piret.eval(context, form)
-    Piret::Symbol[:"#{context.ns.name}/#{name.inner}"]
+    context.ns.set_here name.inner, Rouge.eval(context, form)
+    Rouge::Symbol[:"#{context.ns.name}/#{name.inner}"]
   end
 
   def if(context, test, if_true, if_false=nil)
     # Note that we rely on Ruby's sense of truthiness. (only false and nil are
     # falsey)
-    if Piret.eval(context, test)
-      Piret.eval context, if_true
+    if Rouge.eval(context, test)
+      Rouge.eval context, if_true
     else
-      Piret.eval context, if_false
+      Rouge.eval context, if_false
     end
   end
 
   def do(context, *forms)
-    Piret.eval context, *forms
+    Rouge.eval context, *forms
   end
 
   def ns(context, name)
-    ns = Piret[name.inner]
-    ns.refer Piret[:"piret.builtin"]
-    context = Piret::Context.new ns
-    raise Piret::Eval::ChangeContextException, context
+    ns = Rouge[name.inner]
+    ns.refer Rouge[:"rouge.builtin"]
+    context = Rouge::Context.new ns
+    raise Rouge::Eval::ChangeContextException, context
   end
 
   def defmacro(context, name, args, *body)
     context.ns.set_here name.inner,
-        Piret::Macro[Piret.eval(
+        Rouge::Macro[Rouge.eval(
             context,
-            Piret::Cons[Piret::Symbol[:fn], args, *body])]
+            Rouge::Cons[Rouge::Symbol[:fn], args, *body])]
 
-    Piret::Symbol[:"#{context.ns.name}/#{name.inner}"]
+    Rouge::Symbol[:"#{context.ns.name}/#{name.inner}"]
   end
 
   def apply(context, fun, *args)
     args =
-        args[0..-2].map {|f| Piret.eval context, f} +
-        Piret.eval(context, args[-1]).to_a
+        args[0..-2].map {|f| Rouge.eval context, f} +
+        Rouge.eval(context, args[-1]).to_a
     # This is a terrible hack.
-    Piret.eval(context,
-        Piret::Cons[fun, *args.map {|a| Piret::Cons[Piret::Symbol[:quote], a]}])
+    Rouge.eval(context,
+        Rouge::Cons[fun, *args.map {|a| Rouge::Cons[Rouge::Symbol[:quote], a]}])
   end
 end
 

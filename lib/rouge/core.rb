@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 [:Symbol, :Macro, :Builtin].each do |name|
-  Piret.const_set name, Class.new {
+  Rouge.const_set name, Class.new {
     def initialize(inner)
       @inner = inner
     end
@@ -24,29 +24,29 @@
   }
 end
 
-class Piret::Symbol
+class Rouge::Symbol
   @@cache = {}
 
   def self.[](inner)
-    sym = Piret::Symbol.class_variable_get('@@cache')[inner]
+    sym = Rouge::Symbol.class_variable_get('@@cache')[inner]
     return sym if sym
 
-    Piret::Symbol.class_variable_get('@@cache')[inner] = new inner
+    Rouge::Symbol.class_variable_get('@@cache')[inner] = new inner
   end
 end
 
-class Piret::Cons
+class Rouge::Cons
   def initialize(head, tail)
-    if tail != Empty and !tail.is_a?(Piret::Cons)
+    if tail != Empty and !tail.is_a?(Rouge::Cons)
       raise ArgumentError,
-        "tail should be a Piret::Cons or Tail, not #{tail}"
+        "tail should be a Rouge::Cons or Tail, not #{tail}"
     end
 
     @head, @tail = head, tail
   end
 
   def inspect
-    "Piret::Cons[#{to_a.map(&:inspect).join ", "}]"
+    "Rouge::Cons[#{to_a.map(&:inspect).join ", "}]"
   end
 
   def to_s; inspect; end
@@ -68,7 +68,7 @@ class Piret::Cons
   end
 
   def ==(cons)
-    cons.is_a?(Piret::Cons) and to_a == cons.to_a
+    cons.is_a?(Rouge::Cons) and to_a == cons.to_a
   end
 
   def length
@@ -84,13 +84,13 @@ class Piret::Cons
   include Enumerable
 end
 
-Piret::Cons::Empty = Object.new
-class << Piret::Cons::Empty
+Rouge::Cons::Empty = Object.new
+class << Rouge::Cons::Empty
   def each(&block); end
   def length; 0; end
   def [](i); nil; end
   def to_a; []; end
-  def inspect; "Piret::Cons[]"; end
+  def inspect; "Rouge::Cons[]"; end
   def to_s; inspect; end
 
   include Enumerable

@@ -1,9 +1,9 @@
 # encoding: utf-8
-require 'piret/core'
+require 'rouge/core'
 
-module Piret::Eval
-  require 'piret/context'
-  require 'piret/namespace'
+module Rouge::Eval
+  require 'rouge/context'
+  require 'rouge/namespace'
 
   class BindingNotFoundError < StandardError; end
   class ChangeContextException < Exception
@@ -12,7 +12,7 @@ module Piret::Eval
   end
 end
 
-class << Piret::Eval
+class << Rouge::Eval
   def eval(context, *forms)
     return nil if forms.length.zero?
 
@@ -20,12 +20,12 @@ class << Piret::Eval
       form = forms.shift
       r =
         case form
-        when Piret::Symbol
+        when Rouge::Symbol
           eval_symbol context, form
-        when Piret::Cons
+        when Rouge::Cons
           begin
             eval_cons context, form
-          rescue Piret::Eval::ChangeContextException => cce
+          rescue Rouge::Eval::ChangeContextException => cce
             context = cce.context
           end
         when Hash
@@ -62,7 +62,7 @@ class << Piret::Eval
       if parts.length == 1
         sub = context
       elsif parts.length == 2
-        sub = Piret::Namespace[parts.shift.intern]
+        sub = Rouge::Namespace[parts.shift.intern]
       else
         raise "parts.length not in 1, 2" # TODO
       end
@@ -85,22 +85,22 @@ class << Piret::Eval
   def eval_cons(context, form)
     fun = eval context, form[0]
     case fun
-    when Piret::Builtin
+    when Rouge::Builtin
       fun.inner.call context, *form.to_a[1..-1]
-    when Piret::Macro
+    when Rouge::Macro
       eval context, fun.inner.call(*form.to_a[1..-1])
     else
       args = form.to_a[1..-1]
 
-      if args.include? Piret::Symbol[:|]
-        index = args.index Piret::Symbol[:|]
+      if args.include? Rouge::Symbol[:|]
+        index = args.index Rouge::Symbol[:|]
         if args.length == index + 2
           # Function.
           block = eval context, args[index + 1]
         else
           # Inline block.
           block = eval context,
-              Piret::Cons[Piret::Symbol[:fn],
+              Rouge::Cons[Rouge::Symbol[:fn],
                           args[index + 1],
                           *args[index + 2..-1]]
         end

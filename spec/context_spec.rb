@@ -1,15 +1,15 @@
 # encoding: utf-8
 require 'spec_helper'
-require 'piret'
+require 'rouge'
 
-describe Piret::Context do
+describe Rouge::Context do
   before do
-    @a = Piret::Context.new nil
-    @ab = Piret::Context.new @a
-    @abb = Piret::Context.new @ab
-    @ac = Piret::Context.new @a
-    @in_rl = Piret::Context.new Piret::Namespace[:"piret.builtin"]
-    @in_rl_nested = Piret::Context.new @in_rl
+    @a = Rouge::Context.new nil
+    @ab = Rouge::Context.new @a
+    @abb = Rouge::Context.new @ab
+    @ac = Rouge::Context.new @a
+    @in_rl = Rouge::Context.new Rouge::Namespace[:"rouge.builtin"]
+    @in_rl_nested = Rouge::Context.new @in_rl
 
     @a.set_here :root, 42
     @ab.set_here :root, 80
@@ -22,23 +22,23 @@ describe Piret::Context do
       @ab[:root].should eq 80
       @abb[:root].should eq 80
       @ac[:root].should eq 42
-      @in_rl[:let].should be_an_instance_of Piret::Builtin
+      @in_rl[:let].should be_an_instance_of Rouge::Builtin
     end
 
     it "should raise an exception if a binding is not found" do
       lambda {
         @a[:non]
-      }.should raise_exception(Piret::Eval::BindingNotFoundError)
+      }.should raise_exception(Rouge::Eval::BindingNotFoundError)
     end
   end
 
   describe "the ns method" do
     it "should get the namespace of a context that has one" do
-      @in_rl.ns.should eq Piret::Namespace[:"piret.builtin"]
+      @in_rl.ns.should eq Rouge::Namespace[:"rouge.builtin"]
     end
 
     it "should get the namespace of a nested context that has one" do
-      @in_rl_nested.ns.should eq Piret::Namespace[:"piret.builtin"]
+      @in_rl_nested.ns.should eq Rouge::Namespace[:"rouge.builtin"]
     end
 
     it "should return nil if a context has none" do
@@ -66,7 +66,7 @@ describe Piret::Context do
     it "should raise an exception if a closest binding is not found" do
       lambda {
         @abb.set_lexical :non, 10
-      }.should raise_exception(Piret::Eval::BindingNotFoundError)
+      }.should raise_exception(Rouge::Eval::BindingNotFoundError)
     end
   end
 end

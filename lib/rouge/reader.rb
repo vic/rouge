@@ -1,7 +1,7 @@
 # encoding: utf-8
-require 'piret/core'
+require 'rouge/core'
 
-class Piret::Reader
+class Rouge::Reader
   class UnexpectedCharacterError < StandardError; end
   class TrailingDataError < StandardError; end
   class EndOfDataError < StandardError; end
@@ -25,7 +25,7 @@ class Piret::Reader
       when /"/
         string
       when /\(/
-        Piret::Cons[*list(')')]
+        Rouge::Cons[*list(')')]
       when /\[/
         list ']'
       when SYMBOL
@@ -60,7 +60,7 @@ class Piret::Reader
   end
 
   def symbol
-    Piret::Symbol[slurp(SYMBOL).intern]
+    Rouge::Symbol[slurp(SYMBOL).intern]
   end
 
   def keyword
@@ -133,7 +133,7 @@ class Piret::Reader
 
   def quotation
     consume
-    Piret::Cons[Piret::Symbol[:quote], lex(true)]
+    Rouge::Cons[Rouge::Symbol[:quote], lex(true)]
   end
 
   def map

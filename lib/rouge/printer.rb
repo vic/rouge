@@ -1,14 +1,14 @@
 # encoding: utf-8
-require 'piret/core'
+require 'rouge/core'
 
-module Piret::Printer
+module Rouge::Printer
   class UnknownFormError < StandardError; end
 
   def self.print(form)
     case form
     when Integer
       form.to_s
-    when Piret::Symbol
+    when Rouge::Symbol
       form.inner.to_s
     when Symbol
       form.inspect
@@ -16,10 +16,10 @@ module Piret::Printer
       form.inspect
     when Array
       "[#{form.map {|e| print e}.join " "}]"
-    when Piret::Cons::Empty
+    when Rouge::Cons::Empty
       "()"
-    when Piret::Cons
-      if form.length == 2 and form[0] == Piret::Symbol[:quote]
+    when Rouge::Cons
+      if form.length == 2 and form[0] == Rouge::Symbol[:quote]
         "'#{print form[1]}"
       else
         "(#{form.map {|e| print e}.join " "})"
@@ -38,8 +38,8 @@ module Piret::Printer
       else
         form.inspect
       end
-    when Piret::Builtin
-      "piret.builtin/#{form.inner.name}"
+    when Rouge::Builtin
+      "rouge.builtin/#{form.inner.name}"
     else
       form.inspect
     end

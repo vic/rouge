@@ -1,11 +1,11 @@
 # encoding: utf-8
 
-class Piret::Context
+class Rouge::Context
   def initialize(parent_or_ns)
     case parent_or_ns
-    when Piret::Namespace
+    when Rouge::Namespace
       @ns = parent_or_ns
-    when Piret::Context
+    when Rouge::Context
       @parent = parent_or_ns
       @ns = @parent.ns
     end
@@ -20,7 +20,7 @@ class Piret::Context
     elsif @ns
       @ns[key]
     else
-      raise Piret::Eval::BindingNotFoundError, key
+      raise Rouge::Eval::BindingNotFoundError, key
     end
   end
 
@@ -34,7 +34,7 @@ class Piret::Context
     elsif @parent
       @parent.set_lexical key, value
     else
-      raise Piret::Eval::BindingNotFoundError,
+      raise Rouge::Eval::BindingNotFoundError,
           "setting #{key} to #{value.inspect}"
     end
   end

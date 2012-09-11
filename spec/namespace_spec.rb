@@ -1,27 +1,27 @@
 # encoding: utf-8
 require 'spec_helper'
-require 'piret'
+require 'rouge'
 
-describe Piret::Namespace do
+describe Rouge::Namespace do
   describe "the [] method" do
     it "should vivify non-extant namespaces" do
-      Piret::Namespace.exists?(:vivify_test).should eq false
-      Piret::Namespace[:vivify_test].should be_an_instance_of Piret::Namespace
-      Piret::Namespace.exists?(:vivify_test).should eq true
+      Rouge::Namespace.exists?(:vivify_test).should eq false
+      Rouge::Namespace[:vivify_test].should be_an_instance_of Rouge::Namespace
+      Rouge::Namespace.exists?(:vivify_test).should eq true
     end
   end
 
-  describe "the Piret[] shortcut" do
+  describe "the Rouge[] shortcut" do
     it "should directly call the [] method" do
-      Piret::Namespace.should_receive(:[]).with(:trazzle)
-      Piret[:trazzle]
+      Rouge::Namespace.should_receive(:[]).with(:trazzle)
+      Rouge[:trazzle]
     end
   end
 
   describe "the refer method" do
     it "should cause items in one namespace to be locatable from the other" do
-      abc = Piret::Namespace.new :abc
-      xyz = Piret::Namespace.new :xyz
+      abc = Rouge::Namespace.new :abc
+      xyz = Rouge::Namespace.new :xyz
 
       xyz.refer abc
 
@@ -31,19 +31,19 @@ describe Piret::Namespace do
 
     it "may not be used to refer namespaces to themselves" do
       lambda {
-        Piret[:user].refer Piret[:user]
-      }.should raise_exception(Piret::Namespace::RecursiveNamespaceError)
+        Rouge[:user].refer Rouge[:user]
+      }.should raise_exception(Rouge::Namespace::RecursiveNamespaceError)
     end
   end
 
-  describe "the piret.builtin namespace" do
+  describe "the rouge.builtin namespace" do
     before do
-      @ns = Piret[:"piret.builtin"]
+      @ns = Rouge[:"rouge.builtin"]
     end
 
-    it "should contain elements from Piret::Builtins" do
-      @ns[:let].should be_an_instance_of Piret::Builtin
-      @ns[:quote].should be_an_instance_of Piret::Builtin
+    it "should contain elements from Rouge::Builtins" do
+      @ns[:let].should be_an_instance_of Rouge::Builtin
+      @ns[:quote].should be_an_instance_of Rouge::Builtin
     end
 
     it "should contain fundamental objects" do
@@ -55,20 +55,20 @@ describe Piret::Namespace do
     it "should not find objects from ruby" do
       lambda {
         @ns[:Float]
-      }.should raise_exception(Piret::Eval::BindingNotFoundError)
+      }.should raise_exception(Rouge::Eval::BindingNotFoundError)
       lambda {
         @ns[:String]
-      }.should raise_exception(Piret::Eval::BindingNotFoundError)
+      }.should raise_exception(Rouge::Eval::BindingNotFoundError)
     end
 
     it "should have a name" do
-      @ns.name.should eq :"piret.builtin"
+      @ns.name.should eq :"rouge.builtin"
     end
   end
 
   describe "the ruby namespace" do
     before do
-      @ns = Piret::Namespace[:ruby]
+      @ns = Rouge::Namespace[:ruby]
     end
 
     it "should contain elements from Kernel" do

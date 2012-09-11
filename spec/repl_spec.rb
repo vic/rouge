@@ -1,8 +1,8 @@
 # encoding: utf-8
 require 'spec_helper'
-require 'piret'
+require 'rouge'
 
-describe Piret::REPL do
+describe Rouge::REPL do
   it "should do stuff" do
     pending
   end

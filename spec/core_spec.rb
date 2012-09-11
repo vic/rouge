@@ -1,8 +1,8 @@
 # encoding: utf-8
 require 'spec_helper'
-require 'piret'
+require 'rouge'
 
-describe [Piret::Symbol, Piret::Macro, Piret::Builtin] do
+describe [Rouge::Symbol, Rouge::Macro, Rouge::Builtin] do
   describe "the constructor" do
     it "should return a new wrapper" do
       described_class.each do |klass|
@@ -44,59 +44,59 @@ describe [Piret::Symbol, Piret::Macro, Piret::Builtin] do
   end
 end
 
-describe Piret::Symbol do
+describe Rouge::Symbol do
   describe "the cache" do
-    it "should return the same Piret::Symbol for the same inner symbol" do
-      Piret::Symbol[:x].should be Piret::Symbol[:x]
+    it "should return the same Rouge::Symbol for the same inner symbol" do
+      Rouge::Symbol[:x].should be Rouge::Symbol[:x]
     end
   end
 end
 
-describe Piret::Cons do
+describe Rouge::Cons do
   describe "the multi-constructor" do
     it "should create a Cons for each element" do
-      Piret::Cons[].should eq Piret::Cons::Empty
-      Piret::Cons[1].should eq Piret::Cons.new(1, Piret::Cons::Empty)
-      Piret::Cons[1, 2].
-          should eq Piret::Cons.new(1, Piret::Cons.new(2, Piret::Cons::Empty))
-      Piret::Cons[1, 2, 3].
-          should eq Piret::Cons.new(1,
-                    Piret::Cons.new(2,
-                    Piret::Cons.new(3, Piret::Cons::Empty)))
+      Rouge::Cons[].should eq Rouge::Cons::Empty
+      Rouge::Cons[1].should eq Rouge::Cons.new(1, Rouge::Cons::Empty)
+      Rouge::Cons[1, 2].
+          should eq Rouge::Cons.new(1, Rouge::Cons.new(2, Rouge::Cons::Empty))
+      Rouge::Cons[1, 2, 3].
+          should eq Rouge::Cons.new(1,
+                    Rouge::Cons.new(2,
+                    Rouge::Cons.new(3, Rouge::Cons::Empty)))
     end
   end
 
   describe "the Ruby pretty-printing" do
     it "should resemble the constructor" do
-      Piret::Cons[].inspect.should eq "Piret::Cons[]"
-      Piret::Cons[1].inspect.should eq "Piret::Cons[1]"
-      Piret::Cons[1, 2].inspect.should eq "Piret::Cons[1, 2]"
-      Piret::Cons[1, 2, 3].inspect.should eq "Piret::Cons[1, 2, 3]"
-      Piret::Cons[1, 2, 3].tail.inspect.should eq "Piret::Cons[2, 3]"
+      Rouge::Cons[].inspect.should eq "Rouge::Cons[]"
+      Rouge::Cons[1].inspect.should eq "Rouge::Cons[1]"
+      Rouge::Cons[1, 2].inspect.should eq "Rouge::Cons[1, 2]"
+      Rouge::Cons[1, 2, 3].inspect.should eq "Rouge::Cons[1, 2, 3]"
+      Rouge::Cons[1, 2, 3].tail.inspect.should eq "Rouge::Cons[2, 3]"
     end
   end
 
   describe "the index-access getter" do
     it "should get single elements" do
-      Piret::Cons[1, 2, 3][0].should eq 1
-      Piret::Cons[1, 2, 3][1].should eq 2
+      Rouge::Cons[1, 2, 3][0].should eq 1
+      Rouge::Cons[1, 2, 3][1].should eq 2
     end
 
     it "should return nil if an element is not present" do
-      Piret::Cons[1, 2, 3][5].should eq nil
+      Rouge::Cons[1, 2, 3][5].should eq nil
     end
 
     it "should work with negative indices" do
-      Piret::Cons[1, 2, 3][-1].should eq 3
-      Piret::Cons[1, 2, 3][-2].should eq 2
+      Rouge::Cons[1, 2, 3][-1].should eq 3
+      Rouge::Cons[1, 2, 3][-2].should eq 2
     end
 
     it "should return Arrays for ranges" do
-      Piret::Cons[1, 2, 3][0..-1].should eq [1, 2, 3]
-      Piret::Cons[1, 2, 3][0..-2].should eq [1, 2]
-      Piret::Cons[1, 2, 3][0...-2].should eq [1]
-      Piret::Cons[1, 2, 3][2...-1].should eq []
-      Piret::Cons[1, 2, 3][2..-1].should eq [3]
+      Rouge::Cons[1, 2, 3][0..-1].should eq [1, 2, 3]
+      Rouge::Cons[1, 2, 3][0..-2].should eq [1, 2]
+      Rouge::Cons[1, 2, 3][0...-2].should eq [1]
+      Rouge::Cons[1, 2, 3][2...-1].should eq []
+      Rouge::Cons[1, 2, 3][2..-1].should eq [3]
     end
   end
 end

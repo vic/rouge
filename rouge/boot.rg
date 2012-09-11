@@ -1,10 +1,10 @@
-;; piret
+;; rouge
 
-(ns piret.core)
+(ns rouge.core)
 
 ; This should return a lazy seq.
 (def concat (fn [& lists]
-              (apply .[] ruby/Piret.Cons (.inject (.map lists | .to_a) | .+))))
+              (apply .[] ruby/Rouge.Cons (.inject (.map lists | .to_a) | .+))))
 
 (defmacro defn [name args & body]
   (list 'def name (concat (list 'fn args) body)))
