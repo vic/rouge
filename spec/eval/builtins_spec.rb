@@ -110,9 +110,16 @@ describe Piret::Eval::Builtins do
     it "should execute one branch or the other" do
       a = mock("a")
       b = mock("b")
-      a.should_receive(:call)
+      a.should_receive(:call).with(any_args)
+      b.should_not_receive(:call).with(any_args)
       Piret.eval(@context,
                  Piret::Cons[:if, true, Piret::Cons[a], Piret::Cons[b]])
+    end
+
+    it "should not do anything in the case of a missing second branch" do
+      lambda {
+        Piret.eval(@context, Piret::Cons[:if, false, :a])
+      }.should_not raise_exception
     end
   end
 end

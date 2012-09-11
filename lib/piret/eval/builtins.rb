@@ -71,6 +71,16 @@ class << Piret::Eval::Builtins
     context.ns.set_here name, Piret.eval(context, form)
     :"#{context.ns.name}/#{name}"
   end
+
+  def if(context, test, if_true, if_false=nil)
+    # Note that we rely on Ruby's sense of truthiness. (only false and nil are
+    # falsey)
+    if Piret.eval(context, test)
+      Piret.eval context, if_true
+    else
+      Piret.eval context, if_false
+    end
+  end
 end
 
 # vim: set sw=2 et cc=80:
