@@ -1,3 +1,9 @@
+- comments
+- newlines in REPL are A-OK
+- boot.p
+  - is .p an okay extension?
+- `piret' binary, `ipiret'
+- package as a gem?
 - seqs
 - vars
 - freeze vectors, lists where approriate
@@ -7,3 +13,4 @@
 - destructuring (in FN, LET, everywhere else)
 - rest of the clojure core API (maybe even in clojure.core ns)
 - clojure-ish IO libraries which expose async IO
+- string interpol (clojurish. hum. maybe not?)
