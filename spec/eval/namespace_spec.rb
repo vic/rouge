@@ -12,6 +12,13 @@ describe Piret::Eval::Namespace do
     end
   end
 
+  describe "the Piret[] shortcut" do
+    it "should directly call the [] method" do
+      Piret::Eval::Namespace.should_receive(:[]).with(:trazzle)
+      Piret[:trazzle]
+    end
+  end
+
   describe "the refers method" do
     it "should cause items in one namespace to be locatable from the other" do
       abc = Piret::Eval::Namespace.new :abc

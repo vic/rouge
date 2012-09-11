@@ -19,18 +19,18 @@ describe Piret::Eval::Builtins do
   describe "quote" do
     it "should prevent evaluation" do
       Piret.eval(@context, Piret.read("(quote lmnop)")).
-          should eq Piret::Symbol[:lmnop]
+          should eq Piret.read('lmnop')
     end
   end
 
   describe "list" do
     it "should create the empty list" do
-      Piret.eval(@context, Piret.read("(list)")).should eq Piret::Cons[]
+      Piret.eval(@context, Piret.read("(list)")).should eq Piret.read('()')
     end
 
     it "should create a unary list" do
       Piret.eval(@context, Piret.read('(list "trent")')).
-          should eq Piret::Cons["trent"]
+          should eq Piret.read('("trent")')
       Piret.eval(@context, Piret.read("(list true)")).
           should eq Piret::Cons[true]
     end
@@ -80,15 +80,14 @@ describe Piret::Eval::Builtins do
       it "should bind rest arguments correctly" do
         Piret.eval(@context, Piret.read('(fn (y z & rest) (list y z rest))')).
             call("where", "is", "mordialloc", "gosh").
-            should eq Piret::Cons["where", "is",
-                                  Piret::Cons["mordialloc", "gosh"]]
+            should eq Piret.read('("where" "is" ("mordialloc" "gosh"))')
       end
 
       it "should bind block arguments correctly" do
         l = lambda {}
-        Piret.eval(@context, Piret.read('(fn (a | b) (list a b))')).
+        Piret.eval(@context, Piret.read('(fn (a | b) [a b])')).
             call("hello", &l).
-            should eq Piret::Cons["hello", l]
+            should eq ["hello", l]
       end
     end
   end
@@ -96,14 +95,14 @@ describe Piret::Eval::Builtins do
   describe "def" do
     it "should make a binding" do
       Piret.eval(@context, Piret.read("(def barge 'a)")).
-          should eq Piret::Symbol[:"user.spec/barge"]
+          should eq Piret.read('user.spec/barge')
     end
 
     it "should always make a binding at the top of the namespace" do
       subcontext = Piret::Eval::Context.new @context
       Piret.eval(subcontext, Piret.read("(def sarge 'b)")).
-          should eq Piret::Symbol[:"user.spec/sarge"]
-      Piret.eval(@context, Piret::Symbol[:sarge]).should eq Piret::Symbol[:b]
+          should eq Piret.read('user.spec/sarge')
+      Piret.eval(@context, Piret.read('sarge')).should eq Piret.read('b')
     end
   end
 
@@ -113,16 +112,15 @@ describe Piret::Eval::Builtins do
       b = mock("b")
       a.should_receive(:call).with(any_args)
       b.should_not_receive(:call).with(any_args)
-      Piret.eval(@context,
-                 Piret::Cons[Piret::Symbol[:if], true,
-                               Piret::Cons[a],
-                               Piret::Cons[b]])
+      subcontext = Piret::Eval::Context.new @context
+      subcontext.set_here :a, a
+      subcontext.set_here :b, b
+      Piret.eval(subcontext, Piret.read('(if true (a) (b))'))
     end
 
     it "should not do anything in the case of a missing second branch" do
       lambda {
-        Piret.eval(@context,
-                   Piret::Cons[Piret::Symbol[:if], false, Piret::Symbol[:a]])
+        Piret.eval(@context, Piret.read('(if false (a))'))
       }.should_not raise_exception
     end
   end

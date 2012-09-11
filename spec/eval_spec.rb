@@ -15,22 +15,22 @@ describe Piret::Eval do
   describe "symbols" do
     it "should evaluate symbols to the object within their context" do
       @context.set_here :vitamin_b, "vegemite"
-      Piret.eval(@context, Piret::Symbol[:vitamin_b]).should eq "vegemite"
+      Piret.eval(@context, Piret.read("vitamin_b")).should eq "vegemite"
 
       subcontext = Piret::Eval::Context.new @context
       subcontext.set_here :joy, [:yes]
-      Piret.eval(subcontext, Piret::Symbol[:joy]).should eq [:yes]
+      Piret.eval(subcontext, Piret.read("joy")).should eq [:yes]
     end
 
     it "should evaluate symbols in other namespaces" do
-      Piret.eval(@context, Piret::Symbol[:"ruby/Object"]).should eq Object
-      Piret.eval(@context, Piret::Symbol[:"ruby/Exception"]).should eq Exception
+      Piret.eval(@context, Piret.read("ruby/Object")).should eq Object
+      Piret.eval(@context, Piret.read("ruby/Exception")).should eq Exception
     end
 
     it "should evaluate nested objects" do
-      Piret.eval(@context, Piret::Symbol[:"ruby/Piret.Eval.Context"]).
+      Piret.eval(@context, Piret.read("ruby/Piret.Eval.Context")).
           should eq Piret::Eval::Context
-      Piret.eval(@context, Piret::Symbol[:"ruby/Errno.EAGAIN"]).
+      Piret.eval(@context, Piret.read("ruby/Errno.EAGAIN")).
           should eq Errno::EAGAIN
     end
   end
@@ -61,43 +61,39 @@ describe Piret::Eval do
 
   describe "function calls" do
     it "should evaluate function calls" do
-      Piret.eval(@context, Piret::Cons[lambda {|x| "hello #{x}"}, "world"]).
+      subcontext = Piret::Eval::Context.new @context
+      subcontext.set_here :f, lambda {|x| "hello #{x}"}
+      Piret.eval(subcontext, Piret.read('(f "world")')).
           should eq "hello world"
     end
 
     it "should evaluate macro calls" do
-      macro = Piret::Macro[lambda {|n, body|
+      macro = Piret::Macro[lambda {|n, *body|
         Piret::Cons[Piret::Symbol[:let], Piret::Cons[n, "example"],
           *body]
       }]
 
-      Piret.eval(@context,
-                 Piret::Cons[macro, Piret::Symbol[:bar],
-                 Piret::Cons[
-                 Piret::Cons[lambda {|x,y| x + y},
-                 Piret::Symbol[:bar], Piret::Symbol[:bar]]]]).
-        should eq "exampleexample"
+      subcontext = Piret::Eval::Context.new @context
+      subcontext.set_here :macro, macro
+      subcontext.set_here :f, lambda {|x,y| x + y}
+      Piret.eval(subcontext, Piret.read('(macro bar (f bar bar))')).
+          should eq "exampleexample"
     end
 
     it "should evaluate calls with splats" do
-      Piret.eval(@context,
-                 Piret.read('((fn [a b] [b a]) 1 & [2])')).
+      Piret.eval(@context, Piret.read('((fn [a b] [b a]) 1 & [2])')).
           should eq [2, 1]
 
-      Piret.eval(@context,
-                 Piret.read('((fn [a b] [b a]) & [1 2])')).
+      Piret.eval(@context, Piret.read('((fn [a b] [b a]) & [1 2])')).
           should eq [2, 1]
 
-      Piret.eval(@context,
-                 Piret.read("((fn [a b] [b a]) & '(1 2))")).
+      Piret.eval(@context, Piret.read("((fn [a b] [b a]) & '(1 2))")).
           should eq [2, 1]
 
-      Piret.eval(@context,
-                 Piret.read("((fn [a b] [b a]) 1 2 & ())")).
+      Piret.eval(@context, Piret.read("((fn [a b] [b a]) 1 2 & ())")).
           should eq [2, 1]
 
-      Piret.eval(@context,
-                 Piret.read("((fn [a b] [b a]) 1 2 & nil)")).
+      Piret.eval(@context, Piret.read("((fn [a b] [b a]) 1 2 & nil)")).
           should eq [2, 1]
     end
 
@@ -111,7 +107,7 @@ describe Piret::Eval do
       describe "new object creation" do
         it "should call X.new with (X.)" do
           klass = double("klass")
-          klass.should_receive(:new).with(Piret::Symbol[:a]).and_return(:b)
+          klass.should_receive(:new).with(Piret.read('a')).and_return(:b)
 
           subcontext = Piret::Eval::Context.new @context
           subcontext.set_here :klass, klass
@@ -122,7 +118,7 @@ describe Piret::Eval do
       describe "generic method calls" do
         it "should call x.y(:z) with (.y x 'z)" do
           x = double("x")
-          x.should_receive(:y).with(Piret::Symbol[:z]).and_return(:tada)
+          x.should_receive(:y).with(Piret.read('z')).and_return(:tada)
 
           subcontext = Piret::Eval::Context.new @context
           subcontext.set_here :x, x
@@ -132,31 +128,29 @@ describe Piret::Eval do
         it "should call e.f(:g, *h) with (.e f 'g & h)" do
           f = double("f")
           h = [1, 9]
-          f.should_receive(:e).with(Piret::Symbol[:g], *h).and_return(:yada)
+          f.should_receive(:e).with(Piret.read('g'), *h).and_return(:yada)
 
           subcontext = Piret::Eval::Context.new @context
           subcontext.set_here :f, f
           subcontext.set_here :h, h
-          Piret.eval(subcontext, Piret.read("(.e f 'g & h)")).
-              should eq :yada
+          Piret.eval(subcontext, Piret.read("(.e f 'g & h)")).should eq :yada
         end
 
         it "should call q.r(:s, &t) with (.r q 's | t)" do
           q = double("q")
           t = lambda {}
-          q.should_receive(:r).with(Piret::Symbol[:s], &t).and_return(:success)
+          q.should_receive(:r).with(Piret.read('s'), &t).and_return(:bop)
 
           subcontext = Piret::Eval::Context.new @context
           subcontext.set_here :q, q
           subcontext.set_here :t, t
-          Piret.eval(subcontext, Piret.read("(.r q 's | t)")).
-              should eq :success
+          Piret.eval(subcontext, Piret.read("(.r q 's | t)")).should eq :bop
         end
 
         it "should call a.b(:c) {|d| d + 1} with (.b a 'c | [d] (.+ d 1))" do
           a = double("a")
           a.should_receive(:b) do |c, &b|
-            c.should eq Piret::Symbol[:c]
+            c.should eq Piret.read('c')
             b.call(1).should eq 2
             b.call(2).should eq 3
             b.call(3).should eq 4
