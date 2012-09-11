@@ -19,4 +19,4 @@ core lang
 - rest of the clojure core API (maybe even in clojure.core ns)
 - clojure-ish IO libraries which expose async IO
 - string interpol (clojurish. hum. maybe not?)
-- defprotocol -- looks important!
+- defprotocol -- looks important! ISeq, ISeqable, ISequential and what have you.

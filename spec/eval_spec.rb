@@ -4,7 +4,7 @@ require 'piret'
 
 describe Piret::Eval do
   before do
-    @context = Piret::Eval::Context.new Piret[:piret]
+    @context = Piret::Eval::Context.new Piret[:"piret.builtin"]
   end
 
   it "should evaluate quotations to their unquoted form" do

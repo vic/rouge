@@ -38,23 +38,6 @@ class Piret::Eval::Namespace
   attr_reader :name
 end
 
-module Piret::Eval::Namespace::Vivifiers
-  def self.piret
-    ns = Piret::Eval::Namespace.new :piret
-    Piret::Eval::Builtins.methods(false).each do |m|
-      ns.set_here m, Piret::Builtin[Piret::Eval::Builtins.method(m)]
-    end
-    Piret::Eval::Builtins::SYMBOLS.each do |name, val|
-      ns.set_here name, val
-    end
-    ns
-  end
-
-  def self.ruby
-    Piret::Eval::Namespace::Ruby.new
-  end
-end
-
 class << Piret::Eval::Namespace
   def exists?(ns)
     Piret::Eval::Namespace.class_variable_get('@@namespaces').include? ns
@@ -64,12 +47,7 @@ class << Piret::Eval::Namespace
     r = Piret::Eval::Namespace.class_variable_get('@@namespaces')[ns]
     return r if r
 
-    if not Piret::Eval::Namespace::Vivifiers.respond_to?(ns)
-      Piret::Eval::Namespace.class_variable_get('@@namespaces')[ns] = new(ns)
-    else
-      Piret::Eval::Namespace.class_variable_get('@@namespaces')[ns] = \
-          Piret::Eval::Namespace::Vivifiers.send(ns)
-    end
+    Piret::Eval::Namespace.class_variable_get('@@namespaces')[ns] = new(ns)
   end
 end
 
@@ -87,6 +65,19 @@ class Piret::Eval::Namespace::Ruby
   def name
     :ruby
   end
+end
+
+class Piret::Eval::Namespace
+  ns = @@namespaces[:"piret.builtin"] =
+      Piret::Eval::Namespace.new :"piret.builtin"
+  Piret::Eval::Builtins.methods(false).each do |m|
+    ns.set_here m, Piret::Builtin[Piret::Eval::Builtins.method(m)]
+  end
+  Piret::Eval::Builtins::SYMBOLS.each do |name, val|
+    ns.set_here name, val
+  end
+
+  @@namespaces[:ruby] = Piret::Eval::Namespace::Ruby.new
 end
 
 # vim: set sw=2 et cc=80:

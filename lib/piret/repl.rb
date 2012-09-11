@@ -3,7 +3,7 @@
 module Piret::REPL
   def self.repl
     ns = Piret[:user]
-    ns.refers Piret[:piret]
+    ns.refers Piret[:"piret.builtin"]
     ns.refers Piret[:ruby]
     context = Piret::Eval::Context.new ns
     count = 0

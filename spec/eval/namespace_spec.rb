@@ -31,9 +31,9 @@ describe Piret::Eval::Namespace do
     end
   end
 
-  describe "the piret namespace" do
+  describe "the piret.builtin namespace" do
     before do
-      @ns = Piret[:piret]
+      @ns = Piret[:"piret.builtin"]
     end
 
     it "should contain elements from Piret::Eval::Builtins" do
@@ -57,7 +57,7 @@ describe Piret::Eval::Namespace do
     end
 
     it "should have a name" do
-      @ns.name.should eq :piret
+      @ns.name.should eq :"piret.builtin"
     end
   end
 

@@ -39,7 +39,7 @@ module Piret::Printer
         form.inspect
       end
     when Piret::Builtin
-      "piret/#{form.inner.name}"
+      "piret.builtin/#{form.inner.name}"
     else
       form.inspect
     end
