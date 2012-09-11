@@ -9,4 +9,7 @@
            (let [args (map .to_s args)]
              (.join args ""))))
 
+(def print (fn [& args]
+             (.print Kernel (join (map .to_s args) " "))))
+
 ; vim: set ft=clojure:

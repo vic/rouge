@@ -6,6 +6,10 @@ miscellaeny
 - package as a gem?
 - readline autocomplete
 
+ruby interop
+------------
+- accessing the scope/self (DSLs!)
+
 core lang
 ---------
 - seqs
