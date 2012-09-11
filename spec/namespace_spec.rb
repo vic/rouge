@@ -28,6 +28,12 @@ describe Piret::Namespace do
       abc.set_here :hello, :wow
       xyz[:hello].should eq :wow
     end
+
+    it "may not be used to refer namespaces to themselves" do
+      lambda {
+        Piret[:user].refer Piret[:user]
+      }.should raise_exception(Piret::Namespace::RecursiveNamespaceError)
+    end
   end
 
   describe "the piret.builtin namespace" do

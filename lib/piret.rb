@@ -28,6 +28,21 @@ class << Piret
   def repl(argv)
     Piret::REPL.repl(argv)
   end
+
+  def relative_to_lib name
+    File.join(File.dirname(File.absolute_path(__FILE__)), name)
+  end
 end
+
+core = Piret[:"piret.core"]
+core.refer Piret[:"piret.builtin"]
+
+user = Piret[:user]
+user.refer Piret[:"piret.builtin"]
+user.refer Piret[:"piret.core"]
+user.refer Piret[:ruby]
+
+boot = Piret.read("[#{File.read(Piret.relative_to_lib('../piret/boot.p'))}]")
+Piret.eval(Piret::Context.new(user), *boot)
 
 # vim: set sw=2 et cc=80:

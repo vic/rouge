@@ -5,6 +5,8 @@ require 'piret/builtins'
 class Piret::Namespace
   @@namespaces = {}
 
+  class RecursiveNamespaceError < StandardError; end
+
   def initialize(name)
     @name = name
     @table = {}
@@ -12,6 +14,10 @@ class Piret::Namespace
   end
 
   def refer(ns)
+    if ns.name == @name
+      raise RecursiveNamespaceError, "#@name will not refer #{ns.name}"
+    end
+
     @refers << ns if not @refers.include? ns
   end
 

@@ -5,11 +5,10 @@ module Piret::REPL; end
 
 class << Piret::REPL
   def repl(argv)
-    context = self.context
+    context = Piret::Context.new Piret[:user]
 
     if argv.length == 1
-      form = Piret.read("(do #{File.read(argv[0])})")
-      Piret.eval(context, form)
+      Piret.eval(context, *Piret.read("[#{File.read(argv[0])}]"))
       exit(0)
     elsif argv.length > 1
       STDERR.puts "!! usage: #$0 [FILE]"
@@ -54,13 +53,6 @@ class << Piret::REPL
         STDOUT.puts "#{e.backtrace.join "\n"}"
       end
     end
-  end
-
-  def context
-    ns = Piret[:user]
-    ns.refer Piret[:"piret.builtin"]
-    ns.refer Piret[:ruby]
-    Piret::Context.new ns
   end
 end
 

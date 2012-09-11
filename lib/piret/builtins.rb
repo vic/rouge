@@ -83,11 +83,22 @@ class << Piret::Builtins
   end
 
   def do(context, *forms)
-    while forms.length > 1
-      Piret.eval context forms.shift
-    end
+    Piret.eval context, *forms
+  end
 
-    Piret.eval context, forms[0]
+  def ns(context, name)
+    ns = Piret[name.inner]
+    ns.refer Piret[:"piret.builtin"]
+    context = Piret::Context.new ns
+    raise Piret::Eval::ChangeContextException, context
+  end
+
+  def defmacro(context, name, args, *body)
+    context.ns.set_here name.inner,
+        Piret::Macro[Piret.eval(
+            context,
+            Piret::Cons[Piret::Symbol[:fn], args, *body])]
+    Piret::Symbol[:"#{context.ns.name}/#{name.inner}"]
   end
 end
 

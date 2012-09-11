@@ -80,23 +80,6 @@ describe Piret::Eval do
           should eq "exampleexample"
     end
 
-    it "should evaluate calls with splats" do
-      Piret.eval(@context, Piret.read('((fn [a b] [b a]) 1 & [2])')).
-          should eq [2, 1]
-
-      Piret.eval(@context, Piret.read('((fn [a b] [b a]) & [1 2])')).
-          should eq [2, 1]
-
-      Piret.eval(@context, Piret.read("((fn [a b] [b a]) & '(1 2))")).
-          should eq [2, 1]
-
-      Piret.eval(@context, Piret.read("((fn [a b] [b a]) 1 2 & ())")).
-          should eq [2, 1]
-
-      Piret.eval(@context, Piret.read("((fn [a b] [b a]) 1 2 & nil)")).
-          should eq [2, 1]
-    end
-
     it "should evaluate calls with inline blocks and block binds" do
       Piret.eval(@context,
                  Piret.read('((fn [a | b] (b a)) 42 | [e] (./ e 2))')).
@@ -123,17 +106,6 @@ describe Piret::Eval do
           subcontext = Piret::Context.new @context
           subcontext.set_here :x, x
           Piret.eval(subcontext, Piret.read("(.y x 'z)")).should eq :tada
-        end
-
-        it "should call e.f(:g, *h) with (.e f 'g & h)" do
-          f = double("f")
-          h = [1, 9]
-          f.should_receive(:e).with(Piret.read('g'), *h).and_return(:yada)
-
-          subcontext = Piret::Context.new @context
-          subcontext.set_here :f, f
-          subcontext.set_here :h, h
-          Piret.eval(subcontext, Piret.read("(.e f 'g & h)")).should eq :yada
         end
 
         it "should call q.r(:s, &t) with (.r q 's | t)" do

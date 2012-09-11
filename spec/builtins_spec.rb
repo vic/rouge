@@ -124,6 +124,45 @@ describe Piret::Builtins do
       }.should_not raise_exception
     end
   end
+
+  describe "do" do
+    it "should return nil with no arguments" do
+      Piret.eval(@context, Piret.read('(do)')).should eq nil
+    end
+
+    it "should evaluate and return one argument" do
+      subcontext = Piret::Context.new @context
+      subcontext.set_here :x, lambda {4}
+      Piret.eval(subcontext, Piret.read('(do (x))')).should eq 4
+    end
+
+    it "should evaluate multiple arguments and return the last value" do
+      a = mock("a")
+      a.should_receive(:call)
+      subcontext = Piret::Context.new @context
+      subcontext.set_here :a, a
+      subcontext.set_here :b, lambda {7}
+      Piret.eval(subcontext, Piret.read('(do (a) (b))')).should eq 7
+    end
+  end
+
+  describe "ns" do
+    it "should create a new context pointing at a given ns" do
+      lambda {
+        Piret[:"user.spec2"][:nope]
+      }.should raise_exception(Piret::Eval::BindingNotFoundError)
+
+      Piret.eval(@context, Piret.read('(do (ns user.spec2) (def nope 8))'))
+      Piret[:"user.spec2"][:nope].should eq 8
+      lambda {
+        @context[:nope]
+      }.should raise_exception(Piret::Eval::BindingNotFoundError)
+    end
+  end
+
+  describe "defmacro" do
+    pending
+  end
 end
 
 # vim: set sw=2 et cc=80:
