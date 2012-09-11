@@ -87,7 +87,7 @@ class << Piret::Eval
             end
 
             args = args.map {|f| eval context, f}
-            args += rest if rest
+            args += rest.to_a if rest
 
             fun.call *args, &block
           end

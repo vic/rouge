@@ -78,6 +78,28 @@ describe Piret::Eval do
         should eq "exampleexample"
     end
 
+    it "should evaluate calls with splats" do
+      Piret.eval(@context,
+                 Piret.read('((fn [a b] [b a]) 1 & [2])')).
+          should eq [2, 1]
+
+      Piret.eval(@context,
+                 Piret.read('((fn [a b] [b a]) & [1 2])')).
+          should eq [2, 1]
+
+      Piret.eval(@context,
+                 Piret.read("((fn [a b] [b a]) & '(1 2))")).
+          should eq [2, 1]
+
+      Piret.eval(@context,
+                 Piret.read("((fn [a b] [b a]) 1 2 & ())")).
+          should eq [2, 1]
+
+      Piret.eval(@context,
+                 Piret.read("((fn [a b] [b a]) 1 2 & nil)")).
+          should eq [2, 1]
+    end
+
     it "should evaluate calls with inline blocks and block binds" do
       Piret.eval(@context,
                  Piret.read('((fn [a | b] (b a)) 42 | [e] (./ e 2))')).
