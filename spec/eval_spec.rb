@@ -78,7 +78,11 @@ describe Piret::Eval do
         should eq "exampleexample"
     end
 
-
+    it "should evaluate calls with inline blocks and block binds" do
+      Piret.eval(@context,
+                 Piret.read('((fn [a | b] (b a)) 42 | [e] (./ e 2))')).
+          should eq 21
+    end
 
     describe "Ruby interop" do
       describe "new object creation" do
