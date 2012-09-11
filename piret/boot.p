@@ -1,3 +1,7 @@
+;; piret
+
+(ns piret.core)
+
 (def map (fn [f coll]
            (.map coll | f)))
 

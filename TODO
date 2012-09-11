@@ -1,5 +1,6 @@
 miscellaeny
 -----------
+- builtins: -> piret.builtin
 - boot.p
   - is .p an okay extension?
 - `piret' binary, `ipiret'
