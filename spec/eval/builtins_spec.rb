@@ -18,7 +18,8 @@ describe Piret::Eval::Builtins do
 
   describe "quote" do
     it "should prevent evaluation" do
-      Piret.eval(@context, Piret.read("(quote lmnop)")).should eq :lmnop
+      Piret.eval(@context, Piret.read("(quote lmnop)")).
+          jshould eq Piret::Symbol[:lmnop]
     end
   end
 
@@ -35,7 +36,7 @@ describe Piret::Eval::Builtins do
     end
 
     it "should create an n-ary list" do
-      Piret.eval(@context, Piret::Cons[:list, *(1..50)]).
+      Piret.eval(@context, Piret::Cons[Piret::Symbol[:list], *(1..50)]).
           should eq Piret::Cons[*(1..50)]
     end
   end
@@ -95,14 +96,14 @@ describe Piret::Eval::Builtins do
   describe "def" do
     it "should make a binding" do
       Piret.eval(@context, Piret.read("(def barge 'a)")).
-          should eq :"user.spec/barge"
+          should eq Piret::Symbol[:"user.spec/barge"]
     end
 
     it "should always make a binding at the top of the namespace" do
       subcontext = Piret::Eval::Context.new @context
       Piret.eval(subcontext, Piret.read("(def sarge 'b)")).
-          should eq :"user.spec/sarge"
-      Piret.eval(@context, :sarge).should eq :b
+          should eq Piret::Symbol[:"user.spec/sarge"]
+      Piret.eval(@context, :sarge).should eq Piret::Symbol[:b]
     end
   end
 
@@ -113,12 +114,15 @@ describe Piret::Eval::Builtins do
       a.should_receive(:call).with(any_args)
       b.should_not_receive(:call).with(any_args)
       Piret.eval(@context,
-                 Piret::Cons[:if, true, Piret::Cons[a], Piret::Cons[b]])
+                 Piret::Cons[Piret::Symbol[:if], true,
+                               Piret::Cons[a],
+                               Piret::Cons[b]])
     end
 
     it "should not do anything in the case of a missing second branch" do
       lambda {
-        Piret.eval(@context, Piret::Cons[:if, false, :a])
+        Piret.eval(@context,
+                   Piret::Cons[Piret::Symbol[:if], false, Piret::Symbol[:a]])
       }.should_not raise_exception
     end
   end

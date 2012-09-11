@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-[:Keyword, :Macro, :Builtin].each do |name|
+[:Symbol, :Macro, :Builtin].each do |name|
   Piret.const_set name, Class.new {
     def initialize(inner)
       @inner = inner

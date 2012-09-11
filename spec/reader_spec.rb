@@ -14,32 +14,32 @@ describe Piret::Reader do
   end
 
   it "should read symbols" do
-    Piret.read("loki").should eq :loki
-    Piret.read("wah?").should eq :wah?
-    Piret.read("!ruby!").should eq :"!ruby!"
-    Piret.read("nil").should eq :nil
-    Piret.read("true").should eq :true
-    Piret.read("false").should eq :false
-    Piret.read("&").should eq :&
-    Piret.read("*").should eq :*
-    Piret.read("-").should eq :-
-    Piret.read("+").should eq :+
-    Piret.read("/").should eq :/
-    Piret.read("|").should eq :|
+    Piret.read("loki").should eq Piret::Symbol[:loki]
+    Piret.read("wah?").should eq Piret::Symbol[:wah?]
+    Piret.read("!ruby!").should eq Piret::Symbol[:"!ruby!"]
+    Piret.read("nil").should eq Piret::Symbol[:nil]
+    Piret.read("true").should eq Piret::Symbol[:true]
+    Piret.read("false").should eq Piret::Symbol[:false]
+    Piret.read("&").should eq Piret::Symbol[:&]
+    Piret.read("*").should eq Piret::Symbol[:*]
+    Piret.read("-").should eq Piret::Symbol[:-]
+    Piret.read("+").should eq Piret::Symbol[:+]
+    Piret.read("/").should eq Piret::Symbol[:/]
+    Piret.read("|").should eq Piret::Symbol[:|]
   end
 
   describe "keywords" do
     it "should read plain keywords" do
-      Piret.read(":loki").should eq Piret::Keyword[:loki]
-      Piret.read(":/").should eq Piret::Keyword[:/]
-      Piret.read(":wah?").should eq Piret::Keyword[:wah?]
-      Piret.read(":nil").should eq Piret::Keyword[:nil]
-      Piret.read(":true").should eq Piret::Keyword[:true]
-      Piret.read(":false").should eq Piret::Keyword[:false]
+      Piret.read(":loki").should eq :loki
+      Piret.read(":/").should eq :/
+      Piret.read(":wah?").should eq :wah?
+      Piret.read(":nil").should eq :nil
+      Piret.read(":true").should eq :true
+      Piret.read(":false").should eq :false
     end
 
     it "should read string-symbols" do
-      Piret.read(":\"!ruby!\"").should eq Piret::Keyword[:"!ruby!"]
+      Piret.read(":\"!ruby!\"").should eq :"!ruby!"
     end
   end
 
@@ -63,15 +63,15 @@ describe Piret::Reader do
     end
 
     it "should read one-element lists" do
-      Piret.read("(tiffany)").should eq Piret::Cons[:tiffany]
+      Piret.read("(tiffany)").should eq Piret::Cons[Piret::Symbol[:tiffany]]
       Piret.read("(:raaaaash)").
-          should eq Piret::Cons[Piret::Keyword[:raaaaash]]
+          should eq Piret::Cons[:raaaaash]
     end
 
     it "should read multiple-element lists" do
       Piret.read("(1 2 3)").should eq Piret::Cons[1, 2, 3]
       Piret.read("(true () [] \"no\")").
-          should eq Piret::Cons[:true, Piret::Cons[], [], "no"]
+          should eq Piret::Cons[Piret::Symbol[:true], Piret::Cons[], [], "no"]
     end
 
     it "should read nested lists" do
@@ -88,14 +88,14 @@ describe Piret::Reader do
     end
 
     it "should read one-element vectors" do
-      Piret.read("[tiffany]").should eq [:tiffany]
-      Piret.read("[:raaaaash]").should eq [Piret::Keyword[:raaaaash]]
+      Piret.read("[tiffany]").should eq [Piret::Symbol[:tiffany]]
+      Piret.read("[:raaaaash]").should eq [:raaaaash]
     end
 
     it "should read multiple-element vectors" do
       Piret.read("[1 2 3]").should eq [1, 2, 3]
       Piret.read("[true () [] \"no\"]").
-          should eq [:true, Piret::Cons[], [], "no"]
+          should eq [Piret::Symbol[:true], Piret::Cons[], [], "no"]
     end
 
     it "should read nested vectors" do
@@ -106,12 +106,16 @@ describe Piret::Reader do
 
   describe "quotations" do
     it "should read 'X as (QUOTE X)" do
-      Piret.read("'x").should eq Piret::Cons[:quote, :x]
+      Piret.read("'x").
+          should eq Piret::Cons[Piret::Symbol[:quote], Piret::Symbol[:x]]
     end
 
     it "should read ''('X) as (QUOTE (QUOTE ((QUOTE X))))" do
-      Piret.read("''('x)").should eq Piret::Cons[:quote,
-          Piret::Cons[:quote, Piret::Cons[Piret::Cons[:quote, :x]]]]
+      Piret.read("''('x)").
+          should eq Piret::Cons[Piret::Symbol[:quote],
+                    Piret::Cons[Piret::Symbol[:quote],
+                    Piret::Cons[Piret::Cons[Piret::Symbol[:quote],
+                                            Piret::Symbol[:x]]]]]
     end
   end
 
@@ -121,18 +125,20 @@ describe Piret::Reader do
     end
 
     it "should read one-element maps" do
-      Piret.read("{a 1}").should eq({:a => 1})
-      Piret.read("{\"quux\" [lambast]}").should eq({"quux" => [:lambast]})
+      Piret.read("{a 1}").should eq({Piret::Symbol[:a] => 1})
+      Piret.read("{\"quux\" [lambast]}").
+          should eq({"quux" => [Piret::Symbol[:lambast]]})
     end
 
     it "should read multiple-element maps" do
-      Piret.read("{a 1 b 2}").should eq({:a => 1, :b => 2})
-      Piret.read("{f f, y y\nz z}").should eq({:f => :f, :y => :y, :z => :z})
+      Piret.read("{:a 1 :b 2}").should eq({:a => 1, :b => 2})
+      Piret.read("{:f :f, :y :y\n:z :z}").
+          should eq({:f => :f, :y => :y, :z => :z})
     end
 
     it "should read nested maps" do
-      Piret.read("{a {z 9} b {q :q}}").should eq(
-        {:a => {:z => 9}, :b => {:q => Piret::Keyword[:q]}})
+      Piret.read("{:a {:z 9} :b {:q q}}").should eq(
+        {:a => {:z => 9}, :b => {:q => Piret::Symbol[:q]}})
       Piret.read("{{9 7} 5}").should eq({{9 => 7} => 5})
     end
   end
@@ -146,7 +152,7 @@ describe Piret::Reader do
 
     it "should not fail with trailing whitespace" do
       lambda {
-        Piret.read("hello    \n\n\t\t  ").should eq :hello
+        Piret.read(":hello    \n\n\t\t  ").should eq :hello
       }.should_not raise_exception
     end
 
@@ -179,7 +185,7 @@ describe Piret::Reader do
         Piret.read(";what!")
       }.should raise_exception(Piret::Reader::EndOfDataError)
 
-      Piret.read(";what!\nhmm").should eq :hmm
+      Piret.read(";what!\nhmm").should eq Piret::Symbol[:hmm]
     end
   end
 end

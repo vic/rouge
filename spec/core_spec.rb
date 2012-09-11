@@ -2,7 +2,7 @@
 require 'spec_helper'
 require 'piret'
 
-describe [Piret::Keyword, Piret::Macro, Piret::Builtin] do
+describe [Piret::Symbol, Piret::Macro, Piret::Builtin] do
   describe "the constructor" do
     it "should return a new wrapper" do
       described_class.each do |klass|

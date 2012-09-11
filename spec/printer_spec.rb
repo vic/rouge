@@ -9,27 +9,27 @@ describe Piret::Printer do
     end
 
     it "should print symbols" do
-      Piret.print(:loki).should eq "loki"
-      Piret.print(:/).should eq "/"
-      Piret.print(:wah?).should eq "wah?"
-      Piret.print(:"!ruby!").should eq "!ruby!"
-      Piret.print(:nil).should eq "nil"
-      Piret.print(:true).should eq "true"
-      Piret.print(:false).should eq "false"
+      Piret.print(Piret::Symbol[:loki]).should eq "loki"
+      Piret.print(Piret::Symbol[:/]).should eq "/"
+      Piret.print(Piret::Symbol[:wah?]).should eq "wah?"
+      Piret.print(Piret::Symbol[:"!ruby!"]).should eq "!ruby!"
+      Piret.print(Piret::Symbol[:nil]).should eq "nil"
+      Piret.print(Piret::Symbol[:true]).should eq "true"
+      Piret.print(Piret::Symbol[:false]).should eq "false"
     end
 
     describe "keywords" do
       it "should print plain keywords" do
-        Piret.print(Piret::Keyword[:loki]).should eq ":loki"
-        Piret.print(Piret::Keyword[:/]).should eq ":/"
-        Piret.print(Piret::Keyword[:wah?]).should eq ":wah?"
-        Piret.print(Piret::Keyword[:nil]).should eq ":nil"
-        Piret.print(Piret::Keyword[:true]).should eq ":true"
-        Piret.print(Piret::Keyword[:false]).should eq ":false"
+        Piret.print(:loki).should eq ":loki"
+        Piret.print(:/).should eq ":/"
+        Piret.print(:wah?).should eq ":wah?"
+        Piret.print(:nil).should eq ":nil"
+        Piret.print(:true).should eq ":true"
+        Piret.print(:false).should eq ":false"
       end
 
       it "should print string-symbols" do
-        Piret.print(Piret::Keyword[:"!ruby!"]).should eq ":\"!ruby!\""
+        Piret.print(:"!ruby!").should eq ":\"!ruby!\""
       end
     end
 
@@ -78,13 +78,13 @@ describe Piret::Printer do
       end
 
       it "should print one-element vectors" do
-        Piret.print([:tiffany]).should eq "[tiffany]"
-        Piret.print([Piret::Keyword[:raaaaash]]).should eq "[:raaaaash]"
+        Piret.print([Piret::Symbol[:tiffany]]).should eq "[tiffany]"
+        Piret.print([:raaaaash]).should eq "[:raaaaash]"
       end
 
       it "should print multiple-element vectors" do
         Piret.print([1, 2, 3]).should eq "[1 2 3]"
-        Piret.print([:true, Piret::Cons[], [], "no"]).
+        Piret.print([Piret::Symbol[:true], Piret::Cons[], [], "no"]).
             should eq "[true () [] \"no\"]"
       end
 
@@ -96,12 +96,15 @@ describe Piret::Printer do
 
     describe "quotations" do
       it "should print 'X as (QUOTE X)" do
-        Piret.print(Piret::Cons[:quote, :x]).should eq "'x"
+        Piret.print(Piret::Cons[Piret::Symbol[:quote], Piret::Symbol[:x]]).
+            should eq "'x"
       end
 
       it "should print ''('X) as (QUOTE (QUOTE ((QUOTE X))))" do
-        Piret.print(Piret::Cons[:quote, Piret::Cons[:quote,
-                    Piret::Cons[Piret::Cons[:quote, :x]]]]).
+        Piret.print(Piret::Cons[Piret::Symbol[:quote],
+                    Piret::Cons[Piret::Symbol[:quote],
+                    Piret::Cons[Piret::Cons[Piret::Symbol[:quote],
+                    Piret::Symbol[:x]]]]]).
             should eq "''('x)"
       end
     end
@@ -112,21 +115,23 @@ describe Piret::Printer do
       end
 
       it "should print one-element maps" do
-        Piret.print({:a => 1}).should eq "{a 1}"
-        Piret.print({"quux" => [:lambast]}).should eq "{\"quux\" [lambast]}"
+        Piret.print({Piret::Symbol[:a] => 1}).should eq "{a 1}"
+        Piret.print({"quux" => [Piret::Symbol[:lambast]]}).
+            should eq "{\"quux\" [lambast]}"
       end
 
       it "should print multiple-element maps" do
         # XXX(arlen): these tests rely on stable-ish Hash order
-        Piret.print({:a => 1, :b => 2}).should eq "{a 1, b 2}"
-        Piret.print({:f => :f, :y => :y, :z => :z}).should eq "{f f, y y, z z}"
+        Piret.print({:a => 1, :b => 2}).should eq "{:a 1, :b 2}"
+        Piret.print({:f => :f, :y => :y, :z => :z}).
+            should eq "{:f :f, :y :y, :z :z}"
       end
 
       it "should print nested maps" do
         # XXX(arlen): this test relies on stable-ish Hash order
         Piret.print({:a => {:z => 9},
-                    :b => {:q => Piret::Keyword[:q]}}).
-            should eq "{a {z 9}, b {q :q}}"
+                    :b => {:q => Piret::Symbol[:q]}}).
+            should eq "{:a {:z 9}, :b {:q q}}"
         Piret.print({{9 => 7} => 5}).should eq "{{9 7} 5}"
       end
     end
