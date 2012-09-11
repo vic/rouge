@@ -102,7 +102,19 @@ describe Piret::Eval do
           Piret.eval(subcontext, Piret.read("(.y x 'z)")).should eq :tada
         end
 
-        it "should call q.r(s, &t) with (.r q 's & t)" do
+        it "should call e.f(g, *h) with (.e f 'g & h)" do
+          f = double("f")
+          h = [1, 9]
+          f.should_receive(:e).with(:g, *h).and_return(:yada)
+
+          subcontext = Piret::Eval::Context.new @context
+          subcontext.set_here :f, f
+          subcontext.set_here :h, h
+          Piret.eval(subcontext, Piret.read("(.e f 'g & h)")).
+              should eq :yada
+        end
+
+        it "should call q.r(s, &t) with (.r q 's | t)" do
           q = double("q")
           t = lambda {}
           q.should_receive(:r).with(:s, &t).and_return(:success)
@@ -110,7 +122,7 @@ describe Piret::Eval do
           subcontext = Piret::Eval::Context.new @context
           subcontext.set_here :q, q
           subcontext.set_here :t, t
-          Piret.eval(subcontext, Piret.read("(.r q 's & t)")).
+          Piret.eval(subcontext, Piret.read("(.r q 's | t)")).
               should eq :success
         end
       end

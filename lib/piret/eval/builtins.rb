@@ -28,17 +28,17 @@ class << Piret::Eval::Builtins
   def fn(context, argv, *body)
     context = Piret::Eval::Context.new context
 
-    if argv[-2] == :*
+    if argv[-2] == :&
       rest = argv[-1]
       argv = argv[0...-2]
-    elsif argv[-4] == :* and argv[-2] == :&
+    elsif argv[-4] == :& and argv[-2] == :|
       rest = argv[-3]
       argv = argv[0...-4] + argv[-2..-1]
     else
       rest = nil
     end
 
-    if argv[-2] == :&
+    if argv[-2] == :|
       block = argv[-1]
       argv = argv[0...-2]
     else

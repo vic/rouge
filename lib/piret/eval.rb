@@ -20,8 +20,8 @@ class << Piret::Eval
           form = form.to_s
           if form[0] == ?.
             form = form[1..-1]
-            lambda {|receiver, *args|
-              receiver.send(form, *args)
+            lambda {|receiver, *args, &block|
+              receiver.send(form, *args, &block)
             }
           else
             will_new =
@@ -55,14 +55,35 @@ class << Piret::Eval
           end
         when Piret::Cons
           fun = eval context, form[0]
-          remainder = form[1..-1]
           case fun
           when Piret::Builtin
             fun.inner.call context, *form.to_a[1..-1]
           when Piret::Macro
             eval context, fun.inner.call(*form.to_a[1..-1])
           else
-            fun.call *form.to_a[1..-1].map {|f| eval context, f}
+            args = form.to_a[1..-1]
+
+            if args[-2] == :&
+              rest = eval context, args[-1]
+              args = args[0...-2]
+            elsif args[-4] == :& and args[-2] == :|
+              rest = eval context, args[-3]
+              args = args[0...-4] + args[-2..-1]
+            else
+              rest = nil
+            end
+
+            if args[-2] == :|
+              block = eval context, args[-1]
+              args = args[0...-2]
+            else
+              block = nil
+            end
+
+            args = args.map {|f| eval context, f}
+            args += rest if rest
+
+            fun.call *args, &block
           end
         when Hash
           Hash[*

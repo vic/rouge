@@ -26,6 +26,7 @@ describe Piret::Reader do
       Piret.read("-").should eq :-
       Piret.read("+").should eq :+
       Piret.read("/").should eq :/
+      Piret.read("|").should eq :|
     end
 
     describe "keywords" do
