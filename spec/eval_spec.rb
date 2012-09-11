@@ -93,7 +93,7 @@ describe Piret::Eval do
       end
 
       describe "generic method calls" do
-        it "should call x.y(z) with (.y x)" do
+        it "should call x.y(:z) with (.y x 'z)" do
           x = double("x")
           x.should_receive(:y).with(:z).and_return(:tada)
 
@@ -102,7 +102,7 @@ describe Piret::Eval do
           Piret.eval(subcontext, Piret.read("(.y x 'z)")).should eq :tada
         end
 
-        it "should call e.f(g, *h) with (.e f 'g & h)" do
+        it "should call e.f(:g, *h) with (.e f 'g & h)" do
           f = double("f")
           h = [1, 9]
           f.should_receive(:e).with(:g, *h).and_return(:yada)
@@ -114,7 +114,7 @@ describe Piret::Eval do
               should eq :yada
         end
 
-        it "should call q.r(s, &t) with (.r q 's | t)" do
+        it "should call q.r(:s, &t) with (.r q 's | t)" do
           q = double("q")
           t = lambda {}
           q.should_receive(:r).with(:s, &t).and_return(:success)
@@ -124,6 +124,22 @@ describe Piret::Eval do
           subcontext.set_here :t, t
           Piret.eval(subcontext, Piret.read("(.r q 's | t)")).
               should eq :success
+        end
+
+        it "should call a.b(:c) {|d| d + 1} with (.b a 'c | [d] (.+ d 1))" do
+          a = double("a")
+          a.should_receive(:b) do |c, &b|
+            c.should eq :c
+            b.call(1).should eq 2
+            b.call(2).should eq 3
+            b.call(3).should eq 4
+            :ok
+          end
+
+          subcontext = Piret::Eval::Context.new @context
+          subcontext.set_here :a, a
+          Piret.eval(subcontext, Piret.read("(.b a 'c | [d] (.+ d 1))")).
+              should eq :ok
         end
       end
     end
