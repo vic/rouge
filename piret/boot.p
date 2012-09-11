@@ -13,11 +13,13 @@
 (defn map [f coll]
   (.map coll | f))
 
-;(defn str [& args]
-  ;(let [args (map .to_s args)]
-    ;(.join args "")))
+(defn str [& args]
+  (let [args (map .to_s args)]
+    (.join args "")))
 
-;(defn print [& args]
-  ;(.print Kernel (join (map .to_s args) " ")))
+(defn print [& args]
+  (let [args (map .to_s args)
+        out  (.join args " ")]
+    (.print ruby/Kernel out)))
 
 ; vim: set ft=clojure:
