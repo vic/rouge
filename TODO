@@ -4,4 +4,6 @@
 - (. x y)
 - defmacro (then implement defn, etc. in macros)
 - #(puts %)
-- DESTRUCTURING
+- destructuring (in FN, LET, everywhere else)
+- rest of the clojure core API (maybe even in clojure.core ns)
+- clojure-ish IO libraries which expose async IO
