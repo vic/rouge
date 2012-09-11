@@ -81,6 +81,14 @@ class << Piret::Builtins
       Piret.eval context, if_false
     end
   end
+
+  def do(context, *forms)
+    while forms.length > 1
+      Piret.eval context forms.shift
+    end
+
+    Piret.eval context, forms[0]
+  end
 end
 
 # vim: set sw=2 et cc=80:

@@ -2,14 +2,17 @@
 
 (ns piret.core)
 
-(def map (fn [f coll]
-           (.map coll | f)))
+(defmacro defn [name args & body]
+  (list 'def name args & body))
 
-(def str (fn [& args]
-           (let [args (map .to_s args)]
-             (.join args ""))))
+(defn map [f coll]
+  (.map coll | f))
 
-(def print (fn [& args]
-             (.print Kernel (join (map .to_s args) " "))))
+(defn str [& args]
+  (let [args (map .to_s args)]
+    (.join args "")))
+
+(defn print [& args]
+  (.print Kernel (join (map .to_s args) " ")))
 
 ; vim: set ft=clojure:

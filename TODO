@@ -12,6 +12,7 @@ ruby interop
 
 core lang
 ---------
+- dequoting
 - seqs
 - vars
 - freeze vectors, lists where approriate
