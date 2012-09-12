@@ -9,6 +9,11 @@ ruby interop
 - accessing the scope/self (DSLs!)
 - proc or lambda? setting arity.
 
+"hard" tasks
+------------
+- have a core "apply" function which can be used by eval, defmacro, etc.
+- re-org to allow "compilation" phase: (defmacro a [] b) without a "b" in context should fail immediately.
+
 core lang
 ---------
 - dequoting
