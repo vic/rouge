@@ -50,4 +50,7 @@
 (defn / [a & args]
   (reduce ./ (concat (list a) args)))
 
+(defn require [lib]
+  (.require ruby/Kernel lib))
+
 ; vim: set ft=clojure:
