@@ -1,7 +1,6 @@
 # encoding: utf-8
-require 'rouge/core'
-
 module Rouge::Eval
+  require 'rouge/wrappers'
   require 'rouge/context'
   require 'rouge/namespace'
 

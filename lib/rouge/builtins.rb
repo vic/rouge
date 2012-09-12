@@ -21,10 +21,6 @@ class << Rouge::Builtins
     form
   end
 
-  def list(context, *elements)
-    Rouge::Cons[*elements.map {|f| Rouge.eval context, f}]
-  end
-
   def fn(context, argv, *body)
     context = Rouge::Context.new context
 
@@ -86,9 +82,20 @@ class << Rouge::Builtins
     Rouge.eval context, *forms
   end
 
-  def ns(context, name)
+  def ns(context, name, *args)
     ns = Rouge[name.inner]
     ns.refer Rouge[:"rouge.builtin"]
+
+    args.each do |arg|
+      if arg[0] == :use
+        arg[1..-1].each do |use|
+          ns.refer Rouge[use.inner]
+        end
+      else
+        raise "TODO bad arg in ns: #{arg}"
+      end
+    end
+
     context = Rouge::Context.new ns
     raise Rouge::Eval::ChangeContextException, context
   end

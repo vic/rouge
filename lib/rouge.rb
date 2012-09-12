@@ -3,7 +3,7 @@
 module Rouge; end
 
 class << Rouge
-  require 'rouge/core'
+  require 'rouge/wrappers'
   require 'rouge/reader'
   require 'rouge/printer'
   require 'rouge/eval'
@@ -34,7 +34,7 @@ class << Rouge
     user.refer Rouge[:"rouge.core"]
     user.refer Rouge[:ruby]
 
-    form = "[#{File.read(Rouge.relative_to_lib('../rouge/boot.rg'))}\n]"
+    form = "[#{File.read(Rouge.relative_to_lib('boot.rg'))}\n]"
     boot = Rouge.read(form)
     Rouge.eval(Rouge::Context.new(user), *boot)
   end

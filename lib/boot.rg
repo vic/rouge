@@ -6,6 +6,9 @@
               ; This should return a lazy seq.
               (apply .[] ruby/Rouge.Cons (.inject (.map lists | .to_a) | .+))))
 
+(def list (fn [& elements]
+            elements))
+
 (defmacro defn [name args & body]
   (list 'def name (concat (list 'fn args) body)))
 
@@ -26,8 +29,7 @@
     (.print ruby/Kernel out)))
 
 (defn puts [& args]
-  (apply print args)
-  (print "\n"))
+  (print (apply str args) "\n"))
 
 (defn count [coll]
   (.length coll))
@@ -56,5 +58,16 @@
 
 (defn require [lib]
   (.require ruby/Kernel lib))
+
+(ns rouge.test
+  (:use rouge.core ruby))
+
+(defmacro testing [what & tests]
+  (puts "testing: " what)
+  (concat '(do) tests))
+
+(defmacro is [check]
+  (puts "checking: " (.print Rouge check))
+  check)
 
 ; vim: set ft=clojure:

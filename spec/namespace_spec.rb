@@ -36,6 +36,16 @@ describe Rouge::Namespace do
     end
   end
 
+  describe "the destroy method" do
+    it "should obliterate a namespace" do
+      Rouge[:"user.spec2"].set_here :nope, :ok
+      Rouge::Namespace.destroy :"user.spec2"
+      lambda {
+        Rouge[:"user.spec2"][:nope]
+      }.should raise_exception(Rouge::Eval::BindingNotFoundError)
+    end
+  end
+
   describe "the rouge.builtin namespace" do
     before do
       @ns = Rouge[:"rouge.builtin"]

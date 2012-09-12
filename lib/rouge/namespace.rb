@@ -3,7 +3,7 @@ require 'rouge/context'
 require 'rouge/builtins'
 
 class Rouge::Namespace
-  @@namespaces = {}
+  @namespaces = {}
 
   class RecursiveNamespaceError < StandardError; end
 
@@ -46,14 +46,23 @@ end
 
 class << Rouge::Namespace
   def exists?(ns)
-    Rouge::Namespace.class_variable_get('@@namespaces').include? ns
+    @namespaces.include? ns
   end
 
   def [](ns)
-    r = Rouge::Namespace.class_variable_get('@@namespaces')[ns]
+    r = @namespaces[ns]
     return r if r
 
-    Rouge::Namespace.class_variable_get('@@namespaces')[ns] = new(ns)
+    self[ns] = new(ns)
+    @namespaces[ns] = new(ns)
+  end
+
+  def []=(ns, value)
+    @namespaces[ns] = value
+  end
+
+  def destroy(ns)
+    @namespaces.delete ns
   end
 end
 
@@ -73,16 +82,14 @@ class Rouge::Namespace::Ruby
   end
 end
 
-class Rouge::Namespace
-  ns = @@namespaces[:"rouge.builtin"] = Rouge::Namespace.new :"rouge.builtin"
-  Rouge::Builtins.methods(false).each do |m|
-    ns.set_here m, Rouge::Builtin[Rouge::Builtins.method(m)]
-  end
-  Rouge::Builtins::SYMBOLS.each do |name, val|
-    ns.set_here name, val
-  end
-
-  @@namespaces[:ruby] = Rouge::Namespace::Ruby.new
+ns = Rouge::Namespace[:"rouge.builtin"]
+Rouge::Builtins.methods(false).each do |m|
+  ns.set_here m, Rouge::Builtin[Rouge::Builtins.method(m)]
 end
+Rouge::Builtins::SYMBOLS.each do |name, val|
+  ns.set_here name, val
+end
+
+Rouge::Namespace[:ruby] = Rouge::Namespace::Ruby.new
 
 # vim: set sw=2 et cc=80:

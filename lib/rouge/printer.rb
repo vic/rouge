@@ -1,5 +1,5 @@
 # encoding: utf-8
-require 'rouge/core'
+require 'rouge/wrappers'
 
 module Rouge::Printer
   class UnknownFormError < StandardError; end
