@@ -25,13 +25,16 @@
 end
 
 class Rouge::Symbol
-  @@cache = {}
+  # The symbols for t/f/n are the Ruby objects themselves.
+  @cache = {
+    :true => true,
+    :false => false,
+    :nil => nil,
+  }
 
   def self.[](inner)
-    sym = Rouge::Symbol.class_variable_get('@@cache')[inner]
-    return sym if sym
-
-    Rouge::Symbol.class_variable_get('@@cache')[inner] = new inner
+    return @cache[inner] if @cache.include? inner
+    @cache[inner] = new inner
   end
 end
 

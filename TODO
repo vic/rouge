@@ -4,12 +4,15 @@ miscellaeny
 - package as a gem?
 - readline autocomplete
 - MACROEXPAND
+- run rouge specs from rspec
+- omit Ruby from tracebacks?
+- better read errors
+- better exceptions/errors
 
 ruby interop
 ------------
 - accessing the scope/self (DSLs!)
 - proc or lambda? setting arity.
-- (list true) ≠ '(true)  -- this is an issue
 
 "hard" tasks
 ------------

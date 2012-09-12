@@ -18,8 +18,11 @@ describe Rouge::Reader do
     Rouge.read("wah?").should eq Rouge::Symbol[:wah?]
     Rouge.read("!ruby!").should eq Rouge::Symbol[:"!ruby!"]
     Rouge.read("nil").should eq Rouge::Symbol[:nil]
+    Rouge.read("nil").should eq nil
     Rouge.read("true").should eq Rouge::Symbol[:true]
+    Rouge.read("true").should eq true
     Rouge.read("false").should eq Rouge::Symbol[:false]
+    Rouge.read("false").should eq false
     Rouge.read("&").should eq Rouge::Symbol[:&]
     Rouge.read("*").should eq Rouge::Symbol[:*]
     Rouge.read("-").should eq Rouge::Symbol[:-]

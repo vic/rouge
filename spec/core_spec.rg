@@ -9,10 +9,8 @@
       (is (= (list) '())))
     (testing "unary list creation"
       (is (= (list "trent") '("trent")))
-      (is (= (list 42) '(42))))
+      (is (= (list true) '(true))))
     (testing "n-ary list creation"
-      (is (= (apply list (range 1 51)) (.to_a (ruby/Range. 1 50))))))
-  (testing "this will surely fail"
-    (is (= 5 "quux"))))
+      (is (= (apply list (range 1 51)) (.to_a (ruby/Range. 1 50)))))))
 
 ; vim: set ft=clojure:
