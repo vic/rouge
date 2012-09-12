@@ -25,6 +25,10 @@
         out  (.join args " ")]
     (.print ruby/Kernel out)))
 
+(defn puts [& args]
+  (apply print args)
+  (print "\n"))
+
 (defn count [coll]
   (.length coll))
 
