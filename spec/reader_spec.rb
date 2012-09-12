@@ -28,6 +28,7 @@ describe Rouge::Reader do
     Rouge.read("|").should eq Rouge::Symbol[:|]
     Rouge.read(".").should eq Rouge::Symbol[:"."]
     Rouge.read(".[]").should eq Rouge::Symbol[:".[]"]
+    Rouge.read("=").should eq Rouge::Symbol[:"="]
   end
 
   describe "keywords" do

@@ -11,6 +11,7 @@ ruby interop
 core lang
 ---------
 - dequoting
+- multi-form defn: (defn x ([a] ...) ([a b] ...))
 - seqs
 - vars
   - atoms, refs, agents

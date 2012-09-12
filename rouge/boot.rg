@@ -9,6 +9,9 @@
 (defmacro defn [name args & body]
   (list 'def name (concat (list 'fn args) body)))
 
+(defn reduce [f coll]
+  (.inject coll | f))
+
 (defn map [f coll]
   ; This should return a lazy seq.
   (.map coll | f))
@@ -21,5 +24,30 @@
   (let [args (map .to_s args)
         out  (.join args " ")]
     (.print ruby/Kernel out)))
+
+(defn count [coll]
+  (.length coll))
+
+(defn = [a b]
+  (.== a b))
+
+(defn empty? [coll]
+  (= 0 (count coll)))
+
+(defn + [& args]
+  (if (empty? args)
+    0
+    (reduce .+ args)))
+
+(defn - [a & args]
+  (reduce .- (concat (list a) args)))
+
+(defn * [& args]
+  (if (empty? args)
+    1
+    (reduce .* args)))
+
+(defn / [a & args]
+  (reduce ./ (concat (list a) args)))
 
 ; vim: set ft=clojure:
