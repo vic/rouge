@@ -211,18 +211,6 @@ describe Rouge::Builtins do
       @subcontext.readeval("(apply a 8 9 '(1 2 3))").should eq [8, 9, 1, 2, 3]
     end
   end
-
-  describe "macroexpand" do
-    it "should give the expansion of a macro call" do
-      subcontext = Rouge::Context.new @context
-      subcontext.set_here :f, lambda {|x| x * 2}
-      subcontext.readeval(<<-ROUGE).should eq 6
-          (do
-            (defmacro a [x] `(f ~x))
-            (macroexpand '(a 3)))
-      ROUGE
-    end
-  end
 end
 
 # vim: set sw=2 et cc=80:
