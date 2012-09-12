@@ -39,7 +39,7 @@ class Rouge::Cons
   def initialize(head, tail)
     if tail != Empty and !tail.is_a?(Rouge::Cons)
       raise ArgumentError,
-        "tail should be a Rouge::Cons or Tail, not #{tail}"
+        "tail should be a Rouge::Cons or Empty, not #{tail}"
     end
 
     @head, @tail = head, tail
@@ -61,9 +61,11 @@ class Rouge::Cons
   end
 
   def each(&block)
-    block.call head
-    if tail
-      tail.each &block
+    here = self
+
+    while here and here != Rouge::Cons::Empty
+      block.call here.head
+      here = here.tail
     end
   end
 

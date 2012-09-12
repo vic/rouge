@@ -3,11 +3,13 @@ miscellaeny
 - boot.rg
 - package as a gem?
 - readline autocomplete
+- MACROEXPAND
 
 ruby interop
 ------------
 - accessing the scope/self (DSLs!)
 - proc or lambda? setting arity.
+- (list true) ≠ '(true)  -- this is an issue
 
 "hard" tasks
 ------------
