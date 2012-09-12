@@ -13,9 +13,9 @@ core lang
 - dequoting
 - seqs
 - vars
+  - atoms, refs, agents
 - freeze vectors, lists where approriate
 - (. x y)
-- defmacro (then implement defn, etc. in macros)
 - #(puts %)
 - destructuring (in FN, LET, everywhere else)
 - rest of the clojure core API (maybe even in clojure.core ns)
