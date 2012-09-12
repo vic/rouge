@@ -2,6 +2,7 @@ miscellaeny
 -----------
 - MACROEXPAND
 - organise boot.rg
+- test the whole core
 - run rouge specs from rspec
 - omit Ruby from tracebacks?
 - better read errors
