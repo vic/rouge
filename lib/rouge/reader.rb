@@ -176,7 +176,7 @@ class Rouge::Reader
 
   def dequote form
     case form
-    when Rouge::Cons
+    when Rouge::Cons, Array
       rest = []
       group = []
       form.each do |f|
@@ -195,10 +195,21 @@ class Rouge::Reader
         rest << Rouge::Cons[Rouge::Symbol[:list], *group]
       end
 
-      if rest.length == 1
-        rest[0]
+      r =
+        if rest.length == 1
+          rest[0]
+        else
+          Rouge::Cons[Rouge::Symbol[:concat], *rest]
+        end
+
+      if form.is_a?(Array)
+        Rouge::Cons[Rouge::Symbol[:apply],
+                    Rouge::Symbol[:vector],
+                    r]
+      elsif rest.length > 1
+        Rouge::Cons[Rouge::Symbol[:seq], r]
       else
-        Rouge::Cons[Rouge::Symbol[:concat], *rest]
+        r
       end
     when Rouge::Dequote
       form.inner
@@ -221,7 +232,29 @@ class Rouge::Reader
   end
 
   def dispatch_rewrite form, count
-    [form, count]
+    case form
+    when Rouge::Cons, Array
+      mapped = form.map do |e|
+        e, count = dispatch_rewrite(e, count)
+        e
+      end
+
+      if form.is_a?(Rouge::Cons)
+        [Rouge::Cons[*mapped], count]
+      else
+        [mapped, count]
+      end
+    when Rouge::Symbol
+      if form.inner == :"%"
+        [Rouge::Symbol[:"%1"], [1, count].max]
+      elsif form.inner.to_s =~ /^%(\d+)$/
+        [form, [$1.to_i, count].max]
+      else
+        [form, count]
+      end
+    else
+      [form, count]
+    end
   end
 
   def slurp re

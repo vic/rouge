@@ -2,15 +2,22 @@
 
 (ns rouge.core)
 
+(def seq (fn [coll]
+           ; XXX right now this just coerces to a Cons
+           (apply .[] ruby/Rouge.Cons (.to_a coll))))
+
 (def concat (fn [& lists]
               ; XXX lazy seq
-              (apply .[] ruby/Rouge.Cons (.inject (.map lists | .to_a) | .+))))
+              (seq (.inject (.map lists | .to_a) | .+))))
 
 (def list (fn [& elements]
             elements))
 
 (defmacro defn [name args & body]
   `(def ~name (fn ~args ~@body)))
+
+(defn vector [& args]
+  (.to_a args))
 
 (defn reduce [f coll]
   (.inject coll | f))

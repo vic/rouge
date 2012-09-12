@@ -226,11 +226,16 @@ describe Rouge::Reader do
         Rouge.read('`~`(x)').should eq Rouge.read("(list 'x)")
       end
 
-      it "should splice within cons lists" do
+      it "should splice within seqs and vectors" do
         Rouge.read('`(a ~@b c)').
-            should eq Rouge.read("(concat (list 'a) b (list 'c))")
+            should eq Rouge.read("(seq (concat (list 'a) b (list 'c)))")
         Rouge.read('`(~@(a b) ~c)').
-            should eq Rouge.read("(concat (a b) (list c))")
+            should eq Rouge.read("(seq (concat (a b) (list c)))")
+        Rouge.read('`[a ~@b c]').should eq Rouge.read(<<-ROUGE)
+            (apply vector (concat (list 'a) b (list 'c)))
+        ROUGE
+        Rouge.read('`[~@(a b) ~c]').
+            should eq Rouge.read("(apply vector (concat (a b) (list c)))")
       end
     end
   end

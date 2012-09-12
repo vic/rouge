@@ -17,6 +17,7 @@ ruby interop
 ------------
 - have a core "apply" function which can be used by eval, defmacro, etc.
 - re-org to allow "compilation" phase: (defmacro a [] b) without a "b" in context should fail immediately.
+  - probably generic walking would be nice here
 
 core lang
 ---------
