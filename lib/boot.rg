@@ -10,7 +10,7 @@
             elements))
 
 (defmacro defn [name args & body]
-  (list 'def name (concat (list 'fn args) body)))
+  `(def ~name (fn ~args ~@body)))
 
 (defn reduce [f coll]
   (.inject coll | f))
@@ -23,10 +23,12 @@
   (let [args (map .to_s args)]
     (.join args "")))
 
+(defn pr-str [& args]
+  (let [args (map #(.print ruby/Rouge %) args)]
+    (.join args " ")))
+
 (defn print [& args]
-  (let [args (map (fn [e] (.print ruby/Rouge e)) args)
-        out  (.join args " ")]
-    (.print ruby/Kernel out)))
+  (.print ruby/Kernel (apply pr-str args)))
 
 (defn puts [& args]
   (.print ruby/Kernel (apply str args) "\n"))
@@ -90,36 +92,22 @@
 
 (defmacro test [& body]
   ; Non-standard; while we're missing dynamic vars ...
-  (concat '(let [test-level 0]) body))
+  `(let [test-level 0]
+     ~@body))
 
 (defmacro testing [what & tests]
-  (concat
-    (list 'do
-      (list 'puts '(* " " test-level 2) "testing: " what))
-    (list
-      (concat '(let [test-level (+ 1 test-level)]) tests))))
-
-; (defmacro testing [what & tests]
-;   `(do
-;      (puts (* " " test-level 2) "testing: " ~what)
-;      (let [test-level (+ 1 test-level)]
-;        ~@tests)))
+  `(do
+     (puts (* " " test-level 2) "testing: " ~what)
+     (let [test-level (+ 1 test-level)]
+       ~@tests)))
 
 (defmacro is [check]
-  (list
-    'if (list 'not check)
-      (list 'do
-        (list 'puts "FAIL in ???")
-        (list 'puts "expected: " (.print ruby/Rouge check))
-        (list 'puts "  actual: (not " (.print ruby/Rouge check) ")"))
-      'true))
-
-; (defmacro is [check]
-;   `(if (not ~check)
-;      (do
-;        (puts "FAIL in ???")
-;        (puts "expected: " ~(print check))
-;        (puts "  actual: (not " ~(print check) ")"))))
+  `(if (not ~check)
+     (do
+       (puts "FAIL in ???")
+       (puts "expected: " ~(pr-str check))
+       (puts "  actual: (not " ~(pr-str check) ")"))
+     true))
 
 
 ; vim: set ft=clojure:

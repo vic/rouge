@@ -39,6 +39,10 @@ class Rouge::Context
     end
   end
 
+  def readeval(input)
+    Rouge.eval(self, Rouge.read(input))
+  end
+
   attr_reader :ns
 end
 

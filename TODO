@@ -1,18 +1,17 @@
 miscellaeny
 -----------
-- boot.rg
-- package as a gem?
-- readline autocomplete
 - MACROEXPAND
 - run rouge specs from rspec
 - omit Ruby from tracebacks?
 - better read errors
 - better exceptions/errors
+- readline autocomplete
+- package as a gem?
 
 ruby interop
 ------------
 - accessing the scope/self (DSLs!)
-- proc or lambda? setting arity.
+- proc or lambda? setting ARITY.
 
 "hard" tasks
 ------------
@@ -21,16 +20,15 @@ ruby interop
 
 core lang
 ---------
-- dequoting
 - multi-form defn: (defn x ([a] ...) ([a b] ...))
 - seqs
 - vars
   - atoms, refs, agents
 - freeze vectors, lists where approriate
 - (. x y)
-- #(puts %)
 - destructuring (in FN, LET, everywhere else)
 - rest of the clojure core API (maybe even in clojure.core ns)
 - clojure-ish IO libraries which expose async IO
 - string interpol (clojurish. hum. maybe not?)
 - defprotocol -- looks important! ISeq, ISeqable, ISequential and what have you.
+- dynamic/special vars

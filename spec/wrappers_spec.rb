@@ -2,7 +2,12 @@
 require 'spec_helper'
 require 'rouge'
 
-describe [Rouge::Symbol, Rouge::Macro, Rouge::Builtin] do
+describe [
+    Rouge::Symbol,
+    Rouge::Macro,
+    Rouge::Builtin,
+    Rouge::Dequote,
+    Rouge::Splice] do
   describe "the constructor" do
     it "should return a new wrapper" do
       described_class.each do |klass|

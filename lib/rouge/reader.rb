@@ -16,7 +16,7 @@ class Rouge::Reader
   end
 
   def lex sub=false
-    r = 
+    r =
       case peek
       when NUMBER
         number
@@ -31,10 +31,16 @@ class Rouge::Reader
       when SYMBOL
         # SYMBOL after \[, because it includes \[
         symbol
-      when /'/
-        quotation
       when /{/
         map
+      when /'/
+        quotation
+      when /`/
+        backquotation
+      when /~/
+        dequotation
+      when /#/
+        dispatch
       when nil
         raise EndOfDataError, "in #lex"
       else
@@ -57,10 +63,6 @@ class Rouge::Reader
 
   def number
     slurp(NUMBER).gsub(/\D+/, '').to_i
-  end
-
-  def symbol
-    Rouge::Symbol[slurp(SYMBOL).intern]
   end
 
   def keyword
@@ -131,9 +133,8 @@ class Rouge::Reader
     r
   end
 
-  def quotation
-    consume
-    Rouge::Cons[Rouge::Symbol[:quote], lex(true)]
+  def symbol
+    Rouge::Symbol[slurp(SYMBOL).intern]
   end
 
   def map
@@ -151,6 +152,76 @@ class Rouge::Reader
 
     consume
     r
+  end
+
+  def quotation
+    consume
+    Rouge::Cons[Rouge::Symbol[:quote], lex(true)]
+  end
+
+  def backquotation
+    consume
+    dequote lex(true)
+  end
+
+  def dequotation
+    consume
+    if peek == ?@
+      consume
+      Rouge::Splice[lex(true)]
+    else
+      Rouge::Dequote[lex(true)]
+    end
+  end
+
+  def dequote form
+    case form
+    when Rouge::Cons
+      rest = []
+      group = []
+      form.each do |f|
+        if f.is_a? Rouge::Splice
+          if group.length > 0
+            rest << Rouge::Cons[Rouge::Symbol[:list], *group]
+            group = []
+          end
+          rest << f.inner
+        else
+          group << dequote(f)
+        end
+      end
+
+      if group.length > 0
+        rest << Rouge::Cons[Rouge::Symbol[:list], *group]
+      end
+
+      if rest.length == 1
+        rest[0]
+      else
+        Rouge::Cons[Rouge::Symbol[:concat], *rest]
+      end
+    when Rouge::Dequote
+      form.inner
+    else
+      Rouge::Cons[Rouge::Symbol[:quote], form]
+    end
+  end
+
+  def dispatch
+    consume
+    if peek == '('
+      body, count = dispatch_rewrite(lex(true), 0)
+      Rouge::Cons[
+          Rouge::Symbol[:fn],
+          (1..count).map {|n| Rouge::Symbol[:"%#{n}"]},
+          body]
+    else
+      raise UnexpectedCharacterError, "#{peek}.inspect in #dispatch"
+    end
+  end
+
+  def dispatch_rewrite form, count
+    [form, count]
   end
 
   def slurp re
@@ -181,7 +252,7 @@ class Rouge::Reader
   end
 
   NUMBER = /^[0-9][0-9_]*/
-  SYMBOL = /^(\.\[\])|([a-zA-Z0-9\-_!&\?\*\/\.\+\|=]+)/
+  SYMBOL = /^(\.\[\])|([a-zA-Z0-9\-_!&\?\*\/\.\+\|=%]+)/
 end
 
 # vim: set sw=2 et cc=80:

@@ -8,30 +8,28 @@ describe Rouge::Eval do
   end
 
   it "should evaluate quotations to their unquoted form" do
-    Rouge.eval(@context, Rouge.read("'x")).should eq Rouge.read("x")
-    Rouge.eval(@context, Rouge.read("'':zzy")).should eq Rouge.read("':zzy")
+    @context.readeval("'x").should eq Rouge.read("x")
+    @context.readeval("'':zzy").should eq Rouge.read("':zzy")
   end
 
   describe "symbols" do
     it "should evaluate symbols to the object within their context" do
       @context.set_here :vitamin_b, "vegemite"
-      Rouge.eval(@context, Rouge.read("vitamin_b")).should eq "vegemite"
+      @context.readeval("vitamin_b").should eq "vegemite"
 
       subcontext = Rouge::Context.new @context
       subcontext.set_here :joy, [:yes]
-      Rouge.eval(subcontext, Rouge.read("joy")).should eq [:yes]
+      subcontext.readeval("joy").should eq [:yes]
     end
 
     it "should evaluate symbols in other namespaces" do
-      Rouge.eval(@context, Rouge.read("ruby/Object")).should eq Object
-      Rouge.eval(@context, Rouge.read("ruby/Exception")).should eq Exception
+      @context.readeval("ruby/Object").should eq Object
+      @context.readeval("ruby/Exception").should eq Exception
     end
 
     it "should evaluate nested objects" do
-      Rouge.eval(@context, Rouge.read("ruby/Rouge.Context")).
-          should eq Rouge::Context
-      Rouge.eval(@context, Rouge.read("ruby/Errno.EAGAIN")).
-          should eq Errno::EAGAIN
+      @context.readeval("ruby/Rouge.Context").should eq Rouge::Context
+      @context.readeval("ruby/Errno.EAGAIN").should eq Errno::EAGAIN
     end
   end
 
@@ -39,8 +37,7 @@ describe Rouge::Eval do
     Rouge.eval(@context, 4).should eq 4
     Rouge.eval(@context, "bleep bloop").should eq "bleep bloop"
     Rouge.eval(@context, :"nom it").should eq :"nom it"
-    Rouge.eval(@context, Rouge.read("{:a :b, 1 2}")).to_s.
-        should eq({:a => :b, 1 => 2}.to_s)
+    @context.readeval("{:a :b, 1 2}").to_s.should eq({:a => :b, 1 => 2}.to_s)
 
     l = lambda {}
     Rouge.eval(@context, l).should eq l
@@ -50,12 +47,12 @@ describe Rouge::Eval do
   end
 
   it "should evaluate hash and vector arguments" do
-    Rouge.eval(@context, Rouge.read("{\"z\" 92, 'x ''5}")).
+    @context.readeval("{\"z\" 92, 'x ''5}").
         should eq Rouge.read("{\"z\" 92, x '5}")
 
     subcontext = Rouge::Context.new @context
     subcontext.set_here :lolwut, "off"
-    Rouge.eval(subcontext, Rouge.read("{lolwut [lolwut]}")).
+    subcontext.readeval("{lolwut [lolwut]}").
         should eq Rouge.read('{"off" ["off"]}')
   end
 
@@ -63,8 +60,7 @@ describe Rouge::Eval do
     it "should evaluate function calls" do
       subcontext = Rouge::Context.new @context
       subcontext.set_here :f, lambda {|x| "hello #{x}"}
-      Rouge.eval(subcontext, Rouge.read('(f "world")')).
-          should eq "hello world"
+      subcontext.readeval('(f "world")').should eq "hello world"
     end
 
     it "should evaluate macro calls" do
@@ -76,14 +72,11 @@ describe Rouge::Eval do
       subcontext = Rouge::Context.new @context
       subcontext.set_here :macro, macro
       subcontext.set_here :f, lambda {|x,y| x + y}
-      Rouge.eval(subcontext, Rouge.read('(macro bar (f bar bar))')).
-          should eq "exampleexample"
+      subcontext.readeval('(macro bar (f bar bar))').should eq "exampleexample"
     end
 
     it "should evaluate calls with inline blocks and block binds" do
-      Rouge.eval(@context,
-                 Rouge.read('((fn [a | b] (b a)) 42 | [e] (./ e 2))')).
-          should eq 21
+      @context.readeval('((fn [a | b] (b a)) 42 | [e] (./ e 2))').should eq 21
     end
 
     describe "Ruby interop" do
@@ -94,7 +87,7 @@ describe Rouge::Eval do
 
           subcontext = Rouge::Context.new @context
           subcontext.set_here :klass, klass
-          Rouge.eval(subcontext, Rouge.read("(klass. 'a)")).should eq :b
+          subcontext.readeval("(klass. 'a)").should eq :b
         end
       end
 
@@ -105,7 +98,7 @@ describe Rouge::Eval do
 
           subcontext = Rouge::Context.new @context
           subcontext.set_here :x, x
-          Rouge.eval(subcontext, Rouge.read("(.y x 'z)")).should eq :tada
+          subcontext.readeval("(.y x 'z)").should eq :tada
         end
 
         it "should call q.r(:s, &t) with (.r q 's | t)" do
@@ -116,7 +109,7 @@ describe Rouge::Eval do
           subcontext = Rouge::Context.new @context
           subcontext.set_here :q, q
           subcontext.set_here :t, t
-          Rouge.eval(subcontext, Rouge.read("(.r q 's | t)")).should eq :bop
+          subcontext.readeval("(.r q 's | t)").should eq :bop
         end
 
         it "should call a.b(:c) {|d| d + 1} with (.b a 'c | [d] (.+ d 1))" do
@@ -131,8 +124,7 @@ describe Rouge::Eval do
 
           subcontext = Rouge::Context.new @context
           subcontext.set_here :a, a
-          Rouge.eval(subcontext, Rouge.read("(.b a 'c | [d] (.+ d 1))")).
-              should eq :ok
+          subcontext.readeval("(.b a 'c | [d] (.+ d 1))").should eq :ok
         end
       end
     end

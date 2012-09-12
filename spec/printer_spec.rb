@@ -40,7 +40,7 @@ describe Rouge::Printer do
       end
 
       it "should print escape sequences" do
-        Rouge.print("here \" goes").should eq "\"here \\\" goes\"" 
+        Rouge.print("here \" goes").should eq "\"here \\\" goes\""
         Rouge.print("here \\ goes").should eq "\"here \\\\ goes\""
         Rouge.print("\a\b\e\f\n").should eq "\"\\a\\b\\e\\f\\n\""
         Rouge.print("\r\t\v").should eq "\"\\r\\t\\v\""
@@ -67,7 +67,7 @@ describe Rouge::Printer do
       end
 
       it "should print nested lists" do
-        Rouge.print(Rouge::Cons[Rouge::Cons[Rouge::Cons[3], 
+        Rouge.print(Rouge::Cons[Rouge::Cons[Rouge::Cons[3],
                     Rouge::Cons[Rouge::Cons[]]], 9,
                     Rouge::Cons[Rouge::Cons[8], Rouge::Cons[8]]]).
             should eq "(((3) (())) 9 ((8) (8)))"

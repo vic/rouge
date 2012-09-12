@@ -69,6 +69,14 @@ describe Rouge::Context do
       }.should raise_exception(Rouge::Eval::BindingNotFoundError)
     end
   end
+
+  describe "the readeval method" do
+    it "should read and eval a form in this context" do
+      Rouge.should_receive(:read).with(:a).and_return(:b)
+      Rouge.should_receive(:eval).with(@a, :b).and_return(:c)
+      @a.readeval(:a).should eq :c
+    end
+  end
 end
 
 # vim: set sw=2 et cc=80:

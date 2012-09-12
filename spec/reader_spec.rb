@@ -32,6 +32,8 @@ describe Rouge::Reader do
     Rouge.read(".").should eq Rouge::Symbol[:"."]
     Rouge.read(".[]").should eq Rouge::Symbol[:".[]"]
     Rouge.read("=").should eq Rouge::Symbol[:"="]
+    Rouge.read("%").should eq Rouge::Symbol[:"%"]
+    Rouge.read("%50").should eq Rouge::Symbol[:"%50"]
   end
 
   describe "keywords" do
@@ -192,6 +194,55 @@ describe Rouge::Reader do
       }.should raise_exception(Rouge::Reader::EndOfDataError)
 
       Rouge.read(";what!\nhmm").should eq Rouge::Symbol[:hmm]
+    end
+  end
+
+  describe "backquoting" do
+    describe "non-cons lists" do
+      it "should quote non-cons lists" do
+        Rouge.read('`3').should eq Rouge.read("'3")
+        Rouge.read('`"my my my"').should eq Rouge.read(%{'"my my my"})
+      end
+
+      it "should dequote within non-cons lists" do
+        Rouge.read('`~3').should eq Rouge.read("3")
+        Rouge.read('``~3').should eq Rouge.read("'3")
+        Rouge.read('``~~3').should eq Rouge.read("3")
+      end
+    end
+
+    describe "cons-lists" do
+      it "should quote cons lists" do
+        Rouge.read('`(1 2)').should eq Rouge.read("(list '1 '2)")
+        Rouge.read('`(a b)').should eq Rouge.read("(list 'a 'b)")
+      end
+
+      it "should dequote within cons lists" do
+        Rouge.read('`(a ~b)').should eq Rouge.read("(list 'a b)")
+        Rouge.read('`(a ~(b `(c ~d)))').
+            should eq Rouge.read("(list 'a (b (list 'c d)))")
+        Rouge.read('`(a `(b ~c))').
+            should eq Rouge.read("(list 'a (list 'list (list 'quote 'b) 'c))")
+        Rouge.read('`~`(x)').should eq Rouge.read("(list 'x)")
+      end
+
+      it "should splice within cons lists" do
+        Rouge.read('`(a ~@b c)').
+            should eq Rouge.read("(concat (list 'a) b (list 'c))")
+        Rouge.read('`(~@(a b) ~c)').
+            should eq Rouge.read("(concat (a b) (list c))")
+      end
+    end
+  end
+
+  describe "anonymous functions" do
+    it "should read anonymous functions" do
+      Rouge.read('#(1)').should eq Rouge.read('(fn [] (1))')
+      Rouge.read('#(do 1)').should eq Rouge.read('(fn [] (do 1))')
+      Rouge.read('#(%)').should eq Rouge.read('(fn [%1] (%1))')
+      Rouge.read('#(%2)').should eq Rouge.read('(fn [%1 %2] (%2))')
+      Rouge.read('#(%5)').should eq Rouge.read('(fn [%1 %2 %3 %4 %5] (%5))')
+      Rouge.read('#(%2 %)').should eq Rouge.read('(fn [%1 %2] (%2 %1))')
     end
   end
 end
