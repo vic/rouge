@@ -1,6 +1,7 @@
 # encoding: utf-8
 require 'rouge/context'
 require 'rouge/builtins'
+require 'rouge/var'
 
 class Rouge::Namespace
   @namespaces = {}

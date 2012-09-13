@@ -79,13 +79,6 @@ describe Rouge::Namespace do
       @ns[:quote].root.should be_an_instance_of Rouge::Builtin
     end
 
-    it "should contain fundamental objects" do
-      #@ns[:nil].should eq nil
-      #@ns[:true].should eq true
-      #@ns[:false].should eq false
-      pending
-    end
-
     it "should not find objects from ruby" do
       lambda {
         @ns[:Float]

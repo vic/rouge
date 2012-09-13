@@ -105,19 +105,4 @@ class << Rouge::Cons::Empty
   include Enumerable
 end
 
-class Rouge::Var
-  def initialize(name, root=Rouge::Var::Unbound)
-    @name = name
-    @root = root
-  end
-
-  def ==(var)
-    var.is_a?(Rouge::Var) and @name == var.name and @root == var.root
-  end
-
-  attr_reader :name, :root
-end
-
-Rouge::Var::Unbound = Object.new
-
 # vim: set sw=2 et cc=80:

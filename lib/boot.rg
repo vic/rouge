@@ -140,6 +140,32 @@
     :blah
     :hoo))
 
+(defn push-thread-bindings [map]
+  (.push ruby/Rouge.Var map))
+
+(defn pop-thread-bindings []
+  (.pop ruby/Rouge.Var))
+
+(defn hash-map [& keyvals]
+  (apply .[] ruby/Hash keyvals))
+
+(defmacro binding [bindings & body]
+  (let [var-ize (fn [var-vals]
+                  (.flatten
+                    (map
+                      (fn [pair]
+                        (let [key (first pair)
+                              val (second pair)]
+                          [`(.name (var ~key)) val]))
+                      (.each_slice var-vals 2))
+                    1))]
+  `(do
+     (push-thread-bindings (hash-map ~@(var-ize bindings)))
+     ;(try
+       ~@body
+       ;(finally
+         (pop-thread-bindings)))); ))
+
 (ns rouge.test
   (:use rouge.core ruby))
 
