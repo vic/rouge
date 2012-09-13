@@ -15,6 +15,7 @@ ruby interop
 ------------
 - accessing the scope/self (DSLs!)
 - proc or lambda? setting ARITY.
+  - DEFN/DEFMACRO/etc. should create strict lambdas, but FN/#() should not.
 
 "hard" tasks
 ------------
