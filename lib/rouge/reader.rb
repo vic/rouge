@@ -222,22 +222,26 @@ class Rouge::Reader
 
   def dispatch
     consume
-    if peek == '('
-      body, count = dispatch_rewrite(lex(true), 0)
+    case peek
+    when '('
+      body, count = dispatch_rewrite_fn(lex(true), 0)
       Rouge::Cons[
           Rouge::Symbol[:fn],
           (1..count).map {|n| Rouge::Symbol[:"%#{n}"]},
           body]
+    when "'"
+      consume
+      Rouge::Cons[Rouge::Symbol[:var], lex(true)]
     else
       raise UnexpectedCharacterError, "#{peek}.inspect in #dispatch"
     end
   end
 
-  def dispatch_rewrite form, count
+  def dispatch_rewrite_fn form, count
     case form
     when Rouge::Cons, Array
       mapped = form.map do |e|
-        e, count = dispatch_rewrite(e, count)
+        e, count = dispatch_rewrite_fn(e, count)
         e
       end
 

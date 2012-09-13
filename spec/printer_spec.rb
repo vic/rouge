@@ -97,17 +97,32 @@ describe Rouge::Printer do
     end
 
     describe "quotations" do
-      it "should print 'X as (QUOTE X)" do
+      it "should print (QUOTE X) as 'X" do
         Rouge.print(Rouge::Cons[Rouge::Symbol[:quote], Rouge::Symbol[:x]]).
             should eq "'x"
       end
 
-      it "should print ''('X) as (QUOTE (QUOTE ((QUOTE X))))" do
+      it "should print (QUOTE (QUOTE ((QUOTE X)))) as ''('X)" do
         Rouge.print(Rouge::Cons[Rouge::Symbol[:quote],
                     Rouge::Cons[Rouge::Symbol[:quote],
                     Rouge::Cons[Rouge::Cons[Rouge::Symbol[:quote],
                     Rouge::Symbol[:x]]]]]).
             should eq "''('x)"
+      end
+    end
+
+    describe "vars" do
+      it "should print (VAR X) as #'X" do
+        Rouge.print(Rouge::Cons[Rouge::Symbol[:var], Rouge::Symbol[:x]]).
+            should eq "#'x"
+      end
+
+      it "should print (QUOTE (QUOTE ((QUOTE X)))) as #'#'(#'X)" do
+        Rouge.print(Rouge::Cons[Rouge::Symbol[:var],
+                    Rouge::Cons[Rouge::Symbol[:var],
+                    Rouge::Cons[Rouge::Cons[Rouge::Symbol[:var],
+                    Rouge::Symbol[:x]]]]]).
+            should eq "#'#'(#'x)"
       end
     end
 

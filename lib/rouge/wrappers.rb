@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'rouge/metadata'
 
-[:Symbol, :Macro, :Builtin, :Dequote, :Splice].each do |name|
+[:Symbol, :Macro, :Builtin, :Var, :Dequote, :Splice].each do |name|
   Rouge.const_set name, Class.new {
     def initialize(inner)
       @inner = inner

@@ -21,6 +21,8 @@ module Rouge::Printer
     when Rouge::Cons
       if form.length == 2 and form[0] == Rouge::Symbol[:quote]
         "'#{print form[1]}"
+      elsif form.length == 2 and form[0] == Rouge::Symbol[:var]
+        "#'#{print form[1]}"
       else
         "(#{form.map {|e| print e}.join " "})"
       end

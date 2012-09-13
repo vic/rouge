@@ -6,6 +6,7 @@ describe [
     Rouge::Symbol,
     Rouge::Macro,
     Rouge::Builtin,
+    Rouge::Var,
     Rouge::Dequote,
     Rouge::Splice] do
   describe "the constructor" do

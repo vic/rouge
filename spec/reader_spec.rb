@@ -127,6 +127,21 @@ describe Rouge::Reader do
     end
   end
 
+  describe "vars" do
+    it "should read #'X as (VAR X)" do
+      Rouge.read("#'x").
+          should eq Rouge::Cons[Rouge::Symbol[:var], Rouge::Symbol[:x]]
+    end
+
+    it "should read #'#'(#'X) as (VAR (VAR ((VAR X))))" do
+      Rouge.read("#'#'(#'x)").
+          should eq Rouge::Cons[Rouge::Symbol[:var],
+                    Rouge::Cons[Rouge::Symbol[:var],
+                    Rouge::Cons[Rouge::Cons[Rouge::Symbol[:var],
+                                            Rouge::Symbol[:x]]]]]
+    end
+  end
+
   describe "maps" do
     it "should read the empty map" do
       Rouge.read("{}").should eq({})
