@@ -1,5 +1,6 @@
 miscellaeny
 -----------
+- can't eval / fun
 - MACROEXPAND
 - organise boot.rg
 - test the whole core
