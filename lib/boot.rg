@@ -141,16 +141,18 @@
 (ns rouge.test
   (:use rouge.core ruby))
 
-(defmacro test [& body]
-  ; Non-standard; while we're missing dynamic vars ...
-  `(let [test-level 0]
-     ~@body))
-
 (defmacro testing [what & tests]
   `(do
-     (puts (* " " test-level 2) "testing: " ~what)
-     (let [test-level (+ 1 test-level)]
-       ~@tests)))
+     (puts ~(str what))
+     (puts (* "-" (count ~(str what))))
+     (let [test-level 1]
+       (letmacro [(testing [what & tests]
+                    `(do
+                       (puts (* " " test-level 2) ~what)
+                       (let [test-level (+ 1 test-level)]
+                         ~@tests)))]
+         ~@tests
+         (puts)))))
 
 (defmacro is [check]
   `(if (not ~check)

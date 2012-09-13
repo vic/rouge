@@ -30,6 +30,15 @@ describe Rouge do
       @ns.refers.should include(Rouge[:"ruby"])
     end
   end
+
+  describe "the rouge specs" do
+    Dir[relative_to_spec("*.rg")].each do |file|
+      it "should pass #{file}" do
+        Rouge.eval(Rouge::Context.new(Rouge[:user]),
+                   *Rouge.read("[#{File.read(file)}]"))
+      end
+    end
+  end
 end
 
 # vim: set sw=2 et cc=80:

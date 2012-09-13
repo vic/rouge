@@ -19,7 +19,10 @@ describe Rouge::Eval do
 
       subcontext = Rouge::Context.new @context
       subcontext.set_here :joy, [:yes]
+      subcontext.set_here :/, "wah"
       subcontext.readeval("joy").should eq [:yes]
+      subcontext.readeval("vitamin_b").should eq "vegemite"
+      subcontext.readeval("/").should eq "wah"
     end
 
     it "should evaluate symbols in other namespaces" do

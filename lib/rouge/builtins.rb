@@ -100,13 +100,23 @@ class << Rouge::Builtins
     raise Rouge::Eval::ChangeContextException, context
   end
 
-  def defmacro(context, name, args, *body)
-    context.ns.set_here name.inner,
-        Rouge::Macro[Rouge.eval(
-            context,
-            Rouge::Cons[Rouge::Symbol[:fn], args, *body])]
+  def macro(context, args, *body)
+    Rouge::Macro[
+        Rouge.eval(context, Rouge::Cons[Rouge::Symbol[:fn], args, *body])]
+  end
 
+  def defmacro(context, name, args, *body)
+    context.ns.set_here name.inner, macro(context, args, *body)
     Rouge::Symbol[:"#{context.ns.name}/#{name.inner}"]
+  end
+
+  def letmacro(context, bindings, *body)
+    context = Rouge::Context.new context
+    bindings.each do |b|
+      name, args, *macrobody = b.to_a
+      context.set_here name.inner, macro(context, args, *macrobody)
+    end
+    Rouge.eval context, *body
   end
 
   def apply(context, fun, *args)

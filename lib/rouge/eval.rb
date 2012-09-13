@@ -56,7 +56,7 @@ class << Rouge::Eval
           true
         end
 
-      parts = form.split("/")
+      parts = form == "/" ? ["/"] : form.split("/")
 
       if parts.length == 1
         sub = context

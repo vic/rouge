@@ -2,6 +2,7 @@ miscellaeny
 -----------
 - can't eval / fun
 - MACROEXPAND
+- everything in ::Rouge should be accessible via rouge.builtin
 - organise boot.rg
 - test the whole core
 - run rouge specs from rspec
@@ -22,6 +23,7 @@ ruby interop
 - have a core "apply" function which can be used by eval, defmacro, etc.
 - re-org to allow "compilation" phase: (defmacro a [] b) without a "b" in context should fail immediately.
   - probably generic walking would be nice here
+  - macro interpretation in one pass before regular evaluation: this would effect the desired outcome, I think?
 
 core lang
 ---------
