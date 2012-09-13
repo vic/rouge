@@ -1,11 +1,9 @@
 miscellaeny
 -----------
-- can't eval / fun
 - MACROEXPAND
 - everything in ::Rouge should be accessible via rouge.builtin
 - organise boot.rg
 - test the whole core
-- run rouge specs from rspec
 - omit Ruby from tracebacks?
 - better read errors
 - better exceptions/errors
@@ -27,18 +25,17 @@ ruby interop
 
 core lang
 ---------
-- metadata on all collections (not just symbols)
-- symbols should have two distinct parts: ns, name
+- vars
+- dynamic/special vars
 - interning, vars, ...
+- symbols should have two distinct parts: ns, name
 - multi-form defn: (defn x ([a] ...) ([a b] ...))
 - seqs
-- vars
   - atoms, refs, agents
 - freeze vectors, lists where approriate
 - (. x y)
 - destructuring (in FN, LET, everywhere else)
 - rest of the clojure core API (maybe even in clojure.core ns)
 - clojure-ish IO libraries which expose async IO
-- string interpol (clojurish. hum. maybe not?)
 - defprotocol -- looks important! ISeq, ISeqable, ISequential and what have you.
-- dynamic/special vars
+- metadata on all collections (not just symbols)
