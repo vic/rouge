@@ -25,9 +25,10 @@ ruby interop
 
 core lang
 ---------
-- vars
-- dynamic/special vars
-- interning, vars, ...
+- NON-dynamic/special vars
+- INTERN
+- (def a/b) should not create #'user/a/b, lol.
+- (ns blah) in REPL should change ns
 - symbols should have two distinct parts: ns, name
 - multi-form defn: (defn x ([a] ...) ([a b] ...))
 - seqs
