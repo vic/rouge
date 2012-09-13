@@ -122,6 +122,10 @@ class << Rouge::Builtins
     Rouge.eval(context,
         Rouge::Cons[fun, *args.map {|a| Rouge::Cons[Rouge::Symbol[:quote], a]}])
   end
+
+  def var(context, symbol)
+    context.locate symbol.inner
+  end
 end
 
 # vim: set sw=2 et cc=80:

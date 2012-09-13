@@ -43,6 +43,41 @@ class Rouge::Context
     Rouge.eval(self, Rouge.read(input))
   end
 
+  # +symbol+ should be a Ruby Symbol or String, not a Rouge::Symbol.
+  def locate(symbol)
+    symbol = symbol.to_s
+
+    will_new =
+      if symbol[-1] == ?.
+        symbol = symbol[0..-2]
+        true
+      end
+
+    ns, name =
+      symbol == "/" ? [nil, "/"] : symbol.match(/^(?:(.*)\/)?(.*)$/).captures
+
+    if ns.nil?
+      sub = self
+    else
+      sub = Rouge::Namespace[ns.intern]
+    end
+
+    lookups = name.split(/(?<=.)\.(?=.)/)
+    sub = sub[lookups.shift.intern]
+
+    while lookups.length > 0
+      sub = sub.root if sub.is_a?(Rouge::Var)
+      sub = sub.const_get(lookups.shift.intern)
+    end
+
+    if will_new
+      sub = sub.root if sub.is_a?(Rouge::Var)
+      sub.method(:new)
+    else
+      sub
+    end
+  end
+
   attr_reader :ns
 end
 

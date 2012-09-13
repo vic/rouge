@@ -8,12 +8,18 @@ describe Rouge::Context do
     @ab = Rouge::Context.new @a
     @abb = Rouge::Context.new @ab
     @ac = Rouge::Context.new @a
-    @in_rl = Rouge::Context.new Rouge::Namespace[:"rouge.builtin"]
-    @in_rl_nested = Rouge::Context.new @in_rl
-
     @a.set_here :root, 42
     @ab.set_here :root, 80
     @ac.set_here :non, 50
+
+    @in_rl = Rouge::Context.new Rouge::Namespace[:"rouge.builtin"]
+    @in_rl_nested = Rouge::Context.new @in_rl
+
+    @spec = Rouge::Namespace[:"user.spec"]
+    @spec.refer Rouge::Namespace[:"rouge.builtin"]
+    @spec.set_here :tiffany, "wha?"
+    @in_spec = Rouge::Context.new @spec
+    @in_spec.set_here :blah, "code code"
   end
 
   describe "the [] method" do
@@ -76,6 +82,38 @@ describe Rouge::Context do
       Rouge.should_receive(:read).with(:a).and_return(:b)
       Rouge.should_receive(:eval).with(@a, :b).and_return(:c)
       @a.readeval(:a).should eq :c
+    end
+  end
+
+  describe "the locate method" do
+    it "should find the contextually-bound value for an unqualified symbol" do
+      @in_spec.locate(:blah).should eq "code code"
+    end
+
+    it "should find the var in our namespace for an unqualified symbol" do
+      @in_spec.locate(:tiffany).
+          should eq Rouge::Var.new(:"user.spec/tiffany", "wha?")
+    end
+
+    it "should find the var in a referred ns for an unqualified symbol" do
+      v = @in_spec.locate(:def)
+      v.should be_an_instance_of(Rouge::Var)
+      v.name.should eq :"rouge.builtin/def"
+      v.root.should be_an_instance_of(Rouge::Builtin)
+    end
+
+    it "should find the var in any namespace for a qualified symbol" do
+      v = @in_spec.locate(:"ruby/Kernel")
+      v.should be_an_instance_of(Rouge::Var)
+      v.name.should eq :"ruby/Kernel"
+      v.root.should eq Kernel
+    end
+
+    it "should find the method for a new class instantiation" do
+      m = @in_spec.locate("ruby/String.")
+      m.should be_an_instance_of Method
+      m.receiver.should eq String
+      m.name.should eq :new
     end
   end
 end

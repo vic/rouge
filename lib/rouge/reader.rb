@@ -41,7 +41,7 @@ class Rouge::Reader
         dequotation
       when /#/
         dispatch
-      when /^/
+      when /\^/
         metadata
       when nil
         raise EndOfDataError, "in #lex"

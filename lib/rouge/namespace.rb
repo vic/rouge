@@ -76,13 +76,13 @@ class Rouge::Namespace::Ruby
 
   def [](name)
     return @@cache[name] if @@cache.include? name
-    @@cache[name] = Rouge::Var.new(name, Kernel.const_get(name))
+    @@cache[name] = Rouge::Var.new(:"ruby/#{name}", Kernel.const_get(name))
   rescue NameError
     raise Rouge::Namespace::VarNotFoundError, name
   end
 
   def set_here(name, value)
-    @@cache[name] = Rouge::Var.new(name, value)
+    @@cache[name] = Rouge::Var.new(:"ruby/#{name}", value)
     Kernel.const_set name, value
   end
 

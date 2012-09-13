@@ -106,8 +106,8 @@ describe Rouge::Namespace do
     end
 
     it "should contain elements from Kernel" do
-      @ns[:Hash].root.should eq Hash
-      @ns[:Fixnum].root.should eq Fixnum
+      @ns[:Hash].should eq Rouge::Var.new(:"ruby/Hash", Hash)
+      @ns[:Fixnum].should eq Rouge::Var.new(:"ruby/Fixnum", Fixnum)
     end
 
     it "should have a name" do

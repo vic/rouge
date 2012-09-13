@@ -211,6 +211,13 @@ describe Rouge::Builtins do
       @subcontext.readeval("(apply a 8 9 '(1 2 3))").should eq [8, 9, 1, 2, 3]
     end
   end
+
+  describe "var" do
+    it "should return the var for a given symbol" do
+      @ns.set_here :x, 42
+      @context.readeval("(var x)").should eq Rouge::Var.new(:"user.spec/x", 42)
+    end
+  end
 end
 
 # vim: set sw=2 et cc=80:

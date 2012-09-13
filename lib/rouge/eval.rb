@@ -50,35 +50,11 @@ class << Rouge::Eval
         receiver.send(form, *args, &block)
       }
     else
-      will_new =
-        if form[-1] == ?.
-          form = form[0..-2]
-          true
-        end
-
-      parts = form == "/" ? ["/"] : form.split("/")
-
-      if parts.length == 1
-        sub = context
-      elsif parts.length == 2
-        sub = Rouge::Namespace[parts.shift.intern]
+      result = context.locate form
+      if result.is_a?(Rouge::Var)
+        result.root
       else
-        raise "parts.length not in 1, 2" # TODO
-      end
-
-      lookups = parts[0].split(/(?<=.)\.(?=.)/)
-      sub = sub[lookups.shift.intern]
-      sub = sub.root if sub.is_a?(Rouge::Var)
-
-      while lookups.length > 0
-        sub = sub.const_get(lookups.shift.intern)
-        sub = sub.root if sub.is_a?(Rouge::Var)
-      end
-
-      if will_new
-        sub.method(:new)
-      else
-        sub
+        result
       end
     end
   end
