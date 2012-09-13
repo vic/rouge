@@ -27,6 +27,9 @@ ruby interop
 
 core lang
 ---------
+- metadata on all collections (not just symbols)
+- symbols should have two distinct parts: ns, name
+- interning, vars, ...
 - multi-form defn: (defn x ([a] ...) ([a b] ...))
 - seqs
 - vars

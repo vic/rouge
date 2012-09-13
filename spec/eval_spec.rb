@@ -50,8 +50,8 @@ describe Rouge::Eval do
   end
 
   it "should evaluate hash and vector arguments" do
-    @context.readeval("{\"z\" 92, 'x ''5}").
-        should eq Rouge.read("{\"z\" 92, x '5}")
+    @context.readeval("{\"z\" 92, 'x ''5}").to_s.
+        should eq Rouge.read("{\"z\" 92, x '5}").to_s
 
     subcontext = Rouge::Context.new @context
     subcontext.set_here :lolwut, "off"

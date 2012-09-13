@@ -1,6 +1,8 @@
 ;; -*- mode: clojure; -*-
 
-(ns rouge.core)
+(ns ^{:doc "The Rouge core."
+      :author "Arlen Christian Mart Cuss"}
+  rouge.core)
 
 (def seq (fn [coll]
            ; XXX right now this just coerces to a Cons
@@ -141,18 +143,13 @@
 (ns rouge.test
   (:use rouge.core ruby))
 
+(def ^:dynamic *test-level* 0)
+
 (defmacro testing [what & tests]
   `(do
-     (puts ~(str what))
-     (puts (* "-" (count ~(str what))))
-     (let [test-level 1]
-       (letmacro [(testing [what & tests]
-                    `(do
-                       (puts (* " " test-level 2) ~what)
-                       (let [test-level (+ 1 test-level)]
-                         ~@tests)))]
-         ~@tests
-         (puts)))))
+     (puts (* " " *test-level* 2) "testing: " ~what)
+     (binding [*test-level* (+ 1 *test-level*)]
+       ~@tests)))
 
 (defmacro is [check]
   `(if (not ~check)

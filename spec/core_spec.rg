@@ -1,6 +1,8 @@
 ;; -*- mode: clojure; -*-
 
-(ns spec.rouge.core
+(ns ^{:doc "Spec tests for the Rouge core."
+      :author "Arlen Christian Mart Cuss"}
+  spec.rouge.core
   (:use rouge.test))
 
 (testing "list"

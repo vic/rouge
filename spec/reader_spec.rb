@@ -133,7 +133,7 @@ describe Rouge::Reader do
     end
 
     it "should read one-element maps" do
-      Rouge.read("{a 1}").should eq({Rouge::Symbol[:a] => 1})
+      Rouge.read("{a 1}").to_s.should eq({Rouge::Symbol[:a] => 1}.to_s)
       Rouge.read("{\"quux\" [lambast]}").
           should eq({"quux" => [Rouge::Symbol[:lambast]]})
     end
@@ -248,6 +248,32 @@ describe Rouge::Reader do
       Rouge.read('#(%2)').should eq Rouge.read('(fn [%1 %2] (%2))')
       Rouge.read('#(%5)').should eq Rouge.read('(fn [%1 %2 %3 %4 %5] (%5))')
       Rouge.read('#(%2 %)').should eq Rouge.read('(fn [%1 %2] (%2 %1))')
+    end
+  end
+
+  describe "metadata" do
+    it "should read metadata" do
+      y = Rouge.read('^{:x 1} y')
+      y.should eq Rouge::Symbol[:y]
+      y.meta.to_s.should eq({:x => 1}.to_s)
+    end
+
+    it "should stack metadata" do
+      y = Rouge.read('^{:y 2} ^{:y 3 :z 2} y')
+      y.should eq Rouge::Symbol[:y]
+      y.meta.should include({:y => 2, :z => 2})
+    end
+
+    it "should assign tags" do
+      y = Rouge.read('^"xyz" y')
+      y.should eq Rouge::Symbol[:y]
+      y.meta.should include({:tag => "xyz"})
+    end
+
+    it "should assign symbol markers" do
+      y = Rouge.read('^:blargh y')
+      y.should eq Rouge::Symbol[:y]
+      y.meta.should include({:blargh => true})
     end
   end
 end

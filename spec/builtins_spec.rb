@@ -152,10 +152,6 @@ describe Rouge::Builtins do
     end
   end
 
-  describe "macro" do
-    pending
-  end
-
   describe "defmacro" do
     it "should return a reference to the created macro" do
       @context.readeval("(defmacro a [] 'b)").
@@ -196,10 +192,6 @@ describe Rouge::Builtins do
 
       @context.readeval("(let [c 9] (a))").should eq 9
     end
-  end
-
-  describe "letmacro" do
-    pending
   end
 
   describe "apply" do

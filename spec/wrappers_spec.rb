@@ -50,9 +50,19 @@ describe [
 end
 
 describe Rouge::Symbol do
-  describe "the cache" do
-    it "should return the same Rouge::Symbol for the same inner symbol" do
-      Rouge::Symbol[:x].should be Rouge::Symbol[:x]
+  describe "the lookup" do
+    it "should return true, false and nil" do
+      Rouge::Symbol[:true].should be true
+      Rouge::Symbol[:false].should be false
+      Rouge::Symbol[:nil].should be nil
+    end
+  end
+
+  describe "the constructor" do
+    it "should return new objects every time" do
+      Rouge::Symbol[:a].should_not be Rouge::Symbol[:a]
+      # but:
+      Rouge::Symbol[:a].should eq Rouge::Symbol[:a]
     end
   end
 end

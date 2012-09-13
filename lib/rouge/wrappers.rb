@@ -1,4 +1,5 @@
 # encoding: utf-8
+require 'rouge/metadata'
 
 [:Symbol, :Macro, :Builtin, :Dequote, :Splice].each do |name|
   Rouge.const_set name, Class.new {
@@ -26,15 +27,18 @@ end
 
 class Rouge::Symbol
   # The symbols for t/f/n are the Ruby objects themselves.
-  @cache = {
+  include Rouge::Metadata
+
+  @lookup = {
     :true => true,
     :false => false,
     :nil => nil,
   }
 
   def self.[](inner)
-    return @cache[inner] if @cache.include? inner
-    @cache[inner] = new inner
+    return @lookup[inner] if @lookup.include? inner
+    # Note: don't cache symbols themselves, they may have metadata.
+    new inner
   end
 end
 

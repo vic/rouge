@@ -41,6 +41,8 @@ class Rouge::Reader
         dequotation
       when /#/
         dispatch
+      when /^/
+        metadata
       when nil
         raise EndOfDataError, "in #lex"
       else
@@ -255,6 +257,36 @@ class Rouge::Reader
     else
       [form, count]
     end
+  end
+
+  def metadata
+    consume
+    meta = lex(true)
+    attach = lex(true)
+
+    if not attach.class < Rouge::Metadata
+      raise ArgumentError,
+          "metadata can only be applied to classes mixing in Rouge::Metadata"
+    end
+
+    meta =
+      case meta
+      when Symbol
+        {meta => true}
+      when String
+        {:tag => meta}
+      else
+        meta
+      end
+
+    extant = attach.meta
+    if extant.nil?
+      attach.meta = meta
+    else
+      attach.meta = extant.merge(meta)
+    end
+
+    attach
   end
 
   def slurp re
