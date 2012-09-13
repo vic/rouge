@@ -26,6 +26,8 @@ module Rouge::Printer
       else
         "(#{form.map {|e| print e}.join " "})"
       end
+    when Rouge::Var
+      "#'#{form.name}"
     when Hash
       "{#{form.map {|k,v| print(k) + " " + print(v)}.join ", "}}"
     when NilClass

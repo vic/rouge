@@ -68,9 +68,11 @@ class << Rouge::Eval
 
       lookups = parts[0].split(/(?<=.)\.(?=.)/)
       sub = sub[lookups.shift.intern]
+      sub = sub.root if sub.is_a?(Rouge::Var)
 
       while lookups.length > 0
         sub = sub.const_get(lookups.shift.intern)
+        sub = sub.root if sub.is_a?(Rouge::Var)
       end
 
       if will_new

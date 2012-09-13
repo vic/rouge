@@ -6,7 +6,6 @@ describe [
     Rouge::Symbol,
     Rouge::Macro,
     Rouge::Builtin,
-    Rouge::Var,
     Rouge::Dequote,
     Rouge::Splice] do
   describe "the constructor" do
@@ -113,6 +112,34 @@ describe Rouge::Cons do
       Rouge::Cons[1, 2, 3][0...-2].should eq [1]
       Rouge::Cons[1, 2, 3][2...-1].should eq []
       Rouge::Cons[1, 2, 3][2..-1].should eq [3]
+    end
+  end
+end
+
+describe Rouge::Var do
+  describe "the constructor" do
+    it "creates an unbound var by default" do
+      v = Rouge::Var.new(:boo)
+      v.name.should eq :boo
+      v.root.should be Rouge::Var::Unbound
+    end
+
+    it "creates a bound var if requested" do
+      v = Rouge::Var.new(:huh, 99)
+      v.name.should eq :huh
+      v.root.should eq 99
+    end
+  end
+
+  describe "equality" do
+    it "considers two vars equal if their name and roots are equal" do
+      Rouge::Var.new(:a).should == Rouge::Var.new(:a)
+      Rouge::Var.new(:a).should_not == Rouge::Var.new(:b)
+      Rouge::Var.new(:a).should_not == Rouge::Var.new(:a, :a)
+      Rouge::Var.new(:a, :a).should == Rouge::Var.new(:a, :a)
+      Rouge::Var.new(:a, :a).should_not == Rouge::Var.new(:a, :b)
+      Rouge::Var.new(:b, :a).should_not == Rouge::Var.new(:a, :b)
+      Rouge::Var.new(:b, :a).should_not == Rouge::Var.new(:a, :a)
     end
   end
 end

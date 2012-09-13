@@ -124,6 +124,10 @@ describe Rouge::Printer do
                     Rouge::Symbol[:x]]]]]).
             should eq "#'#'(#'x)"
       end
+
+      it "should print the var #'X itself as #'X" do
+        Rouge.print(Rouge::Var.new(:x)).should eq "#'x"
+      end
     end
 
     describe "maps" do

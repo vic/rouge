@@ -63,9 +63,15 @@ class << Rouge::Builtins
     }
   end
 
-  def def(context, name, form)
-    context.ns.set_here name.inner, Rouge.eval(context, form)
-    Rouge::Symbol[:"#{context.ns.name}/#{name.inner}"]
+  def def(context, name, *form)
+    case form.length
+    when 0
+      context.ns.intern name.inner
+    when 1
+      context.ns.set_here name.inner, Rouge.eval(context, form[0])
+    else
+      raise ArgumentError, "def called with too many forms #{form.inspect}"
+    end
   end
 
   def if(context, test, if_true, if_false=nil)

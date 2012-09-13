@@ -73,16 +73,16 @@ describe Rouge::Builtins do
   end
 
   describe "def" do
-    it "should make a binding" do
-      @context.readeval("(def barge 'a)").
-          should eq Rouge.read('user.spec/barge')
+    it "should create and intern a var" do
+      @context.readeval("(def barge)").
+          should eq Rouge::Var.new(:"user.spec/barge")
     end
 
     it "should always make a binding at the top of the namespace" do
       subcontext = Rouge::Context.new @context
-      subcontext.readeval("(def sarge 'b)").
-          should eq Rouge.read('user.spec/sarge')
-      @context.readeval('sarge').should eq Rouge.read('b')
+      subcontext.readeval("(def sarge :b)").
+          should eq Rouge::Var.new(:"user.spec/sarge", :b)
+      @context.readeval('sarge').should eq :b
     end
   end
 
@@ -133,10 +133,10 @@ describe Rouge::Builtins do
 
     it "should create and use a new context pointing at a given ns" do
       @context.readeval('(do (ns user.spec2) (def nope 8))')
-      Rouge[:"user.spec2"][:nope].should eq 8
+      Rouge[:"user.spec2"][:nope].root.should eq 8
       lambda {
         @context[:nope]
-      }.should raise_exception(Rouge::Eval::BindingNotFoundError)
+      }.should raise_exception(Rouge::Namespace::VarNotFoundError)
     end
 
     it "should support the :use option" do
@@ -168,11 +168,11 @@ describe Rouge::Builtins do
 
       lambda {
         @context.readeval('(a)')
-      }.should raise_exception(Rouge::Eval::BindingNotFoundError, "b")
+      }.should raise_exception(Rouge::Namespace::VarNotFoundError, "b")
 
       lambda {
         @context.readeval('(let [b 4] (a))')
-      }.should raise_exception(Rouge::Eval::BindingNotFoundError, "b")
+      }.should raise_exception(Rouge::Namespace::VarNotFoundError, "b")
       # ^-- end surprising
 
       @context.readeval("(def b 'c)")
@@ -188,7 +188,7 @@ describe Rouge::Builtins do
 
       lambda {
         @context.readeval("(a)")
-      }.should raise_exception(Rouge::Eval::BindingNotFoundError, "c")
+      }.should raise_exception(Rouge::Namespace::VarNotFoundError, "c")
 
       @context.readeval("(let [c 9] (a))").should eq 9
     end

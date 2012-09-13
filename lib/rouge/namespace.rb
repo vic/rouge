@@ -5,6 +5,7 @@ require 'rouge/builtins'
 class Rouge::Namespace
   @namespaces = {}
 
+  class VarNotFoundError < StandardError; end
   class RecursiveNamespaceError < StandardError; end
 
   def initialize(name)
@@ -29,16 +30,20 @@ class Rouge::Namespace
     @refers.each do |ns|
       begin
         return ns[key]
-      rescue Rouge::Eval::BindingNotFoundError
+      rescue VarNotFoundError
         # no-op
       end
     end
 
-    raise Rouge::Eval::BindingNotFoundError, key
+    raise VarNotFoundError, key
   end
 
   def set_here(key, value)
-    @table[key] = value
+    @table[key] = Rouge::Var.new(:"#@name/#{key}", value)
+  end
+
+  def intern(key)
+    @table[key] ||= Rouge::Var.new(:"#@name/#{key}")
   end
 
   attr_reader :name, :refers
@@ -67,13 +72,17 @@ class << Rouge::Namespace
 end
 
 class Rouge::Namespace::Ruby
+  @@cache = {}
+
   def [](name)
-    Kernel.const_get name
+    return @@cache[name] if @@cache.include? name
+    @@cache[name] = Rouge::Var.new(name, Kernel.const_get(name))
   rescue NameError
-    raise Rouge::Eval::BindingNotFoundError
+    raise Rouge::Namespace::VarNotFoundError, name
   end
 
   def set_here(name, value)
+    @@cache[name] = Rouge::Var.new(name, value)
     Kernel.const_set name, value
   end
 

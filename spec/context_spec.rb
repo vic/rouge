@@ -22,7 +22,8 @@ describe Rouge::Context do
       @ab[:root].should eq 80
       @abb[:root].should eq 80
       @ac[:root].should eq 42
-      @in_rl[:let].should be_an_instance_of Rouge::Builtin
+      # var, because it's from a namespace
+      @in_rl[:let].root.should be_an_instance_of Rouge::Builtin
     end
 
     it "should raise an exception if a binding is not found" do
