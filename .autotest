@@ -2,9 +2,9 @@ require 'autotest/growl'
 require 'autotest/fsevent'
 
 Autotest.add_hook(:initialize) do |at|
-  at.add_mapping(%r{lib/.*\.rg$}) {|f,_|
-    Dir['spec/**/*.rg']
-  }
+  #at.add_mapping(%r{lib/.*\.rg$}) {|f,_|
+    #Dir['spec/**/*.rg']
+  #}
   nil
 end
 

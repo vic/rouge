@@ -1,6 +1,7 @@
 miscellaeny
 -----------
 - MACROEXPAND
+- SPEED test. run core specs a few times and time.
 - everything in ::Rouge should be accessible via rouge.builtin
 - organise boot.rg
 - test the whole core
