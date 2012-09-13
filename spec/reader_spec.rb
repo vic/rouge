@@ -291,6 +291,12 @@ describe Rouge::Reader do
       y.meta.should include({:blargh => true})
     end
   end
+
+  describe "deref" do
+    it "should read derefs" do
+      Rouge.read('@(boo)').should eq Rouge.read('(rouge.core/deref (boo))')
+    end
+  end
 end
 
 # vim: set sw=2 et cc=80:

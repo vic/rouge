@@ -43,6 +43,8 @@ class Rouge::Reader
         dispatch
       when /\^/
         metadata
+      when /@/
+        deref
       when nil
         raise EndOfDataError, "in #lex"
       else
@@ -291,6 +293,11 @@ class Rouge::Reader
     end
 
     attach
+  end
+
+  def deref
+    consume
+    Rouge::Cons[Rouge::Symbol[:"rouge.core/deref"], lex(true)]
   end
 
   def slurp re
