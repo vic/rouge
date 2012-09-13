@@ -103,6 +103,11 @@ describe Rouge::Namespace do
       @ns[:Fixnum].should eq Rouge::Var.new(:"ruby/Fixnum", Fixnum)
     end
 
+    it "should contain global variables" do
+      @ns[:"$LOAD_PATH"].
+          should eq Rouge::Var.new(:"ruby/$LOAD_PATH", $LOAD_PATH)
+    end
+
     it "should have a name" do
       @ns.name.should eq :ruby
     end

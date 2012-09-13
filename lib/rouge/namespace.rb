@@ -77,7 +77,11 @@ class Rouge::Namespace::Ruby
 
   def [](name)
     return @@cache[name] if @@cache.include? name
-    @@cache[name] = Rouge::Var.new(:"ruby/#{name}", Kernel.const_get(name))
+    if name =~ /^\$/
+      @@cache[name] = Rouge::Var.new(:"ruby/#{name}", eval(name.to_s))
+    else
+      @@cache[name] = Rouge::Var.new(:"ruby/#{name}", Kernel.const_get(name))
+    end
   rescue NameError
     raise Rouge::Namespace::VarNotFoundError, name
   end
