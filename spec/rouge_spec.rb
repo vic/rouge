@@ -39,7 +39,7 @@ describe Rouge do
                        *Rouge.read("[#{File.read(file)}]"))
         total = r[:passed] + r[:failed].length
 
-        message =
+        message = 
             "#{total} example#{total == 1 ? "" : "s"}, " +
             "#{r[:failed].length} failure#{r[:failed].length == 1 ? "" : "s"}"
 

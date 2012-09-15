@@ -34,6 +34,8 @@ describe Rouge::Reader do
     Rouge.read(".[]").should eq Rouge::Symbol[:".[]"]
     Rouge.read("=").should eq Rouge::Symbol[:"="]
     Rouge.read("%").should eq Rouge::Symbol[:"%"]
+    Rouge.read(">").should eq Rouge::Symbol[:">"]
+    Rouge.read("<").should eq Rouge::Symbol[:"<"]
     Rouge.read("%50").should eq Rouge::Symbol[:"%50"]
   end
 
@@ -66,7 +68,7 @@ describe Rouge::Reader do
     end
 
     it "should read strings as frozen" do
-      Rouge.read("\"bah\"").frozen?.should be_true
+      Rouge.read("\"bah\"").should be_frozen
     end
   end
 
@@ -93,6 +95,12 @@ describe Rouge::Reader do
           Rouge::Cons[Rouge::Cons[]]], 9,
           Rouge::Cons[Rouge::Cons[8], Rouge::Cons[8]]]
     end
+    
+    it "should read lists as frozen" do
+      Rouge.read("()").should be_frozen
+      Rouge.read("(1)").should be_frozen
+      Rouge.read("(1 2)").should be_frozen
+    end
   end
 
   describe "vectors" do
@@ -114,6 +122,12 @@ describe Rouge::Reader do
     it "should read nested vectors" do
       Rouge.read("[[[3] [[]]] 9 [[8] [8]]]").
           should eq [[[3], [[]]], 9, [[8], [8]]]
+    end
+
+    it "should read vectors as frozen" do
+      Rouge.read("[]").should be_frozen
+      Rouge.read("[1]").should be_frozen
+      Rouge.read("[1 2]").should be_frozen
     end
   end
 
@@ -168,6 +182,11 @@ describe Rouge::Reader do
       Rouge.read("{:a {:z 9} :b {:q q}}").should eq(
         {:a => {:z => 9}, :b => {:q => Rouge::Symbol[:q]}})
       Rouge.read("{{9 7} 5}").should eq({{9 => 7} => 5})
+    end
+
+    it "should read maps as nested" do
+      Rouge.read("{}").should be_frozen
+      Rouge.read("{:a 1}").should be_frozen
     end
   end
 

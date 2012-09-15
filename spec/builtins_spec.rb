@@ -218,6 +218,85 @@ describe Rouge::Builtins do
       @context.readeval("(var x)").should eq Rouge::Var.new(:"user.spec/x", 42)
     end
   end
+
+  describe "throw" do
+    it "should raise the given throwable as an exception" do
+      lambda {
+        @context.readeval('(throw (ruby/RuntimeError. "boo"))')
+      }.should raise_exception(RuntimeError, "boo")
+    end
+  end
+
+  describe "try" do
+    it "should catch exceptions mentioned in the catch clause" do
+      @context.readeval(<<-ROUGE).should eq :ae
+        (try
+          (throw (ruby/ArgumentError. "bad"))
+          :baa
+          (catch ruby/ArgumentError _ :ae))
+      ROUGE
+    end
+
+    it "should catch only the desired exception" do
+      @context.readeval(<<-ROUGE).should eq :nie
+        (try
+          (throw (ruby/NotImplementedError. "bro"))
+          :baa
+          (catch ruby/ArgumentError _ :ae)
+          (catch ruby/NotImplementedError _ :nie))
+      ROUGE
+    end
+
+    it "should let other exceptions fall through" do
+      lambda {
+        @context.readeval(<<-ROUGE)
+          (try
+            (throw (ruby/Exception. "kwok"))
+            :baa
+            (catch ruby/ArgumentError _ :ae)
+            (catch ruby/NotImplementedError _ :nie))
+        ROUGE
+      }.should raise_exception(Exception, "kwok")
+    end
+
+    it "should return the block's value if no exception was raised" do
+      @context.readeval(<<-ROUGE).should eq :baa
+        (try
+          :baa
+          (catch ruby/ArgumentError _ :ae)
+          (catch ruby/NotImplementedError _ :nie))
+      ROUGE
+    end
+
+    it "should evaluate the finally expressions without returning them" do
+      @context.readeval(<<-ROUGE).should eq :baa
+        (do
+          (def m (ruby/Rouge.Atom. 1))
+          (try
+            :baa
+            (catch ruby/NotImplementedError _ :nie)
+            (finally
+              (.swap! m #(.+ 1 %)))))
+      ROUGE
+
+      @context[:m].deref.deref.should eq 2
+
+      lambda {
+        @context.readeval(<<-ROUGE).should eq :baa
+          (do
+            (def o (ruby/Rouge.Atom. 1))
+            (try
+              (throw (ruby/ArgumentError. "fire"))
+              :baa
+              (catch ruby/NotImplementedError _ :nie)
+              (finally
+                (.swap! o #(.+ 1 %)))))
+        ROUGE
+      }.should raise_exception(ArgumentError, "fire")
+
+      @context[:o].deref.deref.should eq 2
+    end
+  end
 end
 
 # vim: set sw=2 et cc=80:

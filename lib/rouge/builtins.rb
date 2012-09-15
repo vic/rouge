@@ -126,6 +126,54 @@ class << Rouge::Builtins
   def var(context, symbol)
     context.locate symbol.inner
   end
+
+  def throw(context, throwable)
+    exception = Rouge.eval context, throwable
+    raise exception
+  end
+  
+  def try(context, *body)
+    return unless body.length > 0
+
+    form = body[-1]
+    if form.is_a?(Rouge::Cons) and form[0] == Rouge::Symbol[:finally]
+      finally = form[1..-1]
+      body.pop
+    end
+
+    catches = {}
+    while body.length > 0
+      form = body[-1]
+      if !form.is_a?(Rouge::Cons) or !form[0] == Rouge::Symbol[:catch]
+        break
+      end
+
+      body.pop
+      catches[Rouge.eval(context, form[1])] =
+        {:bind => form[2],
+         :body => form[3..-1]}
+    end
+
+    r =
+      begin
+        Rouge.eval context, *body
+      rescue Exception => e
+        catches.each do |klass, caught|
+          if klass === e
+            subcontext = Rouge::Context.new context
+            subcontext.set_here caught[:bind], e
+            r = Rouge.eval subcontext, *caught[:body]
+            Rouge.eval context, *finally if finally
+            return r
+          end
+        end
+        Rouge.eval context, *finally if finally
+        raise e
+      end
+
+    Rouge.eval context, *finally if finally
+    r
+  end
 end
 
 # vim: set sw=2 et cc=80:

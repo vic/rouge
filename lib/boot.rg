@@ -140,10 +140,10 @@
   (first (next coll)))
 
 (defn macroexpand [form]
-  (if (and (seq? form)
-           (= (first form) :wah))
-    :blah
-    :hoo))
+  (if (or (not (seq? form))
+          (> (count form) 0))
+    form
+    ((first form) (rest form))))
 
 (defn push-thread-bindings [map]
   (.push ruby/Rouge.Var map))
@@ -218,18 +218,25 @@
         :failed @*tests-failed*})))
 
 (defmacro is [check]
-  `(if (not ~check)
-     (do
-       (swap! *tests-failed* conj (conj *test-level* (pr-str '~check)))
-       (puts "FAIL in ???")
-       (puts "expected: " ~(pr-str check))
-       (let [actual (if (and (seq? '~check)
-                             (= 'not (first '~check)))
-                      (second '~check)
-                      `(not ~'~check))]
-         (puts "  actual: " (pr-str actual))))
-     (do
-       (swap! *tests-passed* inc)
-       true)))
+  `(let [result (try
+                  {:error nil, :result ~check}
+                  (catch ruby/Exception e
+                    {:error e, :result false}))]
+     (if (not (:result result))
+      (do
+        (swap! *tests-failed* conj (conj *test-level* (pr-str '~check)))
+        (puts "FAIL in ???")
+        (puts "expected: " ~(pr-str check))
+        (let [actual
+                (if-let [error (:error result)]
+                  error
+                  (if (and (seq? '~check)
+                                  (= 'not (first '~check)))
+                           (second '~check)
+                           `(not ~'~check)))]
+          (puts "  actual: " (pr-str actual))))
+      (do
+        (swap! *tests-passed* inc)
+        true))))
 
 ; vim: set ft=clojure:

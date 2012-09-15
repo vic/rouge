@@ -25,7 +25,7 @@ class Rouge::Reader
       when /"/
         string
       when /\(/
-        Rouge::Cons[*list(')')]
+        Rouge::Cons[*list(')')].freeze
       when /\[/
         list ']'
       when SYMBOL
@@ -119,7 +119,7 @@ class Rouge::Reader
 
       s += c
     end
-    s
+    s.freeze
   end
 
   def list(ending)
@@ -134,7 +134,7 @@ class Rouge::Reader
     end
 
     consume
-    r
+    r.freeze
   end
 
   def symbol
@@ -155,12 +155,12 @@ class Rouge::Reader
     end
 
     consume
-    r
+    r.freeze
   end
 
   def quotation
     consume
-    Rouge::Cons[Rouge::Symbol[:quote], lex(true)]
+    Rouge::Cons[Rouge::Symbol[:quote], lex(true)].freeze
   end
 
   def backquotation
@@ -186,7 +186,7 @@ class Rouge::Reader
       form.each do |f|
         if f.is_a? Rouge::Splice
           if group.length > 0
-            rest << Rouge::Cons[Rouge::Symbol[:list], *group]
+            rest << Rouge::Cons[Rouge::Symbol[:list], *group].freeze
             group = []
           end
           rest << f.inner
@@ -196,29 +196,29 @@ class Rouge::Reader
       end
 
       if group.length > 0
-        rest << Rouge::Cons[Rouge::Symbol[:list], *group]
+        rest << Rouge::Cons[Rouge::Symbol[:list], *group].freeze
       end
 
       r =
         if rest.length == 1
           rest[0]
         else
-          Rouge::Cons[Rouge::Symbol[:concat], *rest]
+          Rouge::Cons[Rouge::Symbol[:concat], *rest].freeze
         end
 
       if form.is_a?(Array)
         Rouge::Cons[Rouge::Symbol[:apply],
                     Rouge::Symbol[:vector],
-                    r]
+                    r].freeze
       elsif rest.length > 1
-        Rouge::Cons[Rouge::Symbol[:seq], r]
+        Rouge::Cons[Rouge::Symbol[:seq], r].freeze
       else
         r
       end
     when Rouge::Dequote
       form.inner
     else
-      Rouge::Cons[Rouge::Symbol[:quote], form]
+      Rouge::Cons[Rouge::Symbol[:quote], form].freeze
     end
   end
 
@@ -229,11 +229,11 @@ class Rouge::Reader
       body, count = dispatch_rewrite_fn(lex(true), 0)
       Rouge::Cons[
           Rouge::Symbol[:fn],
-          (1..count).map {|n| Rouge::Symbol[:"%#{n}"]},
-          body]
+          (1..count).map {|n| Rouge::Symbol[:"%#{n}"]}.freeze,
+          body].freeze
     when "'"
       consume
-      Rouge::Cons[Rouge::Symbol[:var], lex(true)]
+      Rouge::Cons[Rouge::Symbol[:var], lex(true)].freeze
     else
       raise UnexpectedCharacterError, "#{peek}.inspect in #dispatch"
     end
@@ -248,7 +248,7 @@ class Rouge::Reader
       end
 
       if form.is_a?(Rouge::Cons)
-        [Rouge::Cons[*mapped], count]
+        [Rouge::Cons[*mapped].freeze, count]
       else
         [mapped, count]
       end
@@ -297,7 +297,7 @@ class Rouge::Reader
 
   def deref
     consume
-    Rouge::Cons[Rouge::Symbol[:"rouge.core/deref"], lex(true)]
+    Rouge::Cons[Rouge::Symbol[:"rouge.core/deref"], lex(true)].freeze
   end
 
   def slurp re
@@ -328,7 +328,7 @@ class Rouge::Reader
   end
 
   NUMBER = /^[0-9][0-9_]*/
-  SYMBOL = /^(\.\[\])|([a-zA-Z0-9\-_!&\?\*\/\.\+\|=%$]+)/
+  SYMBOL = /^(\.\[\])|([a-zA-Z0-9\-_!&\?\*\/\.\+\|=%$<>]+)/
 end
 
 # vim: set sw=2 et cc=80:

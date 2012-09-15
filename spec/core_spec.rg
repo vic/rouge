@@ -38,4 +38,12 @@
              (defmacro a [x] `(f ~x))
              (macroexpand '(a 3))))))
 
+(testing "var passing"
+  (is (= #'my-var (do
+              (def my-var 4)
+              (let [take-var (fn [v] v)]
+                (take-var #'my-var))))))
+
+(testing "for")
+
 ; vim: set ft=clojure:
