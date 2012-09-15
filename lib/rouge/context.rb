@@ -39,6 +39,12 @@ class Rouge::Context
     end
   end
 
+  # Internal use only -- doesn't post-process backtrace.
+  def eval(*forms)
+    Rouge::Eval.eval self, *forms
+  end
+
+  # Uses Piret.eval, and accordingly should not be used internally.
   def readeval(input)
     Rouge.eval(self, Rouge.read(input))
   end

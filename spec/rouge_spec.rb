@@ -8,6 +8,12 @@ describe Rouge do
     Rouge.boot!
   end
 
+  describe "the eval method" do
+    it "should eval forms in this context, post-processing the backtrace" do
+      pending
+    end
+  end
+
   describe "the rouge.core namespace" do
     before do
       @ns = Rouge[:user]

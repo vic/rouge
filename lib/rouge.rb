@@ -13,8 +13,18 @@ class << Rouge
     Rouge::Reader.read input
   end
 
+  #   This top-level eval post-processes the backtrace.  Accordingly, it
+  # should only be called by consumers, and never by Rouge internally itself,
+  # lest it catches an exception and processes the backtrace too early.
+  #   Use Rouge::Context#eval internally.
   def eval(context, *forms)
     Rouge::Eval.eval context, *forms
+  rescue Exception => e
+    # Remove Rouge-related lines unless the exception originated in Rouge.
+    e.backtrace.map! {|line|
+      line.scan(File.dirname(__FILE__)).length > 0 ? nil : line
+    }.compact! unless e.backtrace[0].scan(File.dirname(__FILE__)).length > 0
+    raise e
   end
 
   def print(form)

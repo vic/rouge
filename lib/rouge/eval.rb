@@ -18,40 +18,26 @@ class << Rouge::Eval
     while true
       form = forms.shift
       r =
-        begin
-          case form
-          when Rouge::Symbol
-            eval_symbol context, form
-          when Rouge::Cons
-            begin
-              eval_cons context, form
-            rescue Rouge::Eval::ChangeContextException => cce
-              context = cce.context
-            end
-          when Hash
-            Hash[*
-                form.map {|k,v| [eval(context, k), eval(context, v)]}.flatten(1)]
-          when Array
-            form.map {|f| eval context, f}
-          else
-            form
+        case form
+        when Rouge::Symbol
+          eval_symbol context, form
+        when Rouge::Cons
+          begin
+            eval_cons context, form
+          rescue Rouge::Eval::ChangeContextException => cce
+            context = cce.context
           end
-        rescue Exception => e
-          if form.is_a?(Rouge::Cons)
-            # BACKWARDS w/in context of rouge errors themselves.
-            e.backtrace.unshift "(rouge):?:#{Rouge.print(form)[0...30]}"
-          end
-          raise e
+        when Hash
+          Hash[*
+              form.map {|k,v| [eval(context, k), eval(context, v)]}.flatten(1)]
+        when Array
+          form.map {|f| eval context, f}
+        else
+          form
         end
 
       return r if forms.length.zero?
     end
-  rescue Exception => e
-    # Remove Rouge-related lines unless the exception originated in Rouge.
-    e.backtrace.collect! {|line|
-      line.scan(File.dirname(__FILE__)).length > 0 ? nil : line
-    }.compact! unless e.backtrace[0].scan(File.dirname(__FILE__)).length > 0
-    raise e
   end
 
   private
@@ -77,9 +63,16 @@ class << Rouge::Eval
     fun = eval context, form[0]
     case fun
     when Rouge::Builtin
-      fun.inner.call context, *form.to_a[1..-1]
+      backtrace_fix "(rouge):?:builtin: " + Rouge.print(form) do
+        fun.inner.call context, *form.to_a[1..-1]
+      end
     when Rouge::Macro
-      eval context, fun.inner.call(*form.to_a[1..-1])
+      macro_form = backtrace_fix "(rouge):?:macro expand: " + Rouge.print(form) do 
+        fun.inner.call(*form.to_a[1..-1])
+      end
+      backtrace_fix "(rouge):?:macro run: " + Rouge.print(macro_form) do
+        eval context, macro_form
+      end
     else
       args = form.to_a[1..-1]
 
@@ -102,7 +95,30 @@ class << Rouge::Eval
 
       args = args.map {|f| eval context, f}
 
-      fun.call *args, &block
+      backtrace_fix "(rouge):?:lambda: " + Rouge.print(form) do
+        fun.call *args, &block
+      end
+    end
+  end
+
+  private
+
+  def backtrace_fix name, &block
+    begin
+      block.call
+    rescue Exception => e
+      STDOUT.puts block.source_location.join(':')
+      target = block.source_location.join(':')
+      changed = 0
+      $!.backtrace.map! {|line|
+        if line.scan("#{target}:").size > 0 and changed == 0
+          changed += 1
+          name
+        else
+          line
+        end
+      }
+      raise e
     end
   end
 end

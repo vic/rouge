@@ -333,10 +333,10 @@ class Rouge::Reader
     around = 
         "#{@src[[@n - 3, 0].max...[@n, 0].max]}" +
         "#{@src[@n]}" +
-        "#{@src[@n + 1..@n + 3].gsub(/\n.*$/, '')}"
+        "#{(@src[@n + 1..@n + 3] || "").gsub(/\n.*$/, '')}"
 
     line = @src[0...@n].count("\n") + 1
-    char = @src[0...@n].reverse.index("\n") + 1
+    char = @src[0...@n].reverse.index("\n") || 0 + 1
 
     raise ex, 
         "around: #{around}\n" +

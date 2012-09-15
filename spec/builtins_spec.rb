@@ -27,7 +27,7 @@ describe Rouge::Builtins do
       l = @context.readeval('(fn [] "Mystik Spiral")')
       l.should be_an_instance_of Proc
       l.call.should eq "Mystik Spiral"
-      Rouge.eval(@context, Rouge::Cons[l]).should eq "Mystik Spiral"
+      @context.eval(Rouge::Cons[l]).should eq "Mystik Spiral"
     end
 
     it "should create functions of correct arity" do

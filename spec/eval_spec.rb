@@ -37,16 +37,16 @@ describe Rouge::Eval do
   end
 
   it "should evaluate other things to themselves" do
-    Rouge.eval(@context, 4).should eq 4
-    Rouge.eval(@context, "bleep bloop").should eq "bleep bloop"
-    Rouge.eval(@context, :"nom it").should eq :"nom it"
+    @context.eval(4).should eq 4
+    @context.eval("bleep bloop").should eq "bleep bloop"
+    @context.eval(:"nom it").should eq :"nom it"
     @context.readeval("{:a :b, 1 2}").to_s.should eq({:a => :b, 1 => 2}.to_s)
 
     l = lambda {}
-    Rouge.eval(@context, l).should eq l
+    @context.eval(l).should eq l
 
     o = Object.new
-    Rouge.eval(@context, o).should eq o
+    @context.eval(o).should eq o
   end
 
   it "should evaluate hash and vector arguments" do

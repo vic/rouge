@@ -12,9 +12,9 @@ class << Rouge::Builtins
   def let(context, bindings, *body)
     context = Rouge::Context.new context
     bindings.each_slice(2) do |k, v|
-      context.set_here k.inner, Rouge::Eval.eval(context, v)
+      context.set_here k.inner, context.eval(v)
     end
-    Rouge.eval context, *body
+    context.eval(*body)
   end
 
   def quote(context, form)
@@ -43,8 +43,14 @@ class << Rouge::Builtins
 
     lambda {|*args, &blockgiven|
       if !rest ? (args.length != argv.length) : (args.length < argv.length)
-        raise ArgumentError,
-            "wrong number of arguments (#{args.length} for #{argv.length})"
+        begin
+          raise ArgumentError,
+              "wrong number of arguments (#{args.length} for #{argv.length})"
+        rescue ArgumentError => e
+          e.backtrace.pop
+          e.backtrace.unshift "(rouge):?:lambda call"
+          raise e
+        end
       end
 
       (0...argv.length).each do |i|
@@ -59,7 +65,7 @@ class << Rouge::Builtins
         context.set_here block.inner, blockgiven
       end
 
-      Rouge.eval context, *body
+      context.eval(*body)
     }
   end
 
@@ -68,7 +74,7 @@ class << Rouge::Builtins
     when 0
       context.ns.intern name.inner
     when 1
-      context.ns.set_here name.inner, Rouge.eval(context, form[0])
+      context.ns.set_here name.inner, context.eval(form[0])
     else
       raise ArgumentError, "def called with too many forms #{form.inspect}"
     end
@@ -77,15 +83,15 @@ class << Rouge::Builtins
   def if(context, test, if_true, if_false=nil)
     # Note that we rely on Ruby's sense of truthiness. (only false and nil are
     # falsey)
-    if Rouge.eval(context, test)
-      Rouge.eval context, if_true
+    if context.eval(test)
+      context.eval if_true
     else
-      Rouge.eval context, if_false
+      context.eval if_false
     end
   end
 
   def do(context, *forms)
-    Rouge.eval context, *forms
+    context.eval *forms
   end
 
   def ns(context, name, *args)
@@ -108,7 +114,7 @@ class << Rouge::Builtins
 
   def defmacro(context, name, args, *body)
     context.ns.set_here name.inner, Rouge::Macro[
-        Rouge.eval(context, Rouge::Cons[Rouge::Symbol[:fn], args, *body])]
+        context.eval(Rouge::Cons[Rouge::Symbol[:fn], args, *body].freeze)]
 
     # XXX: should be a var. defmacro could be a non-builtin
     Rouge::Symbol[:"#{context.ns.name}/#{name.inner}"]
@@ -116,11 +122,12 @@ class << Rouge::Builtins
 
   def apply(context, fun, *args)
     args =
-        args[0..-2].map {|f| Rouge.eval context, f} +
-        Rouge.eval(context, args[-1]).to_a
+        args[0..-2].map {|f| context.eval f} +
+        context.eval(args[-1]).to_a
     # This is a terrible hack.
-    Rouge.eval(context,
-        Rouge::Cons[fun, *args.map {|a| Rouge::Cons[Rouge::Symbol[:quote], a]}])
+    context.eval(Rouge::Cons[
+        fun,
+        *args.map {|a| Rouge::Cons[Rouge::Symbol[:quote], a].freeze}.freeze])
   end
 
   def var(context, symbol)
@@ -128,7 +135,7 @@ class << Rouge::Builtins
   end
 
   def throw(context, throwable)
-    exception = Rouge.eval context, throwable
+    exception = context.eval(throwable)
     begin
       raise exception
     rescue Exception => e
@@ -155,29 +162,29 @@ class << Rouge::Builtins
       end
 
       body.pop
-      catches[Rouge.eval(context, form[1])] =
+      catches[context.eval(form[1])] =
         {:bind => form[2],
          :body => form[3..-1]}
     end
 
     r =
       begin
-        Rouge.eval context, *body
+        context.eval *body
       rescue Exception => e
         catches.each do |klass, caught|
           if klass === e
             subcontext = Rouge::Context.new context
             subcontext.set_here caught[:bind].inner, e
-            r = Rouge.eval subcontext, *caught[:body]
-            Rouge.eval context, *finally if finally
+            r = subcontext.eval(*caught[:body])
+            context.eval(*finally) if finally
             return r
           end
         end
-        Rouge.eval context, *finally if finally
+        context.eval(*finally) if finally
         raise e
       end
 
-    Rouge.eval context, *finally if finally
+    context.eval(*finally) if finally
     r
   end
 end

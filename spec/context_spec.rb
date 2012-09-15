@@ -77,6 +77,19 @@ describe Rouge::Context do
     end
   end
 
+  describe "the eval method" do
+    it "should eval forms in this context without processing the backtrace" do
+      @a.eval([5]).should eq [5]
+
+      begin
+        @a.eval(Rouge::Cons[Rouge::Symbol[:blorgh]])
+        raise "failed!"
+      rescue Rouge::Eval::BindingNotFoundError => e
+        e.backtrace.any? {|line| line =~ /^\(rouge\):/}.should be_false
+      end
+    end
+  end
+
   describe "the readeval method" do
     it "should read and eval a form in this context" do
       Rouge.should_receive(:read).with(:a).and_return(:b)
