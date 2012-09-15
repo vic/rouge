@@ -28,6 +28,7 @@ core lang
 ---------
 - NON-dynamic/special vars
 - INTERN
+- FOR
 - (def a/b) should not create #'user/a/b, lol.
 - (ns blah) in REPL should change ns
 - symbols should have two distinct parts: ns, name
