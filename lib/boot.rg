@@ -213,6 +213,17 @@
 (defn get [map key] ; and [map key not-found]
   (.[] map key))
 
+(defmacro if-let
+  ([bindings then]
+   `(if-let ~bindings ~then nil))
+  ([bindings then else]
+   (let [form (bindings 0) tst (bindings 1)]
+     `(let [temp# ~tst]
+        (if temp#
+          (let [~form temp#]
+            ~then)
+          ~else)))))
+
 (ns rouge.test
   (:use rouge.core ruby))
 
@@ -241,12 +252,12 @@
         (puts "FAIL in ???")
         (puts "expected: " ~(pr-str check))
         (let [actual
-                (let [error (get result :error)]
-                  (or error
-                      (if (and (seq? '~check)
-                                      (= 'not (first '~check)))
-                               (second '~check)
-                               `(not ~'~check))))]
+                (if-let [error (get result :error)]
+                  error
+                  (if (and (seq? '~check)
+                           (= 'not (first '~check)))
+                    (second '~check)
+                    `(not ~'~check))))]
           (puts "  actual: " (pr-str actual))))
       (do
         (swap! *tests-passed* inc)

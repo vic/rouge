@@ -237,7 +237,7 @@ class Rouge::Reader
       consume
       Rouge::Cons[Rouge::Symbol[:var], lex(true)].freeze
     else
-      raise UnexpectedCharacterError, "#{peek}.inspect in #dispatch"
+      raise UnexpectedCharacterError, "#{peek.inspect} in #dispatch"
     end
   end
 
