@@ -265,6 +265,10 @@ describe Rouge::Reader do
         Rouge.read('`~`(x)').should eq Rouge.read("(list 'x)")
       end
 
+      it "should dequote within maps" do
+        Rouge.read('`{a ~b}').to_s.should eq Rouge.read("{'a b}").to_s
+      end
+
       it "should splice within seqs and vectors" do
         Rouge.read('`(a ~@b c)').
             should eq Rouge.read("(seq (concat (list 'a) b (list 'c)))")

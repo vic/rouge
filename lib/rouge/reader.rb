@@ -215,6 +215,8 @@ class Rouge::Reader
       else
         r
       end
+    when Hash
+      Hash[*form.map {|k,v| [dequote(k), dequote(v)]}.flatten(1)]
     when Rouge::Dequote
       form.inner
     else

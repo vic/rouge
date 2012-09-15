@@ -247,6 +247,15 @@ describe Rouge::Builtins do
       ROUGE
     end
 
+    it "should actually catch exceptions" do
+      @context.readeval(<<-ROUGE).should eq 3
+        (try
+          {:a 1 :b 2}
+          (throw (ruby/Exception.))
+          (catch ruby/Exception _ 3))
+      ROUGE
+    end
+
     it "should let other exceptions fall through" do
       lambda {
         @context.readeval(<<-ROUGE)
@@ -295,6 +304,15 @@ describe Rouge::Builtins do
       }.should raise_exception(ArgumentError, "fire")
 
       @context[:o].deref.deref.should eq 2
+    end
+
+    it "should bind the exception expressions" do
+      @context.readeval(<<-ROUGE).should be_an_instance_of(NotImplementedError)
+        (try
+          (throw (ruby/NotImplementedError. "wat"))
+          (catch ruby/NotImplementedError e
+            e))
+      ROUGE
     end
   end
 end

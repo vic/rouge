@@ -144,7 +144,7 @@ class << Rouge::Builtins
     catches = {}
     while body.length > 0
       form = body[-1]
-      if !form.is_a?(Rouge::Cons) or !form[0] == Rouge::Symbol[:catch]
+      if !form.is_a?(Rouge::Cons) or form[0] != Rouge::Symbol[:catch]
         break
       end
 
@@ -161,7 +161,7 @@ class << Rouge::Builtins
         catches.each do |klass, caught|
           if klass === e
             subcontext = Rouge::Context.new context
-            subcontext.set_here caught[:bind], e
+            subcontext.set_here caught[:bind].inner, e
             r = Rouge.eval subcontext, *caught[:body]
             Rouge.eval context, *finally if finally
             return r

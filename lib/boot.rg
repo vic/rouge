@@ -139,11 +139,21 @@
 (defn second [coll]
   (first (next coll)))
 
+(defn > [a b]
+  (.> a b))
+
+(defn < [a b]
+  (.< a b))
+
 (defn macroexpand [form]
   (if (or (not (seq? form))
-          (> (count form) 0))
+          (= (count form) 0))
     form
-    ((first form) (rest form))))
+    (do
+      (puts "form: " (pr-str form))
+      (puts "(first form): " (pr-str (first form)))
+      (puts "(.inner (first form)): " (pr-str (.inner (first form))))
+      ((.inner (first form)) (rest form)))))
 
 (defn push-thread-bindings [map]
   (.push ruby/Rouge.Var map))
@@ -200,6 +210,9 @@
         (apply conj (ruby/Rouge.Cons coll hd) tl)
         (apply conj (.push (.dup coll) hd) tl)))))
 
+(defn get [map key] ; and [map key not-found]
+  (.[] map key))
+
 (ns rouge.test
   (:use rouge.core ruby))
 
@@ -222,18 +235,18 @@
                   {:error nil, :result ~check}
                   (catch ruby/Exception e
                     {:error e, :result false}))]
-     (if (not (:result result))
+     (if (not (get result :result))
       (do
         (swap! *tests-failed* conj (conj *test-level* (pr-str '~check)))
         (puts "FAIL in ???")
         (puts "expected: " ~(pr-str check))
         (let [actual
-                (if-let [error (:error result)]
-                  error
-                  (if (and (seq? '~check)
-                                  (= 'not (first '~check)))
-                           (second '~check)
-                           `(not ~'~check)))]
+                (let [error (get result :error)]
+                  (or error
+                      (if (and (seq? '~check)
+                                      (= 'not (first '~check)))
+                               (second '~check)
+                               `(not ~'~check))))]
           (puts "  actual: " (pr-str actual))))
       (do
         (swap! *tests-passed* inc)
