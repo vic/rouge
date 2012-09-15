@@ -209,7 +209,7 @@
 
 (defmacro testing [what & tests]
   `(do
-     (when (= 0 *test-level*)
+     (when (= [] *test-level*)
        (puts))
      (puts (* " " (count *test-level*) 2) "testing: " ~what)
      (binding [*test-level* (conj *test-level* ~what)]

@@ -64,6 +64,10 @@ describe Rouge::Reader do
       Rouge.read("\"\\a\\b\\e\\f\\n\\r\"").should eq "\a\b\e\f\n\r"
       Rouge.read("\"\\s\\t\\v\"").should eq "\s\t\v"
     end
+
+    it "should read strings as frozen" do
+      Rouge.read("\"bah\"").frozen?.should be_true
+    end
   end
 
   describe "lists" do

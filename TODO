@@ -34,7 +34,7 @@ core lang
 - symbols should have two distinct parts: ns, name
 - multi-form defn: (defn x ([a] ...) ([a b] ...))
 - seqs
-  - atoms, refs, agents
+- atoms (actually multithreaded), refs, agents
 - freeze vectors, lists where approriate
 - (. x y)
 - destructuring (in FN, LET, everywhere else)
