@@ -66,12 +66,12 @@ class Rouge::Context
     sub = sub[lookups.shift.intern]
 
     while lookups.length > 0
-      sub = sub.root if sub.is_a?(Rouge::Var)
+      sub = sub.deref if sub.is_a?(Rouge::Var)
       sub = sub.const_get(lookups.shift.intern)
     end
 
     if will_new
-      sub = sub.root if sub.is_a?(Rouge::Var)
+      sub = sub.deref if sub.is_a?(Rouge::Var)
       sub.method(:new)
     else
       sub

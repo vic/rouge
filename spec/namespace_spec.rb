@@ -49,7 +49,7 @@ describe Rouge::Namespace do
       xyz.refer abc
 
       abc.set_here :hello, :wow
-      xyz[:hello].root.should eq :wow
+      xyz[:hello].deref.should eq :wow
     end
 
     it "may not be used to refer namespaces to themselves" do
@@ -75,8 +75,8 @@ describe Rouge::Namespace do
     end
 
     it "should contain elements from Rouge::Builtins" do
-      @ns[:let].root.should be_an_instance_of Rouge::Builtin
-      @ns[:quote].root.should be_an_instance_of Rouge::Builtin
+      @ns[:let].deref.should be_an_instance_of Rouge::Builtin
+      @ns[:quote].deref.should be_an_instance_of Rouge::Builtin
     end
 
     it "should not find objects from ruby" do

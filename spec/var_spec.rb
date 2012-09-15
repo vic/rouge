@@ -7,23 +7,23 @@ describe Rouge::Var do
     it "creates an unbound var by default" do
       v = Rouge::Var.new(:boo)
       v.name.should eq :boo
-      v.root.should be Rouge::Var::Unbound
+      v.deref.should be_an_instance_of Rouge::Var::Unbound
     end
 
     it "creates a bound var if requested" do
       v = Rouge::Var.new(:huh, 99)
       v.name.should eq :huh
-      v.root.should eq 99
+      v.deref.should eq 99
     end
   end
 
   describe "equality" do
-    it "considers two vars equal if their name and roots are equal" do
+    it "considers two vars equal if their names are equal" do
       Rouge::Var.new(:a).should == Rouge::Var.new(:a)
       Rouge::Var.new(:a).should_not == Rouge::Var.new(:b)
-      Rouge::Var.new(:a).should_not == Rouge::Var.new(:a, :a)
+      Rouge::Var.new(:a).should == Rouge::Var.new(:a, :a)
       Rouge::Var.new(:a, :a).should == Rouge::Var.new(:a, :a)
-      Rouge::Var.new(:a, :a).should_not == Rouge::Var.new(:a, :b)
+      Rouge::Var.new(:a, :a).should == Rouge::Var.new(:a, :b)
       Rouge::Var.new(:b, :a).should_not == Rouge::Var.new(:a, :b)
       Rouge::Var.new(:b, :a).should_not == Rouge::Var.new(:a, :a)
     end
@@ -32,19 +32,29 @@ describe Rouge::Var do
   describe "the stack" do
     it "should override a var's root" do
       v = Rouge::Var.new(:hello, :frank)
-      v.root.should eq :frank
+      v.deref.should eq :frank
 
       Rouge::Var.push({:hello => :joe})
-      v.root.should eq :joe
+      v.deref.should eq :joe
 
       Rouge::Var.push({:hello => :mark})
-      v.root.should eq :mark
+      v.deref.should eq :mark
 
       Rouge::Var.pop
-      v.root.should eq :joe
+      v.deref.should eq :joe
 
       Rouge::Var.pop
-      v.root.should eq :frank
+      v.deref.should eq :frank
+    end
+  end
+end
+
+describe Rouge::Var::Unbound do
+  describe "the constructor" do
+    it "creates an unbound var's value" do
+      v = Rouge::Var.new(:boo)
+      ub = Rouge::Var::Unbound.new(v)
+      ub.var.should be v
     end
   end
 end

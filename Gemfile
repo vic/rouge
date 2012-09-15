@@ -2,6 +2,8 @@
 
 source 'https://rubygems.org'
 
+gem 'term-ansicolor'
+
 group :test, :development do
   gem 'rake'
   gem 'rspec'

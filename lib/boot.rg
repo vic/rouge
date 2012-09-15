@@ -21,6 +21,11 @@
 (defmacro defn [name args & body]
   `(def ~name (fn ~args ~@body)))
 
+(defmacro when [cond & body]
+  `(if ~cond
+     (do
+       ~@body)))
+
 (defn vector [& args]
   (.to_a args))
 
@@ -161,25 +166,61 @@
                     1))]
   `(do
      (push-thread-bindings (hash-map ~@(var-ize bindings)))
+     (let [result (do ~@body)]
+       (pop-thread-bindings)
+       result))))
      ;(try
-       ~@body
+       ;~@body
        ;(finally
-         (pop-thread-bindings)))); ))
+         ;(pop-thread-bindings)))) ))
+
+(defn deref [derefable]
+  (.deref derefable))
+
+(defn atom [initial]
+  (ruby/Rouge.Atom. initial))
+
+(defn swap! [atom f & args]
+  (apply .swap! atom f args))
+
+(defn inc [v]
+  (+ v 1))
+
+(defn dec [v]
+  (- v 1))
+
+(defn conj [coll & xs]
+  ; only cons and vector.  Also SUCKS.
+  (if (= 0 (count xs))
+    coll
+    (let [c (class coll)
+          hd (first xs)
+          tl (rest xs)]
+      (if (= c ruby/Rouge.Cons)
+        (apply conj (ruby/Rouge.Cons coll hd) tl)
+        (apply conj (.push (.dup coll) hd) tl)))))
 
 (ns rouge.test
   (:use rouge.core ruby))
 
-(def ^:dynamic *test-level* 0)
+(def ^:dynamic *test-level* [])
+(def *tests-passed* (atom 0))
+(def *tests-failed* (atom []))
 
 (defmacro testing [what & tests]
   `(do
-     (puts (* " " *test-level* 2) "testing: " ~what)
-     (binding [*test-level* (+ 1 *test-level*)]
-       ~@tests)))
+     (when (= 0 *test-level*)
+       (puts))
+     (puts (* " " (count *test-level*) 2) "testing: " ~what)
+     (binding [*test-level* (conj *test-level* ~what)]
+       ~@tests
+       {:passed @*tests-passed*
+        :failed @*tests-failed*})))
 
 (defmacro is [check]
   `(if (not ~check)
      (do
+       (swap! *tests-failed* conj (conj *test-level* (pr-str '~check)))
        (puts "FAIL in ???")
        (puts "expected: " ~(pr-str check))
        (let [actual (if (and (seq? '~check)
@@ -187,6 +228,8 @@
                       (second '~check)
                       `(not ~'~check))]
          (puts "  actual: " (pr-str actual))))
-     true))
+     (do
+       (swap! *tests-passed* inc)
+       true)))
 
 ; vim: set ft=clojure:

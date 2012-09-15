@@ -133,7 +133,7 @@ describe Rouge::Builtins do
 
     it "should create and use a new context pointing at a given ns" do
       @context.readeval('(do (ns user.spec2) (def nope 8))')
-      Rouge[:"user.spec2"][:nope].root.should eq 8
+      Rouge[:"user.spec2"][:nope].deref.should eq 8
       lambda {
         @context[:nope]
       }.should raise_exception(Rouge::Namespace::VarNotFoundError)

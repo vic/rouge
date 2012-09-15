@@ -20,6 +20,7 @@ GEM
     rspec-mocks (2.11.2)
     sys-uname (0.9.0)
       ffi (>= 1.0.0)
+    term-ansicolor (1.0.7)
 
 PLATFORMS
   ruby
@@ -31,3 +32,4 @@ DEPENDENCIES
   autotest-growl
   rake
   rspec
+  term-ansicolor

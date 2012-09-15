@@ -2,6 +2,7 @@
 require 'rouge/context'
 require 'rouge/builtins'
 require 'rouge/var'
+require 'rouge/atom'
 
 class Rouge::Namespace
   @namespaces = {}

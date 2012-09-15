@@ -52,7 +52,7 @@ class << Rouge::Eval
     else
       result = context.locate form
       if result.is_a?(Rouge::Var)
-        result.root
+        result.deref
       else
         result
       end

@@ -29,7 +29,7 @@ describe Rouge::Context do
       @abb[:root].should eq 80
       @ac[:root].should eq 42
       # var, because it's from a namespace
-      @in_rl[:let].root.should be_an_instance_of Rouge::Builtin
+      @in_rl[:let].deref.should be_an_instance_of Rouge::Builtin
     end
 
     it "should raise an exception if a binding is not found" do
@@ -99,14 +99,14 @@ describe Rouge::Context do
       v = @in_spec.locate(:def)
       v.should be_an_instance_of(Rouge::Var)
       v.name.should eq :"rouge.builtin/def"
-      v.root.should be_an_instance_of(Rouge::Builtin)
+      v.deref.should be_an_instance_of(Rouge::Builtin)
     end
 
     it "should find the var in any namespace for a qualified symbol" do
       v = @in_spec.locate(:"ruby/Kernel")
       v.should be_an_instance_of(Rouge::Var)
       v.name.should eq :"ruby/Kernel"
-      v.root.should eq Kernel
+      v.deref.should eq Kernel
     end
 
     it "should find the method for a new class instantiation" do
