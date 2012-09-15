@@ -18,26 +18,40 @@ class << Rouge::Eval
     while true
       form = forms.shift
       r =
-        case form
-        when Rouge::Symbol
-          eval_symbol context, form
-        when Rouge::Cons
-          begin
-            eval_cons context, form
-          rescue Rouge::Eval::ChangeContextException => cce
-            context = cce.context
+        begin
+          case form
+          when Rouge::Symbol
+            eval_symbol context, form
+          when Rouge::Cons
+            begin
+              eval_cons context, form
+            rescue Rouge::Eval::ChangeContextException => cce
+              context = cce.context
+            end
+          when Hash
+            Hash[*
+                form.map {|k,v| [eval(context, k), eval(context, v)]}.flatten(1)]
+          when Array
+            form.map {|f| eval context, f}
+          else
+            form
           end
-        when Hash
-          Hash[*
-              form.map {|k,v| [eval(context, k), eval(context, v)]}.flatten(1)]
-        when Array
-          form.map {|f| eval context, f}
-        else
-          form
+        rescue Exception => e
+          if form.is_a?(Rouge::Cons)
+            # BACKWARDS w/in context of rouge errors themselves.
+            e.backtrace.unshift "(rouge):?:#{Rouge.print(form)[0...30]}"
+          end
+          raise e
         end
 
       return r if forms.length.zero?
     end
+  rescue Exception => e
+    # Remove Rouge-related lines unless the exception originated in Rouge.
+    e.backtrace.collect! {|line|
+      line.scan(File.dirname(__FILE__)).length > 0 ? nil : line
+    }.compact! unless e.backtrace[0].scan(File.dirname(__FILE__)).length > 0
+    raise e
   end
 
   private

@@ -129,7 +129,13 @@ class << Rouge::Builtins
 
   def throw(context, throwable)
     exception = Rouge.eval context, throwable
-    raise exception
+    begin
+      raise exception
+    rescue Exception => e
+      # TODO
+      e.backtrace.unshift "(rouge):?:throw"
+      raise e
+    end
   end
   
   def try(context, *body)

@@ -257,7 +257,7 @@
                   (if (and (seq? '~check)
                            (= 'not (first '~check)))
                     (second '~check)
-                    `(not ~'~check))))]
+                    `(not ~'~check)))]
           (puts "  actual: " (pr-str actual))))
       (do
         (swap! *tests-passed* inc)

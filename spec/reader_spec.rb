@@ -37,6 +37,7 @@ describe Rouge::Reader do
     Rouge.read(">").should eq Rouge::Symbol[:">"]
     Rouge.read("<").should eq Rouge::Symbol[:"<"]
     Rouge.read("%50").should eq Rouge::Symbol[:"%50"]
+    Rouge.read("xyz#").should eq Rouge::Symbol[:"xyz#"]
   end
 
   describe "keywords" do

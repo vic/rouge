@@ -28,8 +28,10 @@ class Rouge::Reader
         Rouge::Cons[*list(')')].freeze
       when /\[/
         list ']'
+      when /#/
+        dispatch
       when SYMBOL
-        # SYMBOL after \[, because it includes \[
+        # SYMBOL after \[ and #, because it includes both
         symbol
       when /{/
         map
@@ -39,16 +41,14 @@ class Rouge::Reader
         backquotation
       when /~/
         dequotation
-      when /#/
-        dispatch
       when /\^/
         metadata
       when /@/
         deref
       when nil
-        raise EndOfDataError, "in #lex"
+        reader_raise EndOfDataError, "in #lex"
       else
-        raise UnexpectedCharacterError, "#{peek.inspect} in #lex"
+        reader_raise UnexpectedCharacterError, "#{peek.inspect} in #lex"
       end
 
     if not sub
@@ -56,7 +56,7 @@ class Rouge::Reader
         consume
       end
       if @n < @src.length
-        raise TrailingDataError, "remaining in #lex: #{@src[@n..-1]}"
+        reader_raise TrailingDataError, "remaining in #lex: #{@src[@n..-1]}"
       end
     end
 
@@ -87,7 +87,7 @@ class Rouge::Reader
       c = @src[@n]
 
       if c.nil?
-        raise EndOfDataError, "in string, got: #{s}"
+        reader_raise EndOfDataError, "in string, got: #{s}"
       end
 
       @n += 1
@@ -101,7 +101,7 @@ class Rouge::Reader
 
         case c
         when nil
-          raise EndOfDataError, "in escaped string, got: #{s}"
+          reader_raise EndOfDataError, "in escaped string, got: #{s}"
         when /[abefnrstv]/
           c = {?a => ?\a,
                ?b => ?\b,
@@ -237,7 +237,7 @@ class Rouge::Reader
       consume
       Rouge::Cons[Rouge::Symbol[:var], lex(true)].freeze
     else
-      raise UnexpectedCharacterError, "#{peek.inspect} in #dispatch"
+      reader_raise UnexpectedCharacterError, "#{peek.inspect} in #dispatch"
     end
   end
 
@@ -273,7 +273,7 @@ class Rouge::Reader
     attach = lex(true)
 
     if not attach.class < Rouge::Metadata
-      raise ArgumentError,
+      reader_raise ArgumentError,
           "metadata can only be applied to classes mixing in Rouge::Metadata"
     end
 
@@ -304,7 +304,7 @@ class Rouge::Reader
 
   def slurp re
     @src[@n..-1] =~ re
-    raise UnexpectedCharacterError, "#{@src[@n]} in #slurp #{re}" if !$&
+    reader_raise UnexpectedCharacterError, "#{@src[@n]} in #slurp #{re}" if !$&
     @n += $&.length
     $&
   end
@@ -329,8 +329,23 @@ class Rouge::Reader
     c
   end
 
+  def reader_raise ex, m
+    around = 
+        "#{@src[[@n - 3, 0].max...[@n, 0].max]}" +
+        "#{@src[@n]}" +
+        "#{@src[@n + 1..@n + 3].gsub(/\n.*$/, '')}"
+
+    line = @src[0...@n].count("\n") + 1
+    char = @src[0...@n].reverse.index("\n") + 1
+
+    raise ex, 
+        "around: #{around}\n" +
+        "           ^\n" +
+        "line #{line} char #{char}: #{m}"
+  end
+
   NUMBER = /^[0-9][0-9_]*/
-  SYMBOL = /^(\.\[\])|([a-zA-Z0-9\-_!&\?\*\/\.\+\|=%$<>]+)/
+  SYMBOL = /^(\.\[\])|([a-zA-Z0-9\-_!&\?\*\/\.\+\|=%$<>#]+)/
 end
 
 # vim: set sw=2 et cc=80:
