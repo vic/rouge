@@ -1,7 +1,8 @@
 NEXT:
 - the reader should perform symbol qualification somehow after e.g. the NS
   macro has taken effect; otherwise how would we correctly know the refers? hm.
-  (We perhaps need to read and eval one form at a time.
+  (We perhaps need to read and eval one form at a time.)
+  Be sure to test all changes.
 - symbols should have two distinct parts: ns, name
 
 miscellaeny
