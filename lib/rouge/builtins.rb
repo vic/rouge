@@ -112,12 +112,51 @@ class << Rouge::Builtins
     raise Rouge::Eval::ChangeContextException, context
   end
 
-  def defmacro(context, name, args, *body)
-    context.ns.set_here name.inner, Rouge::Macro[
+  def defmacro(context, name, *parts)
+    if parts[0].is_a? Array
+      args, *body = parts
+      macro = Rouge::Macro[
         context.eval(Rouge::Cons[Rouge::Symbol[:fn], args, *body].freeze)]
+    elsif parts.all? {|part| part.is_a? Rouge::Cons}
+      arities = {}
 
-    # XXX: should be a var. defmacro could be a non-builtin
-    Rouge::Symbol[:"#{context.ns.name}/#{name.inner}"]
+      parts.each do |cons|
+        args, *body = cons.to_a
+
+        if !args.is_a? Array
+          raise ArgumentError,
+              "bad multi-form defmacro component #{args.inspect}"
+        end
+
+        if args.index(Rouge::Symbol[:|])
+          arity = -1
+        else
+          arity = args.length
+        end
+
+        if arities[arity]
+          raise ArgumentError, "seen same arity twice"
+        end
+
+        arities[arity] =
+            context.eval(Rouge::Cons[Rouge::Symbol[:fn], args, *body].freeze)
+      end
+
+      macro = Rouge::Macro[
+        lambda {|*args, &blockgiven|
+          if arities[args.length]
+            arities[args.length].call *args, &blockgiven
+          elsif arities[-1]
+            arities[-1].call *args, &blockgiven
+          else
+            raise ArgumentError, "no matching arity in macro"
+          end
+        }]
+    else
+      raise ArgumentError, "neither single-form defmacro nor multi-form"
+    end
+
+    context.ns.set_here name.inner, macro
   end
 
   def apply(context, fun, *args)

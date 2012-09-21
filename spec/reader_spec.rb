@@ -252,9 +252,14 @@ describe Rouge::Reader do
     end
 
     describe "cons-lists" do
+      before do
+        @ns = Rouge[:"user.spec"]
+      end
+
       it "should quote cons lists" do
         Rouge.read('`(1 2)').should eq Rouge.read("(list '1 '2)")
-        Rouge.read('`(a b)').should eq Rouge.read("(list 'a 'b)")
+        Rouge.read('`(a b)').
+            should eq Rouge.read("(list 'user.spec/a 'user.spec/b)")
       end
 
       it "should dequote within cons lists" do

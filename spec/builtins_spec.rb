@@ -192,6 +192,18 @@ describe Rouge::Builtins do
 
       @context.readeval("(let [c 9] (a))").should eq 9
     end
+
+    it "should support the multiple argument list form" do
+      @context.readeval(<<-ROUGE)
+        (do
+          (def list (fn [& r] r))
+          (defmacro m
+            ([a] (list 'list ''a (list 'quote a)))
+            ([b c] (list 'list ''b (list 'quote b) (list 'quote c)))))
+      ROUGE
+      @context.readeval("(m x)").should eq Rouge.read("(a x)")
+      @context.readeval("(m x y)").should eq Rouge.read("(b x y)")
+    end
   end
 
   describe "apply" do

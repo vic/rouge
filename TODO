@@ -1,3 +1,7 @@
+NEXT:
+- MACRO expansion should cause symbols to be interned in the source package. (i.e. they should read in that way, or w/e.)
+- symbols should have two distinct parts: ns, name
+
 miscellaeny
 -----------
 - MACROEXPAND
@@ -15,7 +19,7 @@ ruby interop
 ------------
 - accessing the scope/self (DSLs!)
 - proc or lambda? setting ARITY.
-  - DEFN/DEFMACRO/etc. should create strict lambdas, but FN/#() should not.
+  - DEFN/DEFMACRO/etc. should create strict lambdas, but FN/#() should not.  Emulate by accepting |*a| and selecting ourselves how strict we want to be.
 
 "hard" tasks
 ------------
@@ -26,13 +30,11 @@ ruby interop
 
 core lang
 ---------
-- MACRO expansion should cause symbols to be interned in the source package. (i.e. they should read in that way, or w/e.)
 - NON-dynamic/special vars
 - INTERN
 - FOR
 - (def a/b) should not create #'user/a/b, lol.
 - (ns blah) in REPL should change ns
-- symbols should have two distinct parts: ns, name
 - multi-form defn: (defn x ([a] ...) ([a b] ...))
 - seqs
 - atoms (actually multithreaded), refs, agents

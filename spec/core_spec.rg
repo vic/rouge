@@ -33,16 +33,16 @@
   (is (= 2 (nth [1 2 3] 1)))
   (is (= 3 (nth [1 2 3] 2))))
 
-(testing "macroexpand"
-  (is (= 6 (let [f #(* % 2)]
-             (defmacro a [x] `(f ~x))
-             (macroexpand '(a 3))))))
+;(testing "macroexpand"
+  ;(is (= 6 (let [f #(* % 2)]
+             ;(defmacro a [x] `(f ~x))
+             ;(macroexpand '(a 3))))))
 
 (testing "var passing"
   (is (= #'my-var (do
-              (def my-var 4)
-              (let [take-var (fn [v] v)]
-                (take-var #'my-var))))))
+                    (def my-var 4)
+                    (let [take-var (fn [v] v)]
+                      (take-var #'my-var))))))
 
 (testing "for")
 
