@@ -46,7 +46,7 @@ class Rouge::Context
 
   # Uses Piret.eval, and accordingly should not be used internally.
   def readeval(input)
-    Rouge.eval(self, Rouge.read(input))
+    Rouge.eval(self, ns.read(input))
   end
 
   # +symbol+ should be a Ruby Symbol or String, not a Rouge::Symbol.

@@ -18,7 +18,7 @@ describe Rouge::Builtins do
 
   describe "quote" do
     it "should prevent evaluation" do
-      @context.readeval("(quote lmnop)").should eq Rouge.read('lmnop')
+      @context.readeval("(quote lmnop)").should eq @ns.read('lmnop')
     end
   end
 
@@ -60,7 +60,7 @@ describe Rouge::Builtins do
       it "should bind rest arguments correctly" do
         @context.readeval('(fn (y z & rest) [y z rest])').
             call("where", "is", "mordialloc", "gosh").
-            should eq Rouge.read('["where" "is" ("mordialloc" "gosh")]')
+            should eq @ns.read('["where" "is" ("mordialloc" "gosh")]')
       end
 
       it "should bind block arguments correctly" do
@@ -197,13 +197,13 @@ describe Rouge::Builtins do
     it "should support the multiple argument list form" do
       @context.readeval(<<-ROUGE)
         (do
-          (def list (fn [& r] r))
+          (def vector (fn [& r] r))
           (defmacro m
-            ([a] (list 'list ''a (list 'quote a)))
-            ([b c] (list 'list ''b (list 'quote b) (list 'quote c)))))
+            ([a] (vector 'vector ''a (vector 'quote a)))
+            ([b c] (vector 'vector ''b (vector 'quote b) (vector 'quote c)))))
       ROUGE
-      @context.readeval("(m x)").should eq Rouge.read("(a x)")
-      @context.readeval("(m x y)").should eq Rouge.read("(b x y)")
+      @context.readeval("(m x)").should eq @ns.read("(a x)")
+      @context.readeval("(m x y)").should eq @ns.read("(b x y)")
     end
   end
 

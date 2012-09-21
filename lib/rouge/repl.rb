@@ -32,7 +32,7 @@ class << Rouge::REPL
       end
 
       begin
-        form = Rouge.read(input)
+        form = context.ns.read(input)
       rescue Rouge::Reader::EndOfDataError
         chaining = true
         next

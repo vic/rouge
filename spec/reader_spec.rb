@@ -5,6 +5,7 @@ require 'rouge'
 describe Rouge::Reader do
   before do
     @ns = Rouge[:"user.spec"]
+    @ns.refer Rouge[:"rouge.builtin"]
   end
 
   describe "reading numbers" do
@@ -267,9 +268,9 @@ describe Rouge::Reader do
         @ns.read('`(a ~(b `(c ~d)))').
             should eq @ns.read("(list 'user.spec/a (b (list 'user.spec/c d)))")
         @ns.read('`(a `(b ~c))').
-            should eq @ns.read("(list 'user.spec/a (list 'list " \
-                               "(list 'quote 'user.spec/b) 'user.spec/c))")
-        @ns.read('`~`(x)').should eq @ns.read("(list 'x)")
+            should eq @ns.read("(list 'user.spec/a (list 'user.spec/list " \
+                               "(list 'rouge.builtin/quote 'user.spec/b) 'user.spec/c))")
+        @ns.read('`~`(x)').should eq @ns.read("(list 'user.spec/x)")
       end
 
       it "should dequote within maps" do

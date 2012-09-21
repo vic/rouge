@@ -92,7 +92,7 @@ describe Rouge::Context do
 
   describe "the readeval method" do
     it "should read and eval a form in this context" do
-      Rouge.should_receive(:read).with(:a).and_return(:b)
+      @a.ns.should_receive(:read).with(:a).and_return(:b)
       Rouge.should_receive(:eval).with(@a, :b).and_return(:c)
       @a.readeval(:a).should eq :c
     end

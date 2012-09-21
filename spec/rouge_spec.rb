@@ -11,7 +11,7 @@ describe Rouge do
   describe "the eval method" do
     it "should eval forms in this context, post-processing the backtrace" do
       context = Rouge::Context.new Rouge[:user]
-      form = Rouge.read <<-ROUGE
+      form = Rouge[:user].read <<-ROUGE
         (do
           (defn z [] (throw (RuntimeError. "boo")))
           (defn y [] (z))
@@ -63,7 +63,7 @@ describe Rouge do
     Dir[relative_to_spec("*.rg")].each do |file|
       it "should pass #{File.basename file}" do
         r = Rouge.eval(Rouge::Context.new(Rouge[:user]),
-                       *Rouge.read("[#{File.read(file)}]"))
+                       *Rouge[:user].read("[#{File.read(file)}]"))
         total = r[:passed] + r[:failed].length
 
         message = 

@@ -4,12 +4,13 @@ require 'rouge'
 
 describe Rouge::Eval do
   before do
-    @context = Rouge::Context.new Rouge[:"rouge.builtin"]
+    @ns = Rouge[:"rouge.builtin"]
+    @context = Rouge::Context.new @ns
   end
 
   it "should evaluate quotations to their unquoted form" do
-    @context.readeval("'x").should eq Rouge.read("x")
-    @context.readeval("'':zzy").should eq Rouge.read("':zzy")
+    @context.readeval("'x").should eq @ns.read("x")
+    @context.readeval("'':zzy").should eq @ns.read("':zzy")
   end
 
   describe "symbols" do
@@ -51,12 +52,12 @@ describe Rouge::Eval do
 
   it "should evaluate hash and vector arguments" do
     @context.readeval("{\"z\" 92, 'x ''5}").to_s.
-        should eq Rouge.read("{\"z\" 92, x '5}").to_s
+        should eq @ns.read("{\"z\" 92, x '5}").to_s
 
     subcontext = Rouge::Context.new @context
     subcontext.set_here :lolwut, "off"
     subcontext.readeval("{lolwut [lolwut]}").
-        should eq Rouge.read('{"off" ["off"]}')
+        should eq @ns.read('{"off" ["off"]}')
   end
 
   describe "function calls" do
@@ -86,7 +87,7 @@ describe Rouge::Eval do
       describe "new object creation" do
         it "should call X.new with (X.)" do
           klass = double("klass")
-          klass.should_receive(:new).with(Rouge.read('a')).and_return(:b)
+          klass.should_receive(:new).with(@ns.read('a')).and_return(:b)
 
           subcontext = Rouge::Context.new @context
           subcontext.set_here :klass, klass
@@ -97,7 +98,7 @@ describe Rouge::Eval do
       describe "generic method calls" do
         it "should call x.y(:z) with (.y x 'z)" do
           x = double("x")
-          x.should_receive(:y).with(Rouge.read('z')).and_return(:tada)
+          x.should_receive(:y).with(@ns.read('z')).and_return(:tada)
 
           subcontext = Rouge::Context.new @context
           subcontext.set_here :x, x
@@ -107,7 +108,7 @@ describe Rouge::Eval do
         it "should call q.r(:s, &t) with (.r q 's | t)" do
           q = double("q")
           t = lambda {}
-          q.should_receive(:r).with(Rouge.read('s'), &t).and_return(:bop)
+          q.should_receive(:r).with(@ns.read('s'), &t).and_return(:bop)
 
           subcontext = Rouge::Context.new @context
           subcontext.set_here :q, q
@@ -118,7 +119,7 @@ describe Rouge::Eval do
         it "should call a.b(:c) {|d| d + 1} with (.b a 'c | [d] (.+ d 1))" do
           a = double("a")
           a.should_receive(:b) do |c, &b|
-            c.should eq Rouge.read('c')
+            c.should eq @ns.read('c')
             b.call(1).should eq 2
             b.call(2).should eq 3
             b.call(3).should eq 4

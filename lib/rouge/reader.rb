@@ -218,13 +218,13 @@ class Rouge::Reader
       form.inner
     when Rouge::Symbol
       # qualify!
-      if form.to_s =~ /\//
-        form
+      if form.inner.to_s =~ /\//
+        Rouge::Cons[Rouge::Symbol[:quote], form].freeze
       else
         begin
           var = @ns[form.inner]
           Rouge::Cons[Rouge::Symbol[:quote],
-                      var.name].freeze
+                      Rouge::Symbol[var.name]].freeze
         rescue Rouge::Namespace::VarNotFoundError
           Rouge::Cons[Rouge::Symbol[:quote],
                       Rouge::Symbol[:"#{@ns.name}/#{form.inner}"]].freeze
