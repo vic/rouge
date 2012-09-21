@@ -1,5 +1,4 @@
 NEXT:
-- MACRO expansion should cause symbols to be interned in the source package. (i.e. they should read in that way, or w/e.)
 - symbols should have two distinct parts: ns, name
 
 miscellaeny
