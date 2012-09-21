@@ -112,6 +112,14 @@ describe Rouge::Namespace do
       @ns.name.should eq :ruby
     end
   end
+
+  describe "the read method" do
+    it "should read input in this namespace" do
+      Rouge::Namespace[:xyz].read("`ham").
+          should eq Rouge::Cons[Rouge::Symbol[:quote],
+                                Rouge::Symbol[:"xyz/ham"]]
+    end
+  end
 end
 
 # vim: set sw=2 et cc=80:

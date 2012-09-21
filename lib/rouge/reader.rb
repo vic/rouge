@@ -6,11 +6,8 @@ class Rouge::Reader
   class TrailingDataError < StandardError; end
   class EndOfDataError < StandardError; end
 
-  def self.read(input)
-    new(input).lex
-  end
-
-  def initialize(input)
+  def initialize(ns, input)
+    @ns = ns
     @src = input
     @n = 0
   end
@@ -219,6 +216,20 @@ class Rouge::Reader
       Hash[*form.map {|k,v| [dequote(k), dequote(v)]}.flatten(1)]
     when Rouge::Dequote
       form.inner
+    when Rouge::Symbol
+      # qualify!
+      if form.to_s =~ /\//
+        form
+      else
+        begin
+          var = @ns[form.inner]
+          Rouge::Cons[Rouge::Symbol[:quote],
+                      var.name].freeze
+        rescue Rouge::Namespace::VarNotFoundError
+          Rouge::Cons[Rouge::Symbol[:quote],
+                      Rouge::Symbol[:"#{@ns.name}/#{form.inner}"]].freeze
+        end
+      end
     else
       Rouge::Cons[Rouge::Symbol[:quote], form].freeze
     end

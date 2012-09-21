@@ -48,6 +48,10 @@ class Rouge::Namespace
     @table[key] ||= Rouge::Var.new(:"#@name/#{key}")
   end
 
+  def read(input)
+    Rouge::Reader.new(self, input).lex
+  end
+
   attr_reader :name, :refers
 end
 

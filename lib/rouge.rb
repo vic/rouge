@@ -9,10 +9,6 @@ class << Rouge
   require 'rouge/eval'
   require 'rouge/repl'
 
-  def read(input)
-    Rouge::Reader.read input
-  end
-
   #   This top-level eval post-processes the backtrace.  Accordingly, it
   # should only be called by consumers, and never by Rouge internally itself,
   # lest it catches an exception and processes the backtrace too early.
@@ -45,7 +41,7 @@ class << Rouge
     user.refer Rouge[:ruby]
 
     form = "[#{File.read(Rouge.relative_to_lib('boot.rg'))}\n]"
-    boot = Rouge.read(form)
+    boot = user.read(form)
     Rouge.eval(Rouge::Context.new(user), *boot)
   end
 

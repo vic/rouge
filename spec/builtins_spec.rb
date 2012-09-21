@@ -153,9 +153,10 @@ describe Rouge::Builtins do
   end
 
   describe "defmacro" do
-    it "should return a reference to the created macro" do
-      @context.readeval("(defmacro a [] 'b)").
-          should eq Rouge::Symbol[:"user.spec/a"]
+    it "should return a var of the created macro" do
+      v = @context.readeval("(defmacro a [] 'b)")
+      v.should be_an_instance_of Rouge::Var
+      v.name.should eq :"user.spec/a"
     end
 
     it "should evaluate in the defining context" do
