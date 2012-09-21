@@ -69,7 +69,7 @@ describe Rouge::Eval do
 
     it "should evaluate macro calls" do
       macro = Rouge::Macro[lambda {|n, *body|
-        Rouge::Cons[Rouge::Symbol[:let], Rouge::Cons[n, "example"],
+        Rouge::Cons[Rouge::Symbol[:let], Rouge::Cons[n, "example"].freeze,
           *body]
       }]
 
