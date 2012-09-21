@@ -99,12 +99,30 @@ class << Rouge::Builtins
     ns.refer Rouge[:"rouge.builtin"]
 
     args.each do |arg|
-      if arg[0] == :use
-        arg[1..-1].each do |use|
+      kind, *params = arg.to_a
+
+      case kind
+      when :use
+        params.each do |use|
           ns.refer Rouge[use.inner]
         end
+      when :require
+        params.each do |param|
+          if param.is_a? Rouge::Symbol
+            Kernel.require param.inner.to_s
+          elsif param.is_a? Array and
+                param.length == 3 and
+                param[0].is_a? Rouge::Symbol and
+                param[1] == :as and 
+                param[2].is_a? Rouge::Symbol
+            unless Rouge::Namespace.exists? param[0].inner
+              context.eval(*ns.read("[#{File.read("#{param[0].inner}.rg")}]"))
+            end
+            Rouge::Namespace[param[2].inner] = Rouge[param[0].inner]
+          end
+        end
       else
-        raise "TODO bad arg in ns: #{arg}"
+        raise "TODO bad arg in ns: #{kind}"
       end
     end
 

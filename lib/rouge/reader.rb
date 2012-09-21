@@ -217,8 +217,8 @@ class Rouge::Reader
     when Rouge::Dequote
       form.inner
     when Rouge::Symbol
-      # qualify!
-      if form.inner.to_s =~ /\//
+      case form.inner.to_s
+      when /\//, /^\./, /^[&|]$/
         Rouge::Cons[Rouge::Symbol[:quote], form].freeze
       else
         begin

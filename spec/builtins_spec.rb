@@ -150,6 +150,36 @@ describe Rouge::Builtins do
             love)
       ROUGE
     end
+
+    describe ":require" do
+      it "should support the option" do
+        Kernel.should_receive(:require).with("blah")
+        @context.readeval(<<-ROUGE)
+            (ns user.spec2
+              (:require blah))
+        ROUGE
+      end
+
+      it "should support it with :as" do
+        File.should_receive(:read).with("blah.rg")
+        @context.readeval(<<-ROUGE)
+            (ns user.spec2
+              (:require [blah :as x]))
+        ROUGE
+        Rouge::Namespace[:x].should be Rouge::Namespace[:blah]
+      end
+
+      it ":as should not reload it" do
+        File.should_not_receive(:read).with("moop.rg")
+        @context.readeval(<<-ROUGE)
+            (do
+              (ns moop)
+              (ns user.spec2
+                (:require [moop :as y])))
+        ROUGE
+        Rouge::Namespace[:y].should be Rouge::Namespace[:moop]
+      end
+    end
   end
 
   describe "defmacro" do

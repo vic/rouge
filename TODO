@@ -1,4 +1,7 @@
 NEXT:
+- the reader should perform symbol qualification somehow after e.g. the NS
+  macro has taken effect; otherwise how would we correctly know the refers? hm.
+  (We perhaps need to read and eval one form at a time.
 - symbols should have two distinct parts: ns, name
 
 miscellaeny
@@ -18,14 +21,17 @@ ruby interop
 ------------
 - accessing the scope/self (DSLs!)
 - proc or lambda? setting ARITY.
-  - DEFN/DEFMACRO/etc. should create strict lambdas, but FN/#() should not.  Emulate by accepting |*a| and selecting ourselves how strict we want to be.
+  - DEFN/DEFMACRO/etc. should create strict lambdas, but FN/#() should not.
+    Emulate by accepting |*a| and selecting ourselves how strict we want to be.
 
 "hard" tasks
 ------------
 - have a core "apply" function which can be used by eval, defmacro, etc.
-- re-org to allow "compilation" phase: (defmacro a [] b) without a "b" in context should fail immediately.
+- re-org to allow "compilation" phase: (defmacro a [] b) without a "b" in
+  context should fail immediately.
   - probably generic walking would be nice here
-  - macro interpretation in one pass before regular evaluation: this would effect the desired outcome, I think?
+  - macro interpretation in one pass before regular evaluation: this would
+    effect the desired outcome, I think?
 
 core lang
 ---------
@@ -42,5 +48,6 @@ core lang
 - destructuring (in FN, LET, everywhere else)
 - rest of the clojure core API (maybe even in clojure.core ns)
 - clojure-ish IO libraries which expose async IO
-- defprotocol -- looks important! ISeq, ISeqable, ISequential and what have you.
+- defprotocol -- looks important! ISeq, ISeqable, ISequential and what have
+  you.
 - metadata on all collections (not just symbols)

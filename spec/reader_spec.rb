@@ -254,6 +254,16 @@ describe Rouge::Reader do
         @ns.read('``~3').should eq @ns.read("'3")
         @ns.read('``~~3').should eq @ns.read("3")
       end
+
+      it "should qualify symbols" do
+        @ns.read('`a').should eq @ns.read("'user.spec/a")
+      end
+
+      it "should not qualify special symbols" do
+        @ns.read('`.a').should eq @ns.read("'.a")
+        @ns.read('`&').should eq @ns.read("'&")
+        @ns.read('`|').should eq @ns.read("'|")
+      end
     end
 
     describe "cons-lists" do
