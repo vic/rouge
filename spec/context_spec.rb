@@ -92,9 +92,28 @@ describe Rouge::Context do
   end
 
   describe "the readeval method" do
-    it "should read and eval a form in this context" do
-      Rouge.should_receive(:readeval).with(@a, :a).and_return(:b)
-      @a.readeval(:a).should eq :b
+    it "should post-process the backtrace" do
+      context = Rouge::Context.new Rouge[:user]
+
+      ex = nil
+      begin
+        context.readeval(<<-ROUGE)
+          (do
+            (defn z [] (throw (RuntimeError. "boo")))
+            (defn y [] (z))
+            (defn x [] (y))
+            (x))
+        ROUGE
+      rescue RuntimeError => e
+        ex = e
+      end
+
+      ex.should_not be_nil
+      ex.backtrace[0..3].
+          should eq ["(rouge):?:rouge.builtin/throw",
+                     "(rouge):?:user/z",
+                     "(rouge):?:user/y",
+                     "(rouge):?:user/x"]
     end
   end
 

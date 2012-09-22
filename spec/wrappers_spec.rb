@@ -65,6 +65,19 @@ describe Rouge::Symbol do
       Rouge::Symbol[:a].should eq Rouge::Symbol[:a]
     end
   end
+
+  describe "the name and ns methods" do
+    it "should return the parts of the symbol" do
+      Rouge::Symbol[:abc].ns.should be_nil
+      Rouge::Symbol[:abc].name.should eq :abc
+      Rouge::Symbol[:"abc/def"].ns.should eq :abc
+      Rouge::Symbol[:"abc/def"].name.should eq :def
+      Rouge::Symbol[:/].ns.should be_nil
+      Rouge::Symbol[:/].name.should eq :/
+      Rouge::Symbol[:"rouge.core//"].ns.should eq :"rouge.core"
+      Rouge::Symbol[:"rouge.core//"].name.should eq :/
+    end
+  end
 end
 
 describe Rouge::Cons do

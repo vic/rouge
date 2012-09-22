@@ -8,33 +8,6 @@ describe Rouge do
     Rouge.boot!
   end
 
-  describe "the eval method" do
-    it "should eval forms in this context, post-processing the backtrace" do
-      context = Rouge::Context.new Rouge[:user]
-      form = Rouge[:user].read <<-ROUGE
-        (do
-          (defn z [] (throw (RuntimeError. "boo")))
-          (defn y [] (z))
-          (defn x [] (y))
-          (x))
-      ROUGE
-
-      ex = nil
-      begin
-        Rouge.eval context, form
-      rescue => e
-        ex = e
-      end
-
-      ex.should_not be_nil
-      ex.backtrace[0..3].
-          should eq ["(rouge):?:rouge.builtin/throw",
-                     "(rouge):?:user/z",
-                     "(rouge):?:user/y",
-                     "(rouge):?:user/x"]
-    end
-  end
-
   describe "the rouge.core namespace" do
     before do
       @ns = Rouge[:"rouge.core"]
@@ -62,8 +35,7 @@ describe Rouge do
   describe "the Rouge specs" do
     Dir[relative_to_spec("*.rg")].each do |file|
       it "should pass #{File.basename file}" do
-        r = Rouge.readeval(Rouge::Context.new(Rouge[:user]),
-                           File.read(file))
+        r = Rouge::Context.new(Rouge[:user]).readeval(File.read(file))
         total = r[:passed] + r[:failed].length
 
         message = 

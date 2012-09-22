@@ -161,7 +161,7 @@ describe Rouge::Builtins do
       end
 
       it "should support it with :as" do
-        File.should_receive(:read).with("blah.rg")
+        File.should_receive(:read).with("blah.rg").and_return("")
         @context.readeval(<<-ROUGE)
             (ns user.spec2
               (:require [blah :as x]))
@@ -272,11 +272,11 @@ describe Rouge::Builtins do
 
   describe "try" do
     it "should catch exceptions mentioned in the catch clause" do
-      @context.readeval(<<-ROUGE).should eq :ae
+      @context.readeval(<<-ROUGE).should eq :eofe
         (try
-          (throw (ruby/ArgumentError. "bad"))
+          (throw (ruby/EOFError. "bad"))
           :baa
-          (catch ruby/ArgumentError _ :ae))
+          (catch ruby/EOFError _ :eofe))
       ROUGE
     end
 
@@ -285,7 +285,7 @@ describe Rouge::Builtins do
         (try
           (throw (ruby/NotImplementedError. "bro"))
           :baa
-          (catch ruby/ArgumentError _ :ae)
+          (catch ruby/EOFError _ :eofe)
           (catch ruby/NotImplementedError _ :nie))
       ROUGE
     end
@@ -305,17 +305,26 @@ describe Rouge::Builtins do
           (try
             (throw (ruby/Exception. "kwok"))
             :baa
-            (catch ruby/ArgumentError _ :ae)
+            (catch ruby/EOFError _ :eofe)
             (catch ruby/NotImplementedError _ :nie))
         ROUGE
       }.should raise_exception(Exception, "kwok")
+    end
+
+    it "should work despite catch or finally being interned elsewhere" do
+      @context.readeval(<<-ROUGE).should eq :baa
+        (try
+          :baa
+          (b/catch ruby/EOFError _ :eofe)
+          (a/catch ruby/NotImplementedError _ :nie))
+      ROUGE
     end
 
     it "should return the block's value if no exception was raised" do
       @context.readeval(<<-ROUGE).should eq :baa
         (try
           :baa
-          (catch ruby/ArgumentError _ :ae)
+          (catch ruby/EOFError _ :eofe)
           (catch ruby/NotImplementedError _ :nie))
       ROUGE
     end

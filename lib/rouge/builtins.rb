@@ -14,7 +14,7 @@ class << Rouge::Builtins
     bindings.each_slice(2) do |k, v|
       context.set_here k.inner, context.eval(v)
     end
-    context.eval(*body)
+    self.do(context, *body)
   end
 
   def quote(context, form)
@@ -65,7 +65,7 @@ class << Rouge::Builtins
         context.set_here block.inner, blockgiven
       end
 
-      context.eval(*body)
+      self.do(context, *body)
     }
   end
 
@@ -216,7 +216,9 @@ class << Rouge::Builtins
     return unless body.length > 0
 
     form = body[-1]
-    if form.is_a?(Rouge::Cons) and form[0] == Rouge::Symbol[:finally]
+    if form.is_a?(Rouge::Cons) and
+       form[0].is_a? Rouge::Symbol and
+       form[0].name == :finally
       finally = form[1..-1]
       body.pop
     end
@@ -224,7 +226,9 @@ class << Rouge::Builtins
     catches = {}
     while body.length > 0
       form = body[-1]
-      if !form.is_a?(Rouge::Cons) or form[0] != Rouge::Symbol[:catch]
+      if !form.is_a?(Rouge::Cons) or
+         !form[0].is_a? Rouge::Symbol or
+         form[0].name != :catch
         break
       end
 
@@ -236,22 +240,22 @@ class << Rouge::Builtins
 
     r =
       begin
-        context.eval *body
+        self.do(context, *body)
       rescue Exception => e
         catches.each do |klass, caught|
           if klass === e
             subcontext = Rouge::Context.new context
             subcontext.set_here caught[:bind].inner, e
-            r = subcontext.eval(*caught[:body])
-            context.eval(*finally) if finally
+            r = self.do(subcontext, *caught[:body])
+            self.do(context, *finally) if finally
             return r
           end
         end
-        context.eval(*finally) if finally
+        self.do(context, *finally) if finally
         raise e
       end
 
-    context.eval(*finally) if finally
+    self.do(context, *finally) if finally
     r
   end
 end
