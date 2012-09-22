@@ -196,13 +196,7 @@ describe Rouge::Reader do
     end
   end
 
-  describe "trailing-character behaviour" do
-    it "should fail with trailing non-whitespace" do
-      lambda {
-        @ns.read("hello joe")
-      }.should raise_exception(Rouge::Reader::TrailingDataError)
-    end
-
+  describe "whitespace behaviour" do
     it "should not fail with trailing whitespace" do
       lambda {
         @ns.read(":hello    \n\n\t\t  ").should eq :hello
@@ -342,6 +336,25 @@ describe Rouge::Reader do
   describe "deref" do
     it "should read derefs" do
       @ns.read('@(boo)').should eq @ns.read('(rouge.core/deref (boo))')
+    end
+  end
+
+  describe "multiple reading" do
+    it "should read multiple forms in turn" do
+      r = Rouge::Reader.new(@ns, "a b c")
+      r.lex.should eq Rouge::Symbol[:a]
+      r.lex.should eq Rouge::Symbol[:b]
+      r.lex.should eq Rouge::Symbol[:c]
+
+      lambda {
+        r.lex
+      }.should raise_exception(Rouge::Reader::EndOfDataError)
+    end
+  end
+
+  describe "the ns property" do
+    it "should return the ns the reader is in" do
+      Rouge::Reader.new(@ns, "").ns.should be @ns
     end
   end
 end

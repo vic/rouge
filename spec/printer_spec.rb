@@ -166,7 +166,7 @@ describe Rouge::Printer do
     it "should print Ruby classes in their namespace" do
       Rouge.print(Object).should eq "ruby/Object"
       Rouge.print(Class).should eq "ruby/Class"
-      Rouge.print(Rouge::Eval).should eq "ruby/Rouge.Eval"
+      Rouge.print(Rouge::Context).should eq "ruby/Rouge.Context"
       anon = Class.new
       Rouge.print(anon).should eq anon.inspect
     end

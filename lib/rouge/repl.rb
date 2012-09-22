@@ -8,7 +8,7 @@ class << Rouge::REPL
     context = Rouge::Context.new Rouge[:user]
 
     if argv.length == 1
-      Rouge.eval(context, *context.ns.read("[#{File.read(argv[0])}]"))
+      context.readeval(File.read(argv[0]))
       exit(0)
     elsif argv.length > 1
       STDERR.puts "!! usage: #$0 [FILE]"
@@ -42,7 +42,7 @@ class << Rouge::REPL
 
       chaining = false
       begin
-        result = Rouge.eval(context, form)
+        result = context.eval(form)
         STDOUT.puts Rouge.print(result)
 
         count += 1 if count < 10

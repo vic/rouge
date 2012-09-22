@@ -43,7 +43,7 @@ describe Rouge do
     it "should contain the defn macro" do
       lambda {
         @ns[:defn].should be_an_instance_of Rouge::Macro
-      }.should_not raise_exception(Rouge::Eval::BindingNotFoundError)
+      }.should_not raise_exception(Rouge::Context::BindingNotFoundError)
     end
   end
 
@@ -62,8 +62,8 @@ describe Rouge do
   describe "the Rouge specs" do
     Dir[relative_to_spec("*.rg")].each do |file|
       it "should pass #{File.basename file}" do
-        r = Rouge.eval(Rouge::Context.new(Rouge[:user]),
-                       *Rouge[:user].read("[#{File.read(file)}]"))
+        r = Rouge.readeval(Rouge::Context.new(Rouge[:user]),
+                           File.read(file))
         total = r[:passed] + r[:failed].length
 
         message = 

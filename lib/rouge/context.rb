@@ -1,6 +1,15 @@
 # encoding: utf-8
 
+require 'rouge/wrappers'
+require 'rouge/namespace'
+
 class Rouge::Context
+  class BindingNotFoundError < StandardError; end
+  class ChangeContextException < Exception
+    def initialize(context); @context = context; end
+    attr_reader :context
+  end
+
   def initialize(parent_or_ns)
     case parent_or_ns
     when Rouge::Namespace
@@ -20,7 +29,7 @@ class Rouge::Context
     elsif @ns
       @ns[key]
     else
-      raise Rouge::Eval::BindingNotFoundError, key
+      raise BindingNotFoundError, key
     end
   end
 
@@ -34,19 +43,56 @@ class Rouge::Context
     elsif @parent
       @parent.set_lexical key, value
     else
-      raise Rouge::Eval::BindingNotFoundError,
+      raise BindingNotFoundError,
           "setting #{key} to #{value.inspect}"
     end
   end
 
-  # Internal use only -- doesn't post-process backtrace.
-  def eval(*forms)
-    Rouge::Eval.eval self, *forms
+  #   This readeval post-processes the backtrace.  Accordingly, it should only
+  # be called by consumers, and never by Rouge internally itself, lest it
+  # catches an exception and processes the backtrace too early.
+  def readeval(input)
+    reader = Rouge::Reader.new(ns, input)
+    context = self
+    r = nil
+
+    while true
+      begin
+        form = reader.lex
+      rescue Rouge::Reader::EndOfDataError
+        return r
+      end
+
+      begin
+        r = context.eval form
+      rescue ChangeContextException => cce
+        reader.ns = cce.context.ns
+        context = cce.context
+      end
+    end
+  rescue Exception => e
+    # Remove Rouge-related lines unless the exception originated in Rouge.
+    root = File.dirname(File.dirname(__FILE__))
+    e.backtrace.map! {|line|
+      line.scan(root).length > 0 ? nil : line
+    }.compact! unless e.backtrace[0].scan(root).length > 0
+    raise e
   end
 
-  # Uses Piret.eval, and accordingly should not be used internally.
-  def readeval(input)
-    Rouge.eval(self, ns.read(input))
+  # Internal use only -- doesn't post-process backtrace.
+  def eval(form)
+    case form
+    when Rouge::Symbol
+      eval_symbol form
+    when Rouge::Cons
+      eval_cons form
+    when Hash
+      Hash[form.map {|k,v| [eval(k), eval(v)]}]
+    when Array
+      form.map {|f| eval(f)}
+    else
+      form
+    end
   end
 
   # +symbol+ should be a Ruby Symbol or String, not a Rouge::Symbol.
@@ -85,6 +131,86 @@ class Rouge::Context
   end
 
   attr_reader :ns
+
+  private
+
+  def eval_symbol(form)
+    form = form.inner.to_s
+    if form[0] == ?.
+      form = form[1..-1]
+      lambda {|receiver, *args, &block|
+        receiver.send(form, *args, &block)
+      }
+    else
+      result = locate form
+      if result.is_a?(Rouge::Var)
+        result.deref
+      else
+        result
+      end
+    end
+  end
+
+  def eval_cons(form)
+    fun = eval form[0]
+
+    case fun
+    when Rouge::Builtin
+      backtrace_fix "(rouge):?:builtin: " + Rouge.print(form) do
+        fun.inner.call self, *form.to_a[1..-1]
+      end
+    when Rouge::Macro
+      macro_form = backtrace_fix "(rouge):?:m. expand: " + Rouge.print(form) do 
+        fun.inner.call(*form.to_a[1..-1])
+      end
+      backtrace_fix "(rouge):?:m. run: " + Rouge.print(macro_form) do
+        eval macro_form
+      end
+    else
+      args = form.to_a[1..-1]
+
+      if args.include? Rouge::Symbol[:|]
+        index = args.index Rouge::Symbol[:|]
+        if args.length == index + 2
+          # Function.
+          block = eval args[index + 1]
+        else
+          # Inline block.
+          block = eval(Rouge::Cons[Rouge::Symbol[:fn],
+                                   args[index + 1],
+                                   *args[index + 2..-1]])
+        end
+        args = args[0...index]
+      else
+        block = nil
+      end
+
+      args = args.map {|f| eval(f)}
+
+      backtrace_fix "(rouge):?:lambda: " + Rouge.print(form) do
+        fun.call *args, &block
+      end
+    end
+  end
+
+  def backtrace_fix name, &block
+    begin
+      block.call
+    rescue Exception => e
+      STDOUT.puts block.source_location.join(':')
+      target = block.source_location.join(':')
+      changed = 0
+      $!.backtrace.map! {|line|
+        if line.scan("#{target}:").size > 0 and changed == 0
+          changed += 1
+          name
+        else
+          line
+        end
+      }
+      raise e
+    end
+  end
 end
 
 # vim: set sw=2 et cc=80:

@@ -91,7 +91,17 @@ class << Rouge::Builtins
   end
 
   def do(context, *forms)
-    context.eval *forms
+    r = nil
+
+    while forms.length > 0
+      begin
+        r = context.eval(forms.shift)
+      rescue Rouge::Context::ChangeContextException => cce
+        context = cce.context
+      end
+    end
+
+    r
   end
 
   def ns(context, name, *args)
@@ -116,7 +126,7 @@ class << Rouge::Builtins
                 param[1] == :as and 
                 param[2].is_a? Rouge::Symbol
             unless Rouge::Namespace.exists? param[0].inner
-              context.eval(*ns.read("[#{File.read("#{param[0].inner}.rg")}]"))
+              context.readeval(File.read("#{param[0].inner}.rg"))
             end
             Rouge::Namespace[param[2].inner] = Rouge[param[0].inner]
           end
@@ -127,7 +137,7 @@ class << Rouge::Builtins
     end
 
     context = Rouge::Context.new ns
-    raise Rouge::Eval::ChangeContextException, context
+    raise Rouge::Context::ChangeContextException, context
   end
 
   def defmacro(context, name, *parts)

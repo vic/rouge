@@ -6,22 +6,8 @@ class << Rouge
   require 'rouge/wrappers'
   require 'rouge/reader'
   require 'rouge/printer'
-  require 'rouge/eval'
+  require 'rouge/context'
   require 'rouge/repl'
-
-  #   This top-level eval post-processes the backtrace.  Accordingly, it
-  # should only be called by consumers, and never by Rouge internally itself,
-  # lest it catches an exception and processes the backtrace too early.
-  #   Use Rouge::Context#eval internally.
-  def eval(context, *forms)
-    Rouge::Eval.eval context, *forms
-  rescue Exception => e
-    # Remove Rouge-related lines unless the exception originated in Rouge.
-    e.backtrace.map! {|line|
-      line.scan(File.dirname(__FILE__)).length > 0 ? nil : line
-    }.compact! unless e.backtrace[0].scan(File.dirname(__FILE__)).length > 0
-    raise e
-  end
 
   def print(form)
     Rouge::Printer.print form
@@ -40,9 +26,8 @@ class << Rouge
     user.refer Rouge[:"rouge.core"]
     user.refer Rouge[:ruby]
 
-    form = "[#{File.read(Rouge.relative_to_lib('boot.rg'))}\n]"
-    boot = user.read(form)
-    Rouge.eval(Rouge::Context.new(user), *boot)
+    Rouge::Context.new(user).readeval(
+        File.read(Rouge.relative_to_lib('boot.rg')))
   end
 
   def repl(argv)

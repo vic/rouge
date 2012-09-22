@@ -12,7 +12,9 @@ class Rouge::Reader
     @n = 0
   end
 
-  def lex sub=false
+  attr_accessor :ns
+
+  def lex
     r =
       case peek
       when NUMBER
@@ -47,15 +49,6 @@ class Rouge::Reader
       else
         reader_raise UnexpectedCharacterError, "#{peek.inspect} in #lex"
       end
-
-    if not sub
-      while peek =~ /[\s,]/
-        consume
-      end
-      if @n < @src.length
-        reader_raise TrailingDataError, "remaining in #lex: #{@src[@n..-1]}"
-      end
-    end
 
     r
   end
@@ -127,7 +120,7 @@ class Rouge::Reader
       if peek == ending
         break
       end
-      r << lex(true)
+      r << lex
     end
 
     consume
@@ -146,8 +139,8 @@ class Rouge::Reader
       if peek == '}'
         break
       end
-      k = lex(true)
-      v = lex(true)
+      k = lex
+      v = lex
       r[k] = v
     end
 
@@ -157,21 +150,21 @@ class Rouge::Reader
 
   def quotation
     consume
-    Rouge::Cons[Rouge::Symbol[:quote], lex(true)].freeze
+    Rouge::Cons[Rouge::Symbol[:quote], lex].freeze
   end
 
   def backquotation
     consume
-    dequote lex(true)
+    dequote lex
   end
 
   def dequotation
     consume
     if peek == ?@
       consume
-      Rouge::Splice[lex(true)]
+      Rouge::Splice[lex]
     else
-      Rouge::Dequote[lex(true)]
+      Rouge::Dequote[lex]
     end
   end
 
@@ -239,14 +232,14 @@ class Rouge::Reader
     consume
     case peek
     when '('
-      body, count = dispatch_rewrite_fn(lex(true), 0)
+      body, count = dispatch_rewrite_fn(lex, 0)
       Rouge::Cons[
           Rouge::Symbol[:fn],
           (1..count).map {|n| Rouge::Symbol[:"%#{n}"]}.freeze,
           body].freeze
     when "'"
       consume
-      Rouge::Cons[Rouge::Symbol[:var], lex(true)].freeze
+      Rouge::Cons[Rouge::Symbol[:var], lex].freeze
     else
       reader_raise UnexpectedCharacterError, "#{peek.inspect} in #dispatch"
     end
@@ -280,8 +273,8 @@ class Rouge::Reader
 
   def metadata
     consume
-    meta = lex(true)
-    attach = lex(true)
+    meta = lex
+    attach = lex
 
     if not attach.class < Rouge::Metadata
       reader_raise ArgumentError,
@@ -310,7 +303,7 @@ class Rouge::Reader
 
   def deref
     consume
-    Rouge::Cons[Rouge::Symbol[:"rouge.core/deref"], lex(true)].freeze
+    Rouge::Cons[Rouge::Symbol[:"rouge.core/deref"], lex].freeze
   end
 
   def slurp re
