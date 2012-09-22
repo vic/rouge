@@ -11,8 +11,14 @@ describe Rouge::Builtins do
 
   describe "let" do
     it "should make local bindings" do
-      @context.readeval("(let (a 42) a)").should eq 42
-      @context.readeval("(let (a 1 a 2) a)").should eq 2
+      @context.readeval("(let [a 42] a)").should eq 42
+      @context.readeval("(let [a 1 a 2] a)").should eq 2
+    end
+
+    it "should complain vigorously about letting qualified names" do
+      lambda {
+        @context.readeval("(let [user/x 42] user/x)")
+      }.should raise_exception(Rouge::Context::BadBindingError)
     end
   end
 

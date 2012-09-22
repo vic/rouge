@@ -5,6 +5,7 @@ require 'rouge/namespace'
 
 class Rouge::Context
   class BindingNotFoundError < StandardError; end
+  class BadBindingError < StandardError; end
   class ChangeContextException < Exception
     def initialize(context); @context = context; end
     attr_reader :context
@@ -34,6 +35,10 @@ class Rouge::Context
   end
 
   def set_here(key, value)
+    if Rouge::Symbol[key].ns != nil
+      raise BadBindingError, "cannot bind #{key.inspect}"
+    end
+
     @table[key] = value
   end
 

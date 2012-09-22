@@ -242,23 +242,23 @@
         :failed @*tests-failed*})))
 
 (defmacro is [check]
-  `(let [result (try
+  `(let [result# (try
                   {:error nil, :result ~check}
                   (catch ruby/Exception e
                     {:error e, :result false}))]
-     (if (not (get result :result))
+     (if (not (get result# :result))
       (do
         (swap! *tests-failed* conj (conj *test-level* (pr-str '~check)))
         (puts "FAIL in ???")
         (puts "expected: " ~(pr-str check))
-        (let [actual
-                (if-let [error (get result :error)]
-                  error
+        (let [actual#
+                (if-let [error# (get result# :error)]
+                  error#
                   (if (and (seq? '~check)
                            (= 'not (first '~check)))
                     (second '~check)
                     `(not ~'~check)))]
-          (puts "  actual: " (pr-str actual))))
+          (puts "  actual: " (pr-str actual#))))
       (do
         (swap! *tests-passed* inc)
         true))))

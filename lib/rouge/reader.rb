@@ -37,7 +37,7 @@ class Rouge::Reader
       when /'/
         quotation
       when /`/
-        backquotation
+        syntaxquotation
       when /~/
         dequotation
       when /\^/
@@ -153,7 +153,7 @@ class Rouge::Reader
     Rouge::Cons[Rouge::Symbol[:quote], lex].freeze
   end
 
-  def backquotation
+  def syntaxquotation
     consume
     dequote lex
   end

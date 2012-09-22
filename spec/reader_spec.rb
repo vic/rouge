@@ -236,7 +236,7 @@ describe Rouge::Reader do
     end
   end
 
-  describe "backquoting" do
+  describe "syntax-quoting" do
     describe "non-cons lists" do
       it "should quote non-cons lists" do
         @ns.read('`3').should eq @ns.read("'3")
@@ -292,6 +292,29 @@ describe Rouge::Reader do
         ROUGE
         @ns.read('`[~@(a b) ~c]').
             should eq @ns.read("(apply vector (concat (a b) (list c)))")
+      end
+    end
+
+    describe "gensyms" do
+      it "should read as unique in each invocation" do
+        a1 = @ns.read('`a#')
+        a2 = @ns.read('`a#')
+        a1.to_s.should_not eq a2.to_s
+      end
+
+      it "should read identically within each invocation" do
+        as = @ns.read('`(a# a# `(a# a#))')
+        as[0].should eq Rouge::Symbol[:list]
+        as[1][0].should eq Rouge::Symbol[:quote]
+        a1 = as[1][1]
+        as[2][0].should eq Rouge::Symbol[:quote]
+        a2 = as[2][1]
+        STDOUT.puts as
+        as[3][0].should eq Rouge::Symbol[:list]
+        as[3][1][0].should eq Rouge::Symbol[:quote]
+        a3 = as[3][1][1]
+        as[3][2][0].should eq Rouge::Symbol[:quote]
+        a4 = as[3][2][1]
       end
     end
   end
