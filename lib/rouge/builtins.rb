@@ -259,32 +259,61 @@ class << Rouge::Builtins
     r
   end
 
-  def destructure(context, parameters, values)
+  def destructure(context, parameters, values, evalled=false, r={})
     i = 0
     
-    if values[-2] == Rouge::Symbol[:&]
-      values =
-          values[0...-2].map {|v| context.eval(v)} +
-          context.eval(values[-1]).to_a
-    else
-      values =
-          values.map {|v| context.eval(v)}
-    end
+    unless evalled
+      if values[-2] == Rouge::Symbol[:|]
+        block = context.eval(values[-1])
+        block_supplied = true
 
-    r = {}
-    
-    i = 0
-    pcount = parameters.length
-    while i < pcount
-      p = parameters[i]
-
-      if p == Rouge::Symbol[:&]
-        r[parameters[i + 1]] = values[i..-1].freeze
-        break
+        values = values[0...-2]
       end
 
-      r[p] = values[i]
-      i += 1
+      if values[-2] == Rouge::Symbol[:&]
+        values =
+            values[0...-2].map {|v| context.eval(v)} +
+            context.eval(values[-1]).to_a
+      else
+        values =
+            values.map {|v| context.eval(v)}
+      end
+    else
+      values = values.dup
+    end
+    
+    parameters = parameters.dup
+    while parameters.length > 0
+      p = parameters.shift
+
+      if p == Rouge::Symbol[:&]
+        r[parameters.shift] = values.freeze
+        values = []
+        next
+      end
+
+      if p == Rouge::Symbol[:|]
+        if not block_supplied
+          raise ArgumentError, "no block supplied"
+        end
+
+        r[parameters.shift] = block
+        next
+      end
+
+      if values.length == 0
+        raise ArgumentError, "fewer values than parameters"
+      end
+
+      if p.is_a? Array
+        destructure(context, p, values.shift, true, r)
+      else
+        r[p] = values.shift
+      end
+    end
+
+    if values.length > 0
+      raise ArgumentError, "fewer parameters than values"
     end
 
     r

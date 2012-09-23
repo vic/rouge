@@ -382,10 +382,18 @@ describe Rouge::Builtins do
                      Rouge::Symbol[:c] => 3}.to_s)
     end
 
-    it "should error on arity mismatch" do
+    it "should error on arity mismatch, and not on not" do
       lambda {
         @context.readeval("(destructure [a b] [1 2 3])")
       }.should raise_exception(ArgumentError)
+
+      lambda {
+        @context.readeval("(destructure [a b c] [1 2])")
+      }.should raise_exception(ArgumentError)
+
+      lambda {
+        @context.readeval("(destructure [& a] [1 2 3])")
+      }.should_not raise_exception
     end
 
     it "should assign rest arguments" do
@@ -406,6 +414,35 @@ describe Rouge::Builtins do
           should eq({Rouge::Symbol[:a] => 1,
                      Rouge::Symbol[:b] => 2,
                      Rouge::Symbol[:c] => [3, 4]}.to_s)
+    end
+
+    it "should destructure blocks" do
+      x = lambda {}
+      @context.set_here :x, x
+      @context.readeval("(destructure [a | b] [1 | x])").to_s.
+          should eq({Rouge::Symbol[:a] => 1,
+                     Rouge::Symbol[:b] => x}.to_s)
+    end
+
+    it "should destructure maps" do
+      # user=> (let [{the-x :x the-y :y} point]
+      #          (println "x:" the-x "y:" the-y))
+      # x: 5 y: 7
+      pending
+    end
+
+    it "should destructure with :as" do
+      # user=> (let [[x & more :as full-list] indexes]
+      #                  (println "x:" x "more:" more "full list:" full-list))
+      # x: 1 more: (2 3) full list: [1 2 3]
+      pending
+    end
+
+    it "should destructure with :keys" do
+      # user=> (let [{:keys [x y]} point]
+      #          (println "x:" x "y:" y))
+      # x: 5 y: 7
+      pending
     end
   end
 end
