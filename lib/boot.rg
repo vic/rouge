@@ -174,15 +174,11 @@
                           [`(.name (var ~key)) val]))
                       (.each_slice var-vals 2))
                     1))]
-  `(do
+  `(try
      (push-thread-bindings (hash-map ~@(var-ize bindings)))
-     (let [result (do ~@body)]
-       (pop-thread-bindings)
-       result))))
-     ;(try
-       ;~@body
-       ;(finally
-         ;(pop-thread-bindings)))) ))
+     ~@body
+     (finally
+       (pop-thread-bindings)))))
 
 (defn deref [derefable]
   (.deref derefable))

@@ -304,17 +304,20 @@ describe Rouge::Reader do
 
       it "should read identically within each invocation" do
         as = @ns.read('`(a# a# `(a# a#))')
-        as[0].should eq Rouge::Symbol[:list]
-        as[1][0].should eq Rouge::Symbol[:quote]
-        a1 = as[1][1]
-        as[2][0].should eq Rouge::Symbol[:quote]
-        a2 = as[2][1]
-        STDOUT.puts as
-        as[3][0].should eq Rouge::Symbol[:list]
-        as[3][1][0].should eq Rouge::Symbol[:quote]
-        a3 = as[3][1][1]
-        as[3][2][0].should eq Rouge::Symbol[:quote]
-        a4 = as[3][2][1]
+        as = as
+          .map {|e| e.respond_to?(:to_a) ? e.to_a : e}
+          .flatten
+          .map {|e| e.respond_to?(:to_a) ? e.to_a : e}
+          .flatten
+          .map {|e| e.respond_to?(:to_a) ? e.to_a : e}
+          .flatten
+          .find_all {|e|
+            e.is_a?(Rouge::Symbol) and e.name.to_s =~ /^a/
+          }
+        as.length.should eq 4
+        as[0].should eq as[1]
+        as[2].should eq as[3]
+        as[0].should_not eq as[2]
       end
     end
   end

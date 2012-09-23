@@ -6,10 +6,13 @@ class Rouge::Reader
   class TrailingDataError < StandardError; end
   class EndOfDataError < StandardError; end
 
+  @@gensym_counter = 0
+
   def initialize(ns, input)
     @ns = ns
     @src = input
     @n = 0
+    @gensyms = []
   end
 
   attr_accessor :ns
@@ -155,7 +158,10 @@ class Rouge::Reader
 
   def syntaxquotation
     consume
-    dequote lex
+    @gensyms.unshift(@@gensym_counter += 1)
+    r = dequote lex
+    @gensyms.shift
+    r
   end
 
   def dequotation
@@ -211,6 +217,10 @@ class Rouge::Reader
       form.inner
     when Rouge::Symbol
       case form.inner.to_s
+      when /(\#)$/
+        Rouge::Cons[Rouge::Symbol[:quote],
+                    Rouge::Symbol[
+            :"#{form.inner.to_s.gsub(/(\#)$/, '')}__#{@gensyms[0]}__auto__"]]
       when /\//, /^\./, /^[&|]$/
         Rouge::Cons[Rouge::Symbol[:quote], form].freeze
       else
