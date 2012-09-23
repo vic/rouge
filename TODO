@@ -1,3 +1,7 @@
+NEXT:
+- destructuring (in FN, LET, everywhere else)
+- refactor DEFN, DEFMACRO, LET, BINDING(?) to make use of above
+
 miscellaeny
 -----------
 - MACROEXPAND
@@ -36,7 +40,6 @@ core lang
 - seqs
 - atoms (actually multithreaded), refs, agents
 - (. x y)
-- destructuring (in FN, LET, everywhere else)
 - rest of the clojure core API (maybe even in clojure.core ns)
 - clojure-ish IO libraries which expose async IO
 - defprotocol -- looks important! ISeq, ISeqable, ISequential and what have
