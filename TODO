@@ -6,7 +6,6 @@ miscellaeny
 - organise boot.rg
 - test the whole core
 - omit Ruby from tracebacks?
-- better read errors
 - better exceptions/errors
 - readline autocomplete
 - package as a gem?
@@ -33,11 +32,9 @@ core lang
 - INTERN
 - FOR
 - (def a/b) should not create #'user/a/b, lol.
-- (ns blah) in REPL should change ns
 - multi-form defn: (defn x ([a] ...) ([a b] ...))
 - seqs
 - atoms (actually multithreaded), refs, agents
-- freeze vectors, lists where approriate
 - (. x y)
 - destructuring (in FN, LET, everywhere else)
 - rest of the clojure core API (maybe even in clojure.core ns)

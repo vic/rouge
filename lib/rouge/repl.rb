@@ -36,8 +36,6 @@ class << Rouge::REPL
       rescue Rouge::Reader::EndOfDataError
         chaining = true
         next
-      rescue Rouge::Reader::TrailingDataError
-        STDOUT.puts "!! REPL too stupid to deal with trailing data."
       end
 
       chaining = false
@@ -50,6 +48,9 @@ class << Rouge::REPL
           context.set_here :"*#{i}", context[:"*#{i - 1}"]
         end
         context.set_here :"*1", result
+      rescue Rouge::Context::ChangeContextException => cce
+        context = cce.context
+        count = 0
       rescue => e
         STDOUT.puts "!! #{e.class}: #{e.message}"
         STDOUT.puts "#{e.backtrace.join "\n"}"

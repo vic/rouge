@@ -144,7 +144,7 @@ class << Rouge::Builtins
     if parts[0].is_a? Array
       args, *body = parts
       macro = Rouge::Macro[
-        context.eval(Rouge::Cons[Rouge::Symbol[:fn], args, *body].freeze)]
+        context.eval(Rouge::Cons[Rouge::Symbol[:fn], args, *body])]
     elsif parts.all? {|part| part.is_a? Rouge::Cons}
       arities = {}
 
@@ -167,7 +167,7 @@ class << Rouge::Builtins
         end
 
         arities[arity] =
-            context.eval(Rouge::Cons[Rouge::Symbol[:fn], args, *body].freeze)
+            context.eval(Rouge::Cons[Rouge::Symbol[:fn], args, *body])
       end
 
       macro = Rouge::Macro[
@@ -194,7 +194,7 @@ class << Rouge::Builtins
     # This is a terrible hack.
     context.eval(Rouge::Cons[
         fun,
-        *args.map {|a| Rouge::Cons[Rouge::Symbol[:quote], a].freeze}.freeze])
+        *args.map {|a| Rouge::Cons[Rouge::Symbol[:quote], a]}])
   end
 
   def var(context, symbol)
@@ -219,7 +219,7 @@ class << Rouge::Builtins
     if form.is_a?(Rouge::Cons) and
        form[0].is_a? Rouge::Symbol and
        form[0].name == :finally
-      finally = form[1..-1]
+      finally = form[1..-1].freeze
       body.pop
     end
 
@@ -235,7 +235,7 @@ class << Rouge::Builtins
       body.pop
       catches[context.eval(form[1])] =
         {:bind => form[2],
-         :body => form[3..-1]}
+         :body => form[3..-1].freeze}
     end
 
     r =

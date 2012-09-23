@@ -3,7 +3,6 @@ require 'rouge/wrappers'
 
 class Rouge::Reader
   class UnexpectedCharacterError < StandardError; end
-  class TrailingDataError < StandardError; end
   class EndOfDataError < StandardError; end
 
   @@gensym_counter = 0
@@ -27,7 +26,7 @@ class Rouge::Reader
       when /"/
         string
       when /\(/
-        Rouge::Cons[*list(')')].freeze
+        Rouge::Cons[*list(')')]
       when /\[/
         list ']'
       when /#/
@@ -153,7 +152,7 @@ class Rouge::Reader
 
   def quotation
     consume
-    Rouge::Cons[Rouge::Symbol[:quote], lex].freeze
+    Rouge::Cons[Rouge::Symbol[:quote], lex]
   end
 
   def syntaxquotation
@@ -168,9 +167,9 @@ class Rouge::Reader
     consume
     if peek == ?@
       consume
-      Rouge::Splice[lex]
+      Rouge::Splice[lex].freeze
     else
-      Rouge::Dequote[lex]
+      Rouge::Dequote[lex].freeze
     end
   end
 
@@ -182,7 +181,7 @@ class Rouge::Reader
       form.each do |f|
         if f.is_a? Rouge::Splice
           if group.length > 0
-            rest << Rouge::Cons[Rouge::Symbol[:list], *group].freeze
+            rest << Rouge::Cons[Rouge::Symbol[:list], *group]
             group = []
           end
           rest << f.inner
@@ -192,22 +191,22 @@ class Rouge::Reader
       end
 
       if group.length > 0
-        rest << Rouge::Cons[Rouge::Symbol[:list], *group].freeze
+        rest << Rouge::Cons[Rouge::Symbol[:list], *group]
       end
 
       r =
         if rest.length == 1
           rest[0]
         else
-          Rouge::Cons[Rouge::Symbol[:concat], *rest].freeze
+          Rouge::Cons[Rouge::Symbol[:concat], *rest]
         end
 
       if form.is_a?(Array)
         Rouge::Cons[Rouge::Symbol[:apply],
                     Rouge::Symbol[:vector],
-                    r].freeze
+                    r]
       elsif rest.length > 1
-        Rouge::Cons[Rouge::Symbol[:seq], r].freeze
+        Rouge::Cons[Rouge::Symbol[:seq], r]
       else
         r
       end
@@ -218,23 +217,25 @@ class Rouge::Reader
     when Rouge::Symbol
       case form.inner.to_s
       when /(\#)$/
-        Rouge::Cons[Rouge::Symbol[:quote],
-                    Rouge::Symbol[
-            :"#{form.inner.to_s.gsub(/(\#)$/, '')}__#{@gensyms[0]}__auto__"]]
+        Rouge::Cons[
+            Rouge::Symbol[:quote],
+            Rouge::Symbol[
+                ("#{form.inner.to_s.gsub(/(\#)$/, '')}__" \
+                 "#{@gensyms[0]}__auto__").intern]]
       when /\//, /^\./, /^[&|]$/
-        Rouge::Cons[Rouge::Symbol[:quote], form].freeze
+        Rouge::Cons[Rouge::Symbol[:quote], form]
       else
         begin
           var = @ns[form.inner]
           Rouge::Cons[Rouge::Symbol[:quote],
-                      Rouge::Symbol[var.name]].freeze
+                      Rouge::Symbol[var.name]]
         rescue Rouge::Namespace::VarNotFoundError
           Rouge::Cons[Rouge::Symbol[:quote],
-                      Rouge::Symbol[:"#{@ns.name}/#{form.inner}"]].freeze
+                      Rouge::Symbol[:"#{@ns.name}/#{form.inner}"]]
         end
       end
     else
-      Rouge::Cons[Rouge::Symbol[:quote], form].freeze
+      Rouge::Cons[Rouge::Symbol[:quote], form]
     end
   end
 
@@ -246,10 +247,10 @@ class Rouge::Reader
       Rouge::Cons[
           Rouge::Symbol[:fn],
           (1..count).map {|n| Rouge::Symbol[:"%#{n}"]}.freeze,
-          body].freeze
+          body]
     when "'"
       consume
-      Rouge::Cons[Rouge::Symbol[:var], lex].freeze
+      Rouge::Cons[Rouge::Symbol[:var], lex]
     else
       reader_raise UnexpectedCharacterError, "#{peek.inspect} in #dispatch"
     end
@@ -261,10 +262,10 @@ class Rouge::Reader
       mapped = form.map do |e|
         e, count = dispatch_rewrite_fn(e, count)
         e
-      end
+      end.freeze
 
       if form.is_a?(Rouge::Cons)
-        [Rouge::Cons[*mapped].freeze, count]
+        [Rouge::Cons[*mapped], count]
       else
         [mapped, count]
       end
@@ -313,7 +314,7 @@ class Rouge::Reader
 
   def deref
     consume
-    Rouge::Cons[Rouge::Symbol[:"rouge.core/deref"], lex].freeze
+    Rouge::Cons[Rouge::Symbol[:"rouge.core/deref"], lex]
   end
 
   def slurp re

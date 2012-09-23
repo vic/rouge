@@ -76,7 +76,7 @@ class Rouge::Cons
   def self.[](*elements)
     head = Empty
     (elements.length - 1).downto(0).each do |i|
-      head = new(elements[i], head)
+      head = new(elements[i], head).freeze
     end
 
     head
@@ -119,5 +119,6 @@ class << Rouge::Cons::Empty
 
   include Enumerable
 end
+Rouge::Cons::Empty.freeze
 
 # vim: set sw=2 et cc=80:

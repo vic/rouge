@@ -92,9 +92,9 @@ class Rouge::Context
     when Rouge::Cons
       eval_cons form
     when Hash
-      Hash[form.map {|k,v| [eval(k), eval(v)]}]
+      Hash[form.map {|k,v| [eval(k), eval(v)]}].freeze
     when Array
-      form.map {|f| eval(f)}
+      form.map {|f| eval(f)}.freeze
     else
       form
     end
@@ -202,7 +202,6 @@ class Rouge::Context
     begin
       block.call
     rescue Exception => e
-      STDOUT.puts block.source_location.join(':')
       target = block.source_location.join(':')
       changed = 0
       $!.backtrace.map! {|line|
