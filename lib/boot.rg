@@ -240,8 +240,8 @@
 (defmacro is [check]
   `(let [result# (try
                   {:error nil, :result ~check}
-                  (catch ruby/Exception e
-                    {:error e, :result false}))]
+                  (catch ruby/Exception e#
+                    {:error e#, :result false}))]
      (if (not (get result# :result))
       (do
         (swap! *tests-failed* conj (conj *test-level* (pr-str '~check)))

@@ -373,6 +373,41 @@ describe Rouge::Builtins do
       ROUGE
     end
   end
+
+  describe "destructure" do
+    it "should return a hash of symbols to assigned values" do
+      @context.readeval("(destructure [a b c] [1 2 3])").to_s.
+          should eq({Rouge::Symbol[:a] => 1,
+                     Rouge::Symbol[:b] => 2,
+                     Rouge::Symbol[:c] => 3}.to_s)
+    end
+
+    it "should error on arity mismatch" do
+      lambda {
+        @context.readeval("(destructure [a b] [1 2 3])")
+      }.should raise_exception(ArgumentError)
+    end
+
+    it "should assign rest arguments" do
+      @context.readeval("(destructure [a & b] [1 2 3])").to_s.
+          should eq({Rouge::Symbol[:a] => 1,
+                     Rouge::Symbol[:b] => [2, 3]}.to_s)
+    end
+
+    it "should destructure seqs" do
+      @context.readeval("(destructure [[a b] c] [[1 2] 3])").to_s.
+          should eq({Rouge::Symbol[:a] => 1,
+                     Rouge::Symbol[:b] => 2,
+                     Rouge::Symbol[:c] => 3}.to_s)
+    end
+
+    it "should destructure rests in nested seqs" do
+      @context.readeval("(destructure [a [b & c]] [1 [2 3 4]])").to_s.
+          should eq({Rouge::Symbol[:a] => 1,
+                     Rouge::Symbol[:b] => 2,
+                     Rouge::Symbol[:c] => [3, 4]}.to_s)
+    end
+  end
 end
 
 # vim: set sw=2 et cc=80:
