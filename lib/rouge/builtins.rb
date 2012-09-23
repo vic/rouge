@@ -21,96 +21,52 @@ class << Rouge::Builtins
     form
   end
 
-  def defbody(context, *parts, &action)
-    if parts[0].is_a? Array
-      args, *body = parts
-      action.call(context, args, *body)
-    elsif parts.all? {|part| part.is_a? Rouge::Cons}
-      arities = {}
+  def fn(context, argv, *body)
+    context = Rouge::Context.new context
 
-      parts.each do |cons|
-        args, *body = cons.to_a
-
-        if !args.is_a? Array
-          raise ArgumentError,
-              "bad multi-form defbody component #{args.inspect}"
-        end
-
-        if args.index(Rouge::Symbol[:|])
-          arity = -1
-        else
-          arity = args.length
-        end
-
-        if arities[arity]
-          raise ArgumentError, "seen same arity twice"
-        end
-
-        arities[arity] = action.call(context, args, *body)
-      end
-
-      lambda {|*args, &blockgiven|
-        if arities[args.length]
-          arities[args.length].call *args, &blockgiven
-        elsif arities[-1]
-          arities[-1].call *args, &blockgiven
-        else
-          raise ArgumentError, "no matching arity in defbody"
-        end
-      }
+    if argv[-2] == Rouge::Symbol[:&]
+      rest = argv[-1]
+      argv = argv[0...-2]
+    elsif argv[-4] == Rouge::Symbol[:&] and argv[-2] == Rouge::Symbol[:|]
+      rest = argv[-3]
+      argv = argv[0...-4] + argv[-2..-1]
     else
-      raise ArgumentError, "neither single-form defbody nor multi-form"
+      rest = nil
     end
-  end
 
-  def fn(context, *parts)
-    defbody(context, *parts) do |argv, *body|
-      context = Rouge::Context.new context
+    if argv[-2] == Rouge::Symbol[:|]
+      block = argv[-1]
+      argv = argv[0...-2]
+    else
+      block = nil
+    end
 
-      if argv[-2] == Rouge::Symbol[:&]
-        rest = argv[-1]
-        argv = argv[0...-2]
-      elsif argv[-4] == Rouge::Symbol[:&] and argv[-2] == Rouge::Symbol[:|]
-        rest = argv[-3]
-        argv = argv[0...-4] + argv[-2..-1]
-      else
-        rest = nil
+    lambda {|*args, &blockgiven|
+      if !rest ? (args.length != argv.length) : (args.length < argv.length)
+        begin
+          raise ArgumentError,
+              "wrong number of arguments (#{args.length} for #{argv.length})"
+        rescue ArgumentError => e
+          e.backtrace.pop
+          e.backtrace.unshift "(rouge):?:lambda call"
+          raise e
+        end
       end
 
-      if argv[-2] == Rouge::Symbol[:|]
-        block = argv[-1]
-        argv = argv[0...-2]
-      else
-        block = nil
+      (0...argv.length).each do |i|
+        context.set_here argv[i].inner, args[i]
       end
 
-      lambda {|*args, &blockgiven|
-        if !rest ? (args.length != argv.length) : (args.length < argv.length)
-          begin
-            raise ArgumentError,
-                "wrong number of arguments (#{args.length} for #{argv.length})"
-          rescue ArgumentError => e
-            e.backtrace.pop
-            e.backtrace.unshift "(rouge):?:lambda call"
-            raise e
-          end
-        end
+      if rest
+        context.set_here rest.inner, Rouge::Cons[*args[argv.length..-1]]
+      end
 
-        (0...argv.length).each do |i|
-          context.set_here argv[i].inner, args[i]
-        end
+      if block
+        context.set_here block.inner, blockgiven
+      end
 
-        if rest
-          context.set_here rest.inner, Rouge::Cons[*args[argv.length..-1]]
-        end
-
-        if block
-          context.set_here block.inner, blockgiven
-        end
-
-        self.do(context, *body)
-      }
-    end
+      self.do(context, *body)
+    }
   end
 
   def def(context, name, *form)
@@ -185,9 +141,47 @@ class << Rouge::Builtins
   end
 
   def defmacro(context, name, *parts)
-    macro = defbody(context, *parts) do |argv, *body|
-      Rouge::Macro[
-          context.eval(Rouge::Cons[Rouge::Symbol[:fn], args, *body])]
+    if parts[0].is_a? Array
+      args, *body = parts
+      macro = Rouge::Macro[
+        context.eval(Rouge::Cons[Rouge::Symbol[:fn], args, *body])]
+    elsif parts.all? {|part| part.is_a? Rouge::Cons}
+      arities = {}
+
+      parts.each do |cons|
+        args, *body = cons.to_a
+
+        if !args.is_a? Array
+          raise ArgumentError,
+              "bad multi-form defmacro component #{args.inspect}"
+        end
+
+        if args.index(Rouge::Symbol[:|])
+          arity = -1
+        else
+          arity = args.length
+        end
+
+        if arities[arity]
+          raise ArgumentError, "seen same arity twice"
+        end
+
+        arities[arity] =
+            context.eval(Rouge::Cons[Rouge::Symbol[:fn], args, *body])
+      end
+
+      macro = Rouge::Macro[
+        lambda {|*args, &blockgiven|
+          if arities[args.length]
+            arities[args.length].call *args, &blockgiven
+          elsif arities[-1]
+            arities[-1].call *args, &blockgiven
+          else
+            raise ArgumentError, "no matching arity in macro"
+          end
+        }]
+    else
+      raise ArgumentError, "neither single-form defmacro nor multi-form"
     end
 
     context.ns.set_here name.inner, macro
@@ -262,6 +256,37 @@ class << Rouge::Builtins
       end
 
     self.do(context, *finally) if finally
+    r
+  end
+
+  def destructure(context, parameters, values)
+    i = 0
+    
+    if values[-2] == Rouge::Symbol[:&]
+      values =
+          values[0...-2].map {|v| context.eval(v)} +
+          context.eval(values[-1]).to_a
+    else
+      values =
+          values.map {|v| context.eval(v)}
+    end
+
+    r = {}
+    
+    i = 0
+    pcount = parameters.length
+    while i < pcount
+      p = parameters[i]
+
+      if p == Rouge::Symbol[:&]
+        r[parameters[i + 1]] = values[i..-1].freeze
+        break
+      end
+
+      r[p] = values[i]
+      i += 1
+    end
+
     r
   end
 end
