@@ -41,7 +41,8 @@ class << Rouge::REPL
       chaining = false
       begin
         result = context.eval(form)
-        STDOUT.puts Rouge.print(result)
+        Rouge.print(result, STDOUT)
+        STDOUT.puts
 
         count += 1 if count < 10
         count.downto(2) do |i|

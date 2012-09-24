@@ -9,8 +9,8 @@ class << Rouge
   require 'rouge/context'
   require 'rouge/repl'
 
-  def print(form)
-    Rouge::Printer.print form
+  def print(form, out)
+    Rouge::Printer.print form, out
   end
 
   def [](ns)

@@ -4,48 +4,68 @@ require 'rouge/wrappers'
 module Rouge::Printer
   class UnknownFormError < StandardError; end
 
-  def self.print(form)
+  def self.print(form, out)
     case form
     when Integer
-      form.to_s
+      out << form.to_s
     when Rouge::Symbol
-      form.inner.to_s
+      out << form.inner.to_s
     when Symbol
-      form.inspect
+      out << form.inspect
     when String
-      form.inspect
-    when Array
-      "[#{form.map {|e| print e}.join " "}]"
+      out << form.inspect
     when Rouge::Cons::Empty
-      "()"
+      out << "()"
     when Rouge::Cons
       if form.length == 2 and form[0] == Rouge::Symbol[:quote]
-        "'#{print form[1]}"
+        out << "'"
+        print(form[1], out)
       elsif form.length == 2 and form[0] == Rouge::Symbol[:var]
-        "#'#{print form[1]}"
+        out << "#'"
+        print(form[1], out)
       else
-        "(#{form.map {|e| print e}.join " "})"
+        out << "("
+        len = form.length
+        form.each.with_index do |e, i|
+          out << " " unless i.zero?
+          print(e, out)
+        end
+        out << ")"
       end
+    when Array
+      out << "["
+      form.each.with_index do |e, i|
+        out << " " unless i.zero?
+        print(e, out)
+      end
+      out << "]"
     when Rouge::Var
-      "#'#{form.name}"
+      out << "#'#{form.name}"
     when Hash
-      "{#{form.map {|k,v| print(k) + " " + print(v)}.join ", "}}"
+      out << "{"
+      form.each.with_index do |kv,i|
+        out << ", " unless i.zero?
+        print(kv[0], out)
+        out << " "
+        print(kv[1], out)
+      end
+      out << "}"
     when NilClass
-      "nil"
+      out << "nil"
     when TrueClass
-      "true"
+      out << "true"
     when FalseClass
-      "false"
+      out << "false"
     when Class, Module
       if form.name
-        "ruby/#{form.name.split('::').join('.')}"
+        out << "ruby/#{form.name.split('::').join('.')}"
       else
-        form.inspect
+        out << form.inspect
       end
     when Rouge::Builtin
-      "rouge.builtin/#{form.inner.name}"
+      out << "rouge.builtin/#{form.inner.name}"
     else
-      form.inspect
+      out << form.inspect
     end
   end
 end

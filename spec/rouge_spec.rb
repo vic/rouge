@@ -2,6 +2,7 @@
 require 'spec_helper'
 require 'rouge'
 require 'term/ansicolor'
+require 'ruby-prof'
 
 describe Rouge do
   before do
@@ -35,7 +36,14 @@ describe Rouge do
   describe "the Rouge specs" do
     Dir[relative_to_spec("*.rg")].each do |file|
       it "should pass #{File.basename file}" do
-        r = Rouge::Context.new(Rouge[:user]).readeval(File.read(file))
+        RubyProf.start
+
+        begin
+          r = Rouge::Context.new(Rouge[:user]).readeval(File.read(file))
+        rescue => e
+          r = {:passed => 0, :failed => []}
+        end
+
         total = r[:passed] + r[:failed].length
 
         message = 
@@ -50,6 +58,12 @@ describe Rouge do
               r[:failed].map {|e| "  - #{e.join(" -> ")}"}.join("\n")
         else
           STDOUT.puts Term::ANSIColor.green(message)
+        end
+
+        result = RubyProf.stop
+        
+        File.open("prof-#{file}.html", "w") do |f|
+          RubyProf::GraphHtmlPrinter.new(result).print(f)
         end
       end
     end
