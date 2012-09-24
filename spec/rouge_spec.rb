@@ -41,6 +41,8 @@ describe Rouge do
         begin
           r = Rouge::Context.new(Rouge[:user]).readeval(File.read(file))
         rescue => e
+          STDOUT.puts Term::ANSIColor.red("#{e.class}: #{e.message}")
+          STDOUT.puts Term::ANSIColor.red(e.backtrace.join("\n"))
           r = {:passed => 0, :failed => []}
         end
 
@@ -62,8 +64,9 @@ describe Rouge do
 
         result = RubyProf.stop
         
-        File.open("prof-#{file}.html", "w") do |f|
-          RubyProf::GraphHtmlPrinter.new(result).print(f)
+        File.open("prof-#{File.basename file}.html", "w") do |f|
+          RubyProf::GraphHtmlPrinter.new(result)
+              .print(f, :min_percent => 1, :sort_method => :self_time)
         end
       end
     end

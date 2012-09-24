@@ -4,6 +4,7 @@ module Rouge; end
 
 class << Rouge
   require 'rouge/wrappers'
+  require 'rouge/cons'
   require 'rouge/reader'
   require 'rouge/printer'
   require 'rouge/context'

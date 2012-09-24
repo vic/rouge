@@ -41,7 +41,7 @@
     (.join args "")))
 
 (defn pr-str [& args]
-  (let [args (map #(.print ruby/Rouge %) args)]
+  (let [args (map #(.print ruby/Rouge % (ruby/String.)) args)]
     (.join args " ")))
 
 (defn print [& args]

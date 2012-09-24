@@ -161,14 +161,14 @@ class Rouge::Context
 
     case fun
     when Rouge::Builtin
-      backtrace_fix "(rouge):?:builtin: " + Rouge.print(form) do
+      backtrace_fix("(rouge):?:builtin: ", form) do
         fun.inner.call self, *form.to_a[1..-1]
       end
     when Rouge::Macro
-      macro_form = backtrace_fix "(rouge):?:m. expand: " + Rouge.print(form) do 
+      macro_form = backtrace_fix("(rouge):?:m. expand: ", form) do
         fun.inner.call(*form.to_a[1..-1])
       end
-      backtrace_fix "(rouge):?:m. run: " + Rouge.print(macro_form) do
+      backtrace_fix("(rouge):?:m. run: ", macro_form) do
         eval macro_form
       end
     else
@@ -192,13 +192,13 @@ class Rouge::Context
 
       args = args.map {|f| eval(f)}
 
-      backtrace_fix "(rouge):?:lambda: " + Rouge.print(form) do
+      backtrace_fix("(rouge):?:lambda: ", form) do
         fun.call *args, &block
       end
     end
   end
 
-  def backtrace_fix name, &block
+  def backtrace_fix name, form, &block
     begin
       block.call
     rescue Exception => e
@@ -207,7 +207,7 @@ class Rouge::Context
       $!.backtrace.map! {|line|
         if line.scan("#{target}:").size > 0 and changed == 0
           changed += 1
-          name
+          Rouge.print(form, name.dup)
         else
           line
         end
