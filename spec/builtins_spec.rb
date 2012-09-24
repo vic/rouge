@@ -22,6 +22,12 @@ describe Rouge::Builtins do
     end
   end
 
+  describe "context" do
+    it "should return the calling context" do
+      @context.readeval("(context)").should be @context
+    end
+  end
+
   describe "quote" do
     it "should prevent evaluation" do
       @context.readeval("(quote lmnop)").should eq @ns.read('lmnop')

@@ -17,6 +17,10 @@ class << Rouge::Builtins
     self.do(context, *body)
   end
 
+  def context(context)
+    context
+  end
+
   def quote(context, form)
     form
   end
@@ -260,6 +264,7 @@ class << Rouge::Builtins
   end
 
   def destructure(context, parameters, values, evalled=false, r={})
+    # TODO: can probably move this elsewhere as a regular function.
     i = 0
     
     unless evalled
