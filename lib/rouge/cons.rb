@@ -8,14 +8,6 @@ class Rouge::Cons
     end
 
     @head, @tail = head, tail
-
-    # Performance hack; every cons caches its own array?! XXX
-    @to_a = [@head]
-    cursor = @tail
-    while cursor and cursor != Empty
-      @to_a << cursor.head
-      cursor = cursor.tail
-    end
   end
 
   def inspect
@@ -27,31 +19,39 @@ class Rouge::Cons
   def self.[](*elements)
     head = Empty
     (elements.length - 1).downto(0).each do |i|
-      head = new(elements[i], head).freeze
+      head = new(elements[i], head.freeze)
     end
 
-    head
-  end
-
-  def each(&block)
-    @to_a.each(&block)
+    head.to_a
+    head.freeze
   end
 
   def ==(cons)
-    cons.is_a?(Rouge::Cons) and @to_a == cons.to_a
+    cons.is_a?(Rouge::Cons) and to_a == cons.to_a
   end
 
-  def length
-    @to_a.length
+  def to_a
+    return @to_a if @to_a
+
+    to_a = [@head]
+    cursor = @tail
+    while cursor and cursor != Empty
+      to_a << cursor.head
+      cursor = cursor.tail
+    end
+
+    if frozen?
+      to_a 
+    else
+      @to_a = to_a
+    end
   end
 
-  def [](i)
-    @to_a[i]
+  def method_missing(sym, *args, &block)
+    to_a.send(sym, *args, &block)
   end
 
   attr_reader :head, :tail
-
-  include Enumerable
 end
 
 Rouge::Cons::Empty = Object.new
