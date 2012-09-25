@@ -119,30 +119,30 @@ describe Rouge::Context do
 
   describe "the locate method" do
     it "should find the contextually-bound value for an unqualified symbol" do
-      @in_spec.locate(:blah).should eq "code code"
+      @in_spec.locate(Rouge::Symbol[:blah]).should eq "code code"
     end
 
     it "should find the var in our namespace for an unqualified symbol" do
-      @in_spec.locate(:tiffany).
+      @in_spec.locate(Rouge::Symbol[:tiffany]).
           should eq Rouge::Var.new(:"user.spec/tiffany", "wha?")
     end
 
     it "should find the var in a referred ns for an unqualified symbol" do
-      v = @in_spec.locate(:def)
+      v = @in_spec.locate(Rouge::Symbol[:def])
       v.should be_an_instance_of(Rouge::Var)
       v.name.should eq :"rouge.builtin/def"
       v.deref.should be_an_instance_of(Rouge::Builtin)
     end
 
     it "should find the var in any namespace for a qualified symbol" do
-      v = @in_spec.locate(:"ruby/Kernel")
+      v = @in_spec.locate(Rouge::Symbol[:"ruby/Kernel"])
       v.should be_an_instance_of(Rouge::Var)
       v.name.should eq :"ruby/Kernel"
       v.deref.should eq Kernel
     end
 
     it "should find the method for a new class instantiation" do
-      m = @in_spec.locate("ruby/String.")
+      m = @in_spec.locate(Rouge::Symbol[:"ruby/String."])
       m.should be_an_instance_of Method
       m.receiver.should eq String
       m.name.should eq :new

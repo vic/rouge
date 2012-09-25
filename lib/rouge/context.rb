@@ -100,31 +100,28 @@ class Rouge::Context
     end
   end
 
-  # +symbol+ should be a Ruby Symbol or String, not a Rouge::Symbol.
+  # +symbol+ should be a Rouge::Symbol.
   def locate(symbol)
-    symbol = symbol.to_s
-
-    will_new =
-      if symbol[-1] == ?.
-        symbol = symbol[0..-2]
-        true
-      end
-
-    ns, name =
-      symbol == "/" ? [nil, "/"] : symbol.match(/^(?:(.*)\/)?(.*)$/).captures
-
-    if ns.nil?
-      sub = self
-    else
-      sub = Rouge::Namespace[ns.intern]
+    if !symbol.is_a?(Rouge::Symbol)
+      raise ArgumentError, "locate not called with R::S"
     end
 
-    lookups = name.split(/(?<=.)\.(?=.)/)
-    sub = sub[lookups.shift.intern]
+    will_new = symbol.name_s[-1] == ?.
 
-    while lookups.length > 0
+    if symbol.ns.nil?
+      sub = self
+    else
+      sub = Rouge::Namespace[symbol.ns]
+    end
+
+    lookups = symbol.name_parts
+    sub = sub[lookups[0]]
+    i, count = 1, lookups.length
+
+    while i < count
       sub = sub.deref if sub.is_a?(Rouge::Var)
-      sub = sub.const_get(lookups.shift.intern)
+      sub = sub.const_get(lookups[i])
+      i += 1
     end
 
     if will_new
@@ -140,11 +137,9 @@ class Rouge::Context
   private
 
   def eval_symbol(form)
-    form = form.inner.to_s
-    if form[0] == ?.
-      form = form[1..-1]
+    if !form.ns and form.name_s[0] == ?.
       lambda {|receiver, *args, &block|
-        receiver.send(form, *args, &block)
+        receiver.send(form.name_s[1..-1], *args, &block)
       }
     else
       result = locate form

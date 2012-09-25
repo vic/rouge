@@ -12,7 +12,11 @@ class << Rouge::Builtins
   def let(context, bindings, *body)
     context = Rouge::Context.new context
     bindings.each_slice(2) do |k, v|
-      context.set_here k.inner, context.eval(v)
+      if k.ns
+        raise Rouge::Context::BadBindingError,
+            "cannot LET qualified name"
+      end
+      context.set_here k.name, context.eval(v)
     end
     self.do(context, *body)
   end
@@ -51,22 +55,22 @@ class << Rouge::Builtins
           raise ArgumentError,
               "wrong number of arguments (#{args.length} for #{argv.length})"
         rescue ArgumentError => e
-          e.backtrace.pop
-          e.backtrace.unshift "(rouge):?:lambda call"
+          #e.backtrace.pop
+          #e.backtrace.unshift "(rouge):?:lambda call"
           raise e
         end
       end
 
       (0...argv.length).each do |i|
-        context.set_here argv[i].inner, args[i]
+        context.set_here argv[i].name, args[i]
       end
 
       if rest
-        context.set_here rest.inner, Rouge::Cons[*args[argv.length..-1]]
+        context.set_here rest.name, Rouge::Cons[*args[argv.length..-1]]
       end
 
       if block
-        context.set_here block.inner, blockgiven
+        context.set_here block.name, blockgiven
       end
 
       self.do(context, *body)
@@ -74,11 +78,15 @@ class << Rouge::Builtins
   end
 
   def def(context, name, *form)
+    if name.ns != nil
+      raise ArgumentError, "cannot def qualified var"
+    end
+
     case form.length
     when 0
-      context.ns.intern name.inner
+      context.ns.intern name.name
     when 1
-      context.ns.set_here name.inner, context.eval(form[0])
+      context.ns.set_here name.name, context.eval(form[0])
     else
       raise ArgumentError, "def called with too many forms #{form.inspect}"
     end
@@ -109,7 +117,7 @@ class << Rouge::Builtins
   end
 
   def ns(context, name, *args)
-    ns = Rouge[name.inner]
+    ns = Rouge[name.name]
     ns.refer Rouge[:"rouge.builtin"]
 
     args.each do |arg|
@@ -118,21 +126,21 @@ class << Rouge::Builtins
       case kind
       when :use
         params.each do |use|
-          ns.refer Rouge[use.inner]
+          ns.refer Rouge[use.name]
         end
       when :require
         params.each do |param|
           if param.is_a? Rouge::Symbol
-            Kernel.require param.inner.to_s
+            Kernel.require param.name.to_s
           elsif param.is_a? Array and
                 param.length == 3 and
                 param[0].is_a? Rouge::Symbol and
                 param[1] == :as and 
                 param[2].is_a? Rouge::Symbol
-            unless Rouge::Namespace.exists? param[0].inner
-              context.readeval(File.read("#{param[0].inner}.rg"))
+            unless Rouge::Namespace.exists? param[0].name
+              context.readeval(File.read("#{param[0].name}.rg"))
             end
-            Rouge::Namespace[param[2].inner] = Rouge[param[0].inner]
+            Rouge::Namespace[param[2].name] = Rouge[param[0].name]
           end
         end
       else
@@ -145,6 +153,10 @@ class << Rouge::Builtins
   end
 
   def defmacro(context, name, *parts)
+    if name.ns
+      raise ArgumentError, "cannot defmacro fully qualified var"
+    end
+
     if parts[0].is_a? Array
       args, *body = parts
       macro = Rouge::Macro[
@@ -188,7 +200,7 @@ class << Rouge::Builtins
       raise ArgumentError, "neither single-form defmacro nor multi-form"
     end
 
-    context.ns.set_here name.inner, macro
+    context.ns.set_here name.name, macro
   end
 
   def apply(context, fun, *args)
@@ -202,7 +214,7 @@ class << Rouge::Builtins
   end
 
   def var(context, symbol)
-    context.locate symbol.inner
+    context.locate symbol
   end
 
   def throw(context, throwable)
@@ -211,7 +223,7 @@ class << Rouge::Builtins
       raise exception
     rescue Exception => e
       # TODO
-      e.backtrace.unshift "(rouge):?:throw"
+      #e.backtrace.unshift "(rouge):?:throw"
       raise e
     end
   end
@@ -249,7 +261,7 @@ class << Rouge::Builtins
         catches.each do |klass, caught|
           if klass === e
             subcontext = Rouge::Context.new context
-            subcontext.set_here caught[:bind].inner, e
+            subcontext.set_here caught[:bind].name, e
             r = self.do(subcontext, *caught[:body])
             self.do(context, *finally) if finally
             return r

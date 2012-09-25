@@ -3,8 +3,11 @@
 class Rouge::Var
   @@stack = []
 
-  def initialize(name, root=Rouge::Var::UnboundSentinel)
+  def initialize(ns, name, root=Rouge::Var::UnboundSentinel)
+    @ns = ns
     @name = name
+    raise ArgumentError, "bad var ns" unless ns.is_a? Symbol
+    raise ArgumentError, "bad var name" unless name.is_a? Symbol
     if root == Rouge::Var::UnboundSentinel
       @root = Rouge::Var::Unbound.new self
     else
@@ -13,10 +16,10 @@ class Rouge::Var
   end
 
   def ==(var)
-    var.is_a?(Rouge::Var) and @name == var.name
+    var.is_a?(Rouge::Var) and @ns == var.ns and @name == var.name
   end
 
-  attr_reader :name
+  attr_reader :ns, :name
   
   def deref
     @@stack.reverse_each do |map|
@@ -29,7 +32,7 @@ class Rouge::Var
   end
 
   def inspect
-    "Rouge::Var.new(#{@name.inspect}, #{@root.inspect})"
+    "Rouge::Var.new(#{@ns.inspect}, #{@name.inspect}, #{@root.inspect})"
   end
 
   def to_s

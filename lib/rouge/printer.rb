@@ -9,7 +9,11 @@ module Rouge::Printer
     when Integer
       out << form.to_s
     when Rouge::Symbol
-      out << form.inner.to_s
+      if form.ns_s
+        out << form.ns_s
+        out << "/"
+      end
+      out << form.name_s
     when Symbol
       out << form.inspect
     when String

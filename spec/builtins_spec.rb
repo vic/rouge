@@ -55,7 +55,7 @@ describe Rouge::Builtins do
 
       lambda {
         @context.readeval('(fn [& rest])').call()
-        @context.readeval('(fn [& rest])').call(1)
+        @context.readeval('(fn [& rest])').call(1)#
         @context.readeval('(fn [& rest])').call(1, 2, 3)
         @context.readeval('(fn [& rest])').call(*(1..10000))
       }.should_not raise_exception
@@ -87,13 +87,13 @@ describe Rouge::Builtins do
   describe "def" do
     it "should create and intern a var" do
       @context.readeval("(def barge)").
-          should eq Rouge::Var.new(:"user.spec/barge")
+          should eq Rouge::Var.new(:"user.spec", :barge)
     end
 
     it "should always make a binding at the top of the namespace" do
       subcontext = Rouge::Context.new @context
       subcontext.readeval("(def sarge :b)").
-          should eq Rouge::Var.new(:"user.spec/sarge", :b)
+          should eq Rouge::Var.new(:"user.spec", :sarge, :b)
       @context.readeval('sarge').should eq :b
     end
   end
@@ -198,7 +198,8 @@ describe Rouge::Builtins do
     it "should return a var of the created macro" do
       v = @context.readeval("(defmacro a [] 'b)")
       v.should be_an_instance_of Rouge::Var
-      v.name.should eq :"user.spec/a"
+      v.ns.should eq :"user.spec"
+      v.name.should eq :a
     end
 
     it "should evaluate in the defining context" do
@@ -270,7 +271,8 @@ describe Rouge::Builtins do
   describe "var" do
     it "should return the var for a given symbol" do
       @ns.set_here :x, 42
-      @context.readeval("(var x)").should eq Rouge::Var.new(:"user.spec/x", 42)
+      @context.readeval("(var x)").
+          should eq Rouge::Var.new(:"user.spec", :x, 42)
     end
   end
 

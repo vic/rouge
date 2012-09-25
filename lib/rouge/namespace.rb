@@ -12,6 +12,7 @@ class Rouge::Namespace
 
   def initialize(name)
     @name = name
+    raise ArgumentError, "bad ns name" unless @name.is_a? Symbol
     @table = {}
     @refers = []
   end
@@ -41,11 +42,11 @@ class Rouge::Namespace
   end
 
   def set_here(key, value)
-    @table[key] = Rouge::Var.new(:"#@name/#{key}", value)
+    @table[key] = Rouge::Var.new(@name, key, value)
   end
 
   def intern(key)
-    @table[key] ||= Rouge::Var.new(:"#@name/#{key}")
+    @table[key] ||= Rouge::Var.new(@name, key)
   end
 
   def read(input)
@@ -83,16 +84,16 @@ class Rouge::Namespace::Ruby
   def [](name)
     return @@cache[name] if @@cache.include? name
     if name =~ /^\$/
-      @@cache[name] = Rouge::Var.new(:"ruby/#{name}", eval(name.to_s))
+      @@cache[name] = Rouge::Var.new(:ruby, name, eval(name.to_s))
     else
-      @@cache[name] = Rouge::Var.new(:"ruby/#{name}", Kernel.const_get(name))
+      @@cache[name] = Rouge::Var.new(:ruby, name, Kernel.const_get(name))
     end
   rescue NameError
     raise Rouge::Namespace::VarNotFoundError, name
   end
 
   def set_here(name, value)
-    @@cache[name] = Rouge::Var.new(:"ruby/#{name}", value)
+    @@cache[name] = Rouge::Var.new(:ruby, name, value)
     Kernel.const_set name, value
   end
 

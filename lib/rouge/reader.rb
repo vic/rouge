@@ -215,24 +215,25 @@ class Rouge::Reader
     when Rouge::Dequote
       form.inner
     when Rouge::Symbol
-      case form.inner.to_s
-      when /(\#)$/
+      if form.ns.nil? and form.name_s =~ /(\#)$/
         Rouge::Cons[
             Rouge::Symbol[:quote],
             Rouge::Symbol[
-                ("#{form.inner.to_s.gsub(/(\#)$/, '')}__" \
+                ("#{form.name.to_s.gsub(/(\#)$/, '')}__" \
                  "#{@gensyms[0]}__auto__").intern]]
-      when /\//, /^\./, /^[&|]$/
+      elsif form.ns or form.name_s =~ /^\./ or %w(& |).include? form.name_s
         Rouge::Cons[Rouge::Symbol[:quote], form]
-      else
+      elsif form.ns.nil?
         begin
-          var = @ns[form.inner]
+          var = @ns[form.name]
           Rouge::Cons[Rouge::Symbol[:quote],
                       Rouge::Symbol[var.name]]
         rescue Rouge::Namespace::VarNotFoundError
           Rouge::Cons[Rouge::Symbol[:quote],
-                      Rouge::Symbol[:"#{@ns.name}/#{form.inner}"]]
+                      Rouge::Symbol[:"#{@ns.name}/#{form.name}"]]
         end
+      else
+        raise "impossible, right?" # XXX: be bothered to ensure this is so
       end
     else
       Rouge::Cons[Rouge::Symbol[:quote], form]
@@ -270,9 +271,9 @@ class Rouge::Reader
         [mapped, count]
       end
     when Rouge::Symbol
-      if form.inner == :"%"
+      if form.name == :"%"
         [Rouge::Symbol[:"%1"], [1, count].max]
-      elsif form.inner.to_s =~ /^%(\d+)$/
+      elsif form.name.to_s =~ /^%(\d+)$/
         [form, [$1.to_i, count].max]
       else
         [form, count]
