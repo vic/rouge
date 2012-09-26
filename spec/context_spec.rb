@@ -93,6 +93,7 @@ describe Rouge::Context do
 
   describe "the readeval method" do
     it "should post-process the backtrace" do
+      Rouge.boot!
       context = Rouge::Context.new Rouge[:user]
 
       ex = nil
@@ -124,20 +125,22 @@ describe Rouge::Context do
 
     it "should find the var in our namespace for an unqualified symbol" do
       @in_spec.locate(Rouge::Symbol[:tiffany]).
-          should eq Rouge::Var.new(:"user.spec/tiffany", "wha?")
+          should eq Rouge::Var.new(:"user.spec", :tiffany, "wha?")
     end
 
     it "should find the var in a referred ns for an unqualified symbol" do
       v = @in_spec.locate(Rouge::Symbol[:def])
       v.should be_an_instance_of(Rouge::Var)
-      v.name.should eq :"rouge.builtin/def"
+      v.ns.should eq :"rouge.builtin"
+      v.name.should eq :def
       v.deref.should be_an_instance_of(Rouge::Builtin)
     end
 
     it "should find the var in any namespace for a qualified symbol" do
       v = @in_spec.locate(Rouge::Symbol[:"ruby/Kernel"])
       v.should be_an_instance_of(Rouge::Var)
-      v.name.should eq :"ruby/Kernel"
+      v.ns.should eq :ruby
+      v.name.should eq :Kernel
       v.deref.should eq Kernel
     end
 

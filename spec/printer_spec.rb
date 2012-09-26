@@ -112,21 +112,21 @@ describe Rouge::Printer do
     end
 
     describe "vars" do
-      it "should print (VAR X) as #'X" do
-        Rouge.print(Rouge::Cons[Rouge::Symbol[:var], Rouge::Symbol[:x]], "").
-            should eq "#'x"
+      it "should print (VAR X/Y) as #'X/Y" do
+        Rouge.print(Rouge::Cons[Rouge::Symbol[:var], Rouge::Symbol[:"x/y"]], "").
+            should eq "#'x/y"
       end
 
-      it "should print (QUOTE (QUOTE ((QUOTE X)))) as #'#'(#'X)" do
+      it "should print (VAR (VAR ((VAR X/Y)))) as #'#'(#'X/Y)" do
         Rouge.print(Rouge::Cons[Rouge::Symbol[:var],
                     Rouge::Cons[Rouge::Symbol[:var],
                     Rouge::Cons[Rouge::Cons[Rouge::Symbol[:var],
-                    Rouge::Symbol[:x]]]]], "").
-            should eq "#'#'(#'x)"
+                    Rouge::Symbol[:"x/y"]]]]], "").
+            should eq "#'#'(#'x/y)"
       end
 
-      it "should print the var #'X itself as #'X" do
-        Rouge.print(Rouge::Var.new(:x), "").should eq "#'x"
+      it "should print the var #'X/Y itself as #'X/Y" do
+        Rouge.print(Rouge::Var.new(:x, :y), "").should eq "#'x/y"
       end
     end
 

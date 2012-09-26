@@ -273,7 +273,7 @@ describe Rouge::Reader do
             should eq @ns.read("(list 'user.spec/a (b (list 'user.spec/c d)))")
         @ns.read('`(a `(b ~c))').
             should eq @ns.read("(list 'user.spec/a (list 'user.spec/list " \
-                               "(list 'rouge.builtin/quote 'user.spec/b) 'user.spec/c))")
+                               "(list 'quote 'user.spec/b) 'user.spec/c))")
         @ns.read('`~`(x)').should eq @ns.read("(list 'user.spec/x)")
       end
 

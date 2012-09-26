@@ -20,6 +20,9 @@ class << Rouge
   end
 
   def boot!
+    return if @booted
+    @booted = true
+
     core = Rouge[:"rouge.core"]
     core.refer Rouge[:"rouge.builtin"]
 

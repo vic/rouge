@@ -22,7 +22,7 @@ describe Rouge::Namespace do
     it "should create a var for the name, assigning the root to the value" do
       w = Rouge::Namespace.new :w
       w.set_here :waldorf, "Yes!"
-      w[:waldorf].should eq Rouge::Var.new(:"w/waldorf", "Yes!")
+      w[:waldorf].should eq Rouge::Var.new(:w, :waldorf, "Yes!")
     end
   end
 
@@ -30,14 +30,14 @@ describe Rouge::Namespace do
     it "should create an unbound var for the name if it doesn't exist" do
       m = Rouge::Namespace.new :m
       m.intern :connor
-      m[:connor].should eq Rouge::Var.new(:"m/connor")
+      m[:connor].should eq Rouge::Var.new(:m, :connor)
     end
 
     it "should do nothing if the var already exists" do
       q = Rouge::Namespace.new :q
       q.set_here :matthias, 50
       q.intern :matthias
-      q[:matthias].should eq Rouge::Var.new(:"q/matthias", 50)
+      q[:matthias].should eq Rouge::Var.new(:q, :matthias, 50)
     end
   end
 
@@ -99,13 +99,13 @@ describe Rouge::Namespace do
     end
 
     it "should contain elements from Kernel" do
-      @ns[:Hash].should eq Rouge::Var.new(:"ruby/Hash", Hash)
-      @ns[:Fixnum].should eq Rouge::Var.new(:"ruby/Fixnum", Fixnum)
+      @ns[:Hash].should eq Rouge::Var.new(:ruby, :Hash, Hash)
+      @ns[:Fixnum].should eq Rouge::Var.new(:ruby, :Fixnum, Fixnum)
     end
 
     it "should contain global variables" do
       @ns[:"$LOAD_PATH"].
-          should eq Rouge::Var.new(:"ruby/$LOAD_PATH", $LOAD_PATH)
+          should eq Rouge::Var.new(:ruby, :$LOAD_PATH, $LOAD_PATH)
     end
 
     it "should have a name" do

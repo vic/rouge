@@ -44,7 +44,7 @@ module Rouge::Printer
       end
       out << "]"
     when Rouge::Var
-      out << "#'#{form.name}"
+      out << "#'#{form.ns}/#{form.name}"
     when Hash
       out << "{"
       form.each.with_index do |kv,i|

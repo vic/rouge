@@ -13,7 +13,9 @@ class Rouge::Symbol
   
   KNOWNS = {
     :/ => [nil, :/],
-    :"rouge.core//" => [:"rouge.core", :/]
+    :"./" => [nil, :"./"],
+    :"rouge.core//" => [:"rouge.core", :/],
+    :"rouge.core/./" => [:"rouge.core", :"./"]
   }
 
   CACHE = {}
