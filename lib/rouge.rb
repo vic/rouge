@@ -9,6 +9,7 @@ class << Rouge
   require 'rouge/reader'
   require 'rouge/printer'
   require 'rouge/context'
+  require 'rouge/compiler'
   require 'rouge/repl'
 
   def print(form, out)
