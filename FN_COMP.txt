@@ -1,0 +1,12 @@
+(fn [] a)
+
+The FN builtin should search for a nearby "A".  If not found, compiler
+exception!
+
+In any other instance, we can resolve it then and there -- exciting
+implications for speed, as we can know where to set it without having to call
+Context#lookup.
+
+(fn [a] a)
+
+This implies we need to be able to find the "A" in this context.

@@ -18,7 +18,7 @@ ruby interop
 ------------
 - accessing the scope/self (DSLs!)
 - proc or lambda? setting ARITY.
-  - DEFN/DEFMACRO/etc. should create strict lambdas, but FN/#() should not.
+- DEFN/DEFMACRO/etc. should create strict lambdas, but FN/#() should not.
     Emulate by accepting |*a| and selecting ourselves how strict we want to be.
 
 "hard" tasks
@@ -29,6 +29,8 @@ ruby interop
   - probably generic walking would be nice here
   - macro interpretation in one pass before regular evaluation: this would
     effect the desired outcome, I think?
+  - no, (defn a [] b) or just (fn [] b) (without "b" in ctx) should be similar.
+  - the macro interpretation would effect a large speed increase, however.
 
 core lang
 ---------
