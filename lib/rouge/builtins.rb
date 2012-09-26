@@ -1,6 +1,8 @@
 # encoding: utf-8
 
 module Rouge::Builtins
+  require 'rouge/resolve'
+
   SYMBOLS = {
     :nil => nil,
     :true => true,
@@ -30,7 +32,7 @@ class << Rouge::Builtins
   end
 
   def fn(context, argv, *body)
-    context = Rouge::Context.new context
+    context = Rouge::Context.new(context)
 
     if argv[-2] == Rouge::Symbol[:&]
       rest = argv[-1]
@@ -49,29 +51,34 @@ class << Rouge::Builtins
       block = nil
     end
 
+    # Set initial values in the context so names resolve.
+    argv.each.with_index do |arg, i|
+      context.set_here(arg.name, nil)
+    end
+    context.set_here(rest.name, nil) if rest
+    context.set_here(block.name, nil) if block
+
+    # Now we resolve everything in the body.
+    body = body.map {|form| Rouge::Resolve.resolve(form)}
+
     lambda {|*args, &blockgiven|
       if !rest ? (args.length != argv.length) : (args.length < argv.length)
         begin
           raise ArgumentError,
               "wrong number of arguments (#{args.length} for #{argv.length})"
         rescue ArgumentError => e
-          #e.backtrace.pop
-          #e.backtrace.unshift "(rouge):?:lambda call"
+          orig = e.backtrace.pop
+          e.backtrace.unshift "(rouge):?:FN call"
+          e.backtrace.unshift orig
           raise e
         end
       end
 
-      (0...argv.length).each do |i|
-        context.set_here argv[i].name, args[i]
+      argv.each.with_index do |arg, i|
+        context.set_here(arg.name, args[i])
       end
-
-      if rest
-        context.set_here rest.name, Rouge::Cons[*args[argv.length..-1]]
-      end
-
-      if block
-        context.set_here block.name, blockgiven
-      end
+      context.set_here(rest.name, Rouge::Cons[*args[argv.length..-1]]) if rest
+      context.set_here(block.name, blockgiven) if block
 
       self.do(context, *body)
     }

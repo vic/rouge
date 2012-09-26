@@ -47,6 +47,10 @@ class Rouge::Cons
     end
   end
 
+  def map(&block)
+    Rouge::Cons[*to_a.map(&block)]
+  end
+
   def method_missing(sym, *args, &block)
     to_a.send(sym, *args, &block)
   end
