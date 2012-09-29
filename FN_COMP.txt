@@ -1,3 +1,7 @@
+
+
+--
+
 (fn [] a)
 
 The FN builtin should search for a nearby "A".  If not found, compiler
@@ -17,3 +21,11 @@ This implies we need to be able to find the "A" in this context.
 I'm not sure how cromulent it is having one context created for the FN.  It
 should probably be one context per execution.  The question is whether these
 two cases are distinguishable in reality.
+
+
+
+--
+
+Low-tech beginning: resolve vars (because we can), and anything else we look in
+contexts (maybe plus some aux. info?) for.  IF we can't find it, error, else
+just leave it.  (Or count contexts?)

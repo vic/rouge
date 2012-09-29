@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 module Rouge::Builtins
-  require 'rouge/resolve'
+  require 'rouge/compiler'
 
   SYMBOLS = {
     :nil => nil,
@@ -14,13 +14,23 @@ class << Rouge::Builtins
   def let(context, bindings, *body)
     context = Rouge::Context.new context
     bindings.each_slice(2) do |k, v|
+      context.set_here k.name, context.eval(v)
+    end
+    self.do(context, *body)
+  end
+
+  def _compile_let(ns, lexicals, bindings, *body)
+    lexicals = lexicals.dup
+    bindings.each_slice(2) do |k, v|
       if k.ns
         raise Rouge::Context::BadBindingError,
             "cannot LET qualified name"
       end
-      context.set_here k.name, context.eval(v)
+      lexicals << k.name
     end
-    self.do(context, *body)
+    Rouge::Cons[Rouge::Symbol[:let],
+                bindings,
+                *body.map {|f| compile(ns, lexicals, f)}]
   end
 
   def context(context)
@@ -58,8 +68,10 @@ class << Rouge::Builtins
     context.set_here(rest.name, nil) if rest
     context.set_here(block.name, nil) if block
 
-    # Now we resolve everything in the body.
-    body = body.map {|form| Rouge::Resolve.resolve(form)}
+    # Now we compile everything in the body.
+    body = body.map do |form|
+      Rouge::Compiler.compile(context.ns, Set.new, form)
+    end
 
     lambda {|*args, &blockgiven|
       if !rest ? (args.length != argv.length) : (args.length < argv.length)
