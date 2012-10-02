@@ -18,13 +18,7 @@ describe Rouge::Builtins do
     it "should complain vigorously about letting qualified names" do
       @ns.set_here :x, nil
       lambda {
-        begin
         @context.readeval("(let [user.spec/x 42] user.spec/x)")
-        rescue => x
-          STDERR.puts x
-          STDERR.puts x.backtrace
-          raise
-        end
       }.should raise_exception(Rouge::Context::BadBindingError)
     end
 
@@ -152,7 +146,7 @@ describe Rouge::Builtins do
 
       Rouge::Compiler.should_receive(:compile).
           with(@ns, kind_of(Set), Rouge::Symbol[:b]) do |ns, lexicals, f|
-        set.should eq Set[:a]
+        lexicals.should eq Set[:a]
       end
 
       Rouge::Builtins._compile_def(
@@ -175,9 +169,11 @@ describe Rouge::Builtins do
     end
 
     it "should not do anything in the case of a missing second branch" do
-      lambda {
-        @context.readeval('(if false (a))')
-      }.should_not raise_exception
+      a = mock("a")
+      a.should_not_receive(:call)
+      subcontext = Rouge::Context.new @context
+      subcontext.set_here :a, a
+      subcontext.readeval('(if false (a))')
     end
 
     it "should have no special compile function" do
@@ -203,6 +199,14 @@ describe Rouge::Builtins do
       subcontext.set_here :a, a
       subcontext.set_here :b, lambda {7}
       subcontext.readeval('(do (a) (b))').should eq 7
+    end
+
+    it "should compile and do the right thing with multiple forms" do
+      @context.readeval(<<-ROUGE).should eq 1
+        (do
+          (def o (ruby/Rouge.Atom. 1))
+          @o)
+      ROUGE
     end
 
     it "should have no special compile function" do
@@ -265,8 +269,9 @@ describe Rouge::Builtins do
       end
     end
 
-    it "should have no special compile function" do
-      Rouge::Builtins.should_not respond_to(:_compile_ns)
+    it "should compile without compiling any of its components" do
+      Rouge::Compiler.should_not_receive(:compile)
+      Rouge::Builtins._compile_ns(@ns, Set.new, Rouge::Symbol[:non_extant])
     end
   end
 
@@ -279,21 +284,9 @@ describe Rouge::Builtins do
     end
 
     it "should evaluate in the defining context" do
-      # XXX: normal Clojure behaviour would be to fail immediately here.  This
-      # is contrary to Ruby's own lambdas, however.  Careful thought required;
-      # we may need a more thorough compilation stage which expands macros and
-      # then does a once-over to detect for symbols without bindings.
-      # v-- start surprising (non-Clojurish)
-      @context.readeval("(defmacro a [] b)")
-
       lambda {
-        @context.readeval('(a)')
+        @context.readeval("(defmacro a [] b)")
       }.should raise_exception(Rouge::Namespace::VarNotFoundError, "b")
-
-      lambda {
-        @context.readeval('(let [b 4] (a))')
-      }.should raise_exception(Rouge::Namespace::VarNotFoundError, "b")
-      # ^-- end surprising
 
       @context.readeval("(def b 'c)")
 
@@ -304,23 +297,40 @@ describe Rouge::Builtins do
 
     it "should expand in the calling context" do
       @context.readeval("(def b 'c)")
-      @context.readeval("(defmacro a [] b)")
+      @context.readeval("(defmacro zoom [] b)")
 
       lambda {
-        @context.readeval("(a)")
+        begin
+        @context.readeval("(zoom)")
+        rescue => e
+          STDERR.puts e.backtrace
+          raise
+        end
       }.should raise_exception(Rouge::Namespace::VarNotFoundError, "c")
 
-      @context.readeval("(let [c 9] (a))").should eq 9
+      @context.readeval("(let [c 9] (zoom))").should eq 9
     end
 
     it "should support the multiple argument list form" do
-      @context.readeval(<<-ROUGE)
-        (do
-          (def vector (fn [& r] r))
-          (defmacro m
-            ([a] (vector 'vector ''a (vector 'quote a)))
-            ([b c] (vector 'vector ''b (vector 'quote b) (vector 'quote c)))))
+      @ns.set_here :vector, @context.readeval(<<-ROUGE)
+        (fn [& r] r)
       ROUGE
+
+      @context.readeval(<<-ROUGE)
+        (defmacro m
+          ([a] (vector 'vector ''a (vector 'quote a)))
+          ([b c] (vector 'vector ''b (vector 'quote b) (vector 'quote c))))
+      ROUGE
+
+      # RESUME: Hijinx around taking values of macros needs to be implicated in
+      # the compiler so that we don't attempt to compile this.
+      #
+      # Put better: we can't take the value of a macro, i.e. it's true that we
+      # can always resolve a macro in our current namespace.  Thus the compiler
+      # should be able to resolve a macro at compile-time and know not to
+      # compile its arguments.
+      #
+      # specs, etc. TODO.
       @context.readeval("(m x)").should eq @ns.read("(a x)")
       @context.readeval("(m x y)").should eq @ns.read("(b x y)")
     end
@@ -469,28 +479,28 @@ describe Rouge::Builtins do
     end
 
     it "should evaluate the finally expressions without returning them" do
+      @ns.set_here :m, Rouge::Atom.new(1)
+
       @context.readeval(<<-ROUGE).should eq :baa
-        (do
-          (def m (ruby/Rouge.Atom. 1))
-          (try
-            :baa
-            (catch ruby/NotImplementedError _ :nie)
-            (finally
-              (.swap! m #(.+ 1 %)))))
+        (try
+          :baa
+          (catch ruby/NotImplementedError _ :nie)
+          (finally
+            (.swap! m #(.+ 1 %))))
       ROUGE
 
       @context[:m].deref.deref.should eq 2
 
+      @ns.set_here :o, Rouge::Atom.new(1)
+
       lambda {
         @context.readeval(<<-ROUGE).should eq :baa
-          (do
-            (def o (ruby/Rouge.Atom. 1))
-            (try
-              (throw (ruby/ArgumentError. "fire"))
-              :baa
-              (catch ruby/NotImplementedError _ :nie)
-              (finally
-                (.swap! o #(.+ 1 %)))))
+          (try
+            (throw (ruby/ArgumentError. "fire"))
+            :baa
+            (catch ruby/NotImplementedError _ :nie)
+            (finally
+              (.swap! o #(.+ 1 %))))
         ROUGE
       }.should raise_exception(ArgumentError, "fire")
 
@@ -506,8 +516,34 @@ describe Rouge::Builtins do
       ROUGE
     end
 
-    it "should have no special compile function" do
-      Rouge::Builtins.should_not respond_to(:_compile_try)
+    describe "compilation" do
+      before do
+        @compile = lambda {|rouge, lexicals=[]|
+          Rouge::Builtins._compile_try(
+            @ns, Set[*lexicals],
+            *Rouge::Reader.new(@ns, rouge).lex.to_a)
+        }
+      end
+
+      it "should compile the main body" do
+        lambda {
+          @compile.call("(a)")
+        }.should raise_exception(Rouge::Namespace::VarNotFoundError)
+
+        lambda {
+          @compile.call("(a)", [:a])
+        }.should_not raise_exception
+      end
+
+      it "should compile catch clauses with bindings" do
+        lambda {
+          @compile.call("(a (catch ruby/NotImplementedError b c))", [:a])
+        }.should raise_exception(Rouge::Namespace::VarNotFoundError)
+
+        lambda {
+          @compile.call("(a (catch ruby/NotImplementedError b b))", [:a])
+        }.should_not raise_exception
+      end
     end
   end
 

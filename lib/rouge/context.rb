@@ -69,8 +69,8 @@ class Rouge::Context
       end
 
       begin
-        form = Rouge::Compiler.compile(ns, Set.new, form)
-        r = context.eval form
+        form = Rouge::Compiler.compile(ns, Set[*@table.keys], form)
+        r = context.eval(form)
       rescue ChangeContextException => cce
         reader.ns = cce.context.ns
         context = cce.context

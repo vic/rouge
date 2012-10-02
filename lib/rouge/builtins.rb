@@ -85,9 +85,9 @@ class << Rouge::Builtins
           raise ArgumentError,
               "wrong number of arguments (#{args.length} for #{argv.length})"
         rescue ArgumentError => e
-          orig = e.backtrace.pop
-          e.backtrace.unshift "(rouge):?:FN call"
-          e.backtrace.unshift orig
+          #orig = e.backtrace.pop
+          #e.backtrace.unshift "(rouge):?:FN call"
+          #e.backtrace.unshift orig
           raise e
         end
       end
@@ -103,6 +103,8 @@ class << Rouge::Builtins
   end
 
   def _compile_fn(ns, lexicals, argv, *body)
+    original_argv = argv
+
     if argv[-2] == Rouge::Symbol[:&]
       rest = argv[-1]
       argv = argv[0...-2]
@@ -131,7 +133,7 @@ class << Rouge::Builtins
       Rouge::Compiler.compile(ns, lexicals, f)
     end
 
-    [Rouge::Symbol[:fn], argv, *body]
+    [Rouge::Symbol[:fn], original_argv, *body]
   end
 
   def def(context, name, *form)
@@ -159,7 +161,7 @@ class << Rouge::Builtins
 
     [Rouge::Symbol[:def],
      name,
-     form.map {|f| Rouge::Compiler.compile(ns, lexicals, f)}]
+     *form.map {|f| Rouge::Compiler.compile(ns, lexicals, f)}]
   end
 
   def if(context, test, if_true, if_false=nil)
@@ -222,6 +224,10 @@ class << Rouge::Builtins
     raise Rouge::Context::ChangeContextException, context
   end
 
+  def _compile_ns(ns, lexicals, name, *args)
+    [Rouge::Symbol[:ns], name, *args]
+  end
+
   def defmacro(context, name, *parts)
     if name.ns
       raise ArgumentError, "cannot defmacro fully qualified var"
@@ -282,11 +288,11 @@ class << Rouge::Builtins
       args, *body = parts
       [Rouge::Symbol[:defmacro],
        name,
-       _compile_fn(ns, lexicals, args, *body)[1..-1]]
+       *_compile_fn(ns, lexicals, args, *body)[1..-1]]
     elsif parts.all? {|part| part.is_a? Rouge::Cons}
       [Rouge::Symbol[:defmacro],
        name,
-       parts.map do |cons|
+       *parts.map do |cons|
         args, *body = cons.to_a
 
         if !args.is_a? Array
@@ -371,6 +377,55 @@ class << Rouge::Builtins
 
     self.do(context, *finally) if finally
     r
+  end
+
+  def _compile_try(ns, lexicals, *body)
+    return [Rouge::Symbol[:try]] unless body.length > 0
+
+    form = body[-1]
+    if form.is_a?(Rouge::Cons) and
+       form[0].is_a? Rouge::Symbol and
+       form[0].name == :finally
+      finally = form[1..-1].freeze
+      body.pop
+    end
+
+    catches = []
+    while body.length > 0
+      form = body[-1]
+      if !form.is_a?(Rouge::Cons) or
+         !form[0].is_a? Rouge::Symbol or
+         form[0].name != :catch
+        break
+      end
+
+      body.pop
+      catches <<
+        {:class => form[1],
+         :bind => form[2],
+         :body => form[3..-1].freeze}
+    end
+
+    form = 
+    [Rouge::Symbol[:try],
+     *body.map {|f| Rouge::Compiler.compile(ns, lexicals, f)},
+     *catches.reverse.map {|c|
+      if !c[:bind].is_a?(Rouge::Symbol) or c[:bind].ns
+        raise ArgumentError, "bad catch binding #{c[:bind]}"
+      end
+
+      bind_lexicals = lexicals.dup << c[:bind].name
+      Rouge::Cons[Rouge::Symbol[:catch],
+                  Rouge::Compiler.compile(ns, lexicals, c[:class]),
+                  c[:bind],
+                  *c[:body].map {|f|
+                    Rouge::Compiler.compile(ns, bind_lexicals, f)
+                  }]
+    },
+    *(finally ? [Rouge::Cons[Rouge::Symbol[:finally],
+                             *finally.map {|f|
+                               Rouge::Compiler.compile(ns, lexicals, f)
+                             }]] : [])]
   end
 
   def destructure(context, parameters, values, evalled=false, r={})

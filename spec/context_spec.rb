@@ -116,6 +116,19 @@ describe Rouge::Context do
                      "(rouge):?:user/y",
                      "(rouge):?:user/x"]
     end
+
+    it "should compile with lexicals from the found context" do
+      context = Rouge::Context.new
+      context.set_here :quux, 4
+      context.set_here :bar, 5
+
+      Rouge::Compiler.should_receive(:compile).
+          with(context.ns, kind_of(Set), true) do |ns, lexicals, f|
+        lexicals.should eq Set[:quux, :bar]
+      end
+
+      context.readeval("true")
+    end
   end
 
   describe "the locate method" do
