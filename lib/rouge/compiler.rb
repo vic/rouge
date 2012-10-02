@@ -7,49 +7,25 @@ class << Rouge::Compiler
   def compile(ns, lexicals, form)
     case form
     when Rouge::Symbol
-      if form.ns.nil? and lexicals.include?(form.name)
-        return form
-      end
-
-      will_new = form.name_s[-1] == ?.
-
-      if form.ns.nil?
-        sub = ns
+      if form.ns or lexicals.include?(form.name)
+        # TODO: cache found ns/var/context or no. of context parents.
+        form
       else
-        sub = Rouge::Namespace[form.ns]
-      end
-
-      lookups = form.name_parts
-      sub = sub[lookups[0]]
-      i, count = 1, lookups.length
-
-      while i < count
-        sub = sub.deref if sub.is_a?(Rouge::Var)
-        sub = sub.const_get(lookups[i])
-        i += 1
-      end
-
-      # HACK(arlen): this should likely return something compiler-specific,
-      # not just a quote.
-      if will_new
-        sub = sub.deref if sub.is_a?(Rouge::Var)
-        Rouge::Cons[Rouge::Symbol[:quote],
-                    sub.method(:new)]
-      else
-        Rouge::Cons[Rouge::Symbol[:quote],
-                    sub]
+        ns[form.name] # TODO: cache result
+        form
       end
     when Rouge::Cons
       head, *tail = form.to_a
 
-      head = compile(ns, lexicals, head)
-      if head.is_a?(Rouge::Cons) and head.length == 2 and
-         head[0] == Rouge::Symbol[:quote] and
-         head[1].is_a?(Rouge::Var) and
-         head[1].deref.is_a?(Rouge::Builtin)
-        head, *tail = Rouge::Builtins.send "_compile_#{head[1].deref.inner.name}", ns, lexicals, *tail
+      if head.is_a?(Rouge::Symbol) and
+         head.ns.nil? and
+         Rouge::Builtins.respond_to?("_compile_#{head.name}")
+        head, *tail =
+          Rouge::Builtins.send(
+            "_compile_#{head.name}",
+            ns, lexicals, *tail)
       else
-        STDERR.puts "head: #{head.inspect}"
+        head = compile(ns, lexicals, head)
         tail = tail.map {|f| compile(ns, lexicals, f)}
       end
 
