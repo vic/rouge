@@ -28,9 +28,9 @@ class << Rouge::Builtins
       end
       lexicals << k.name
     end
-    Rouge::Cons[Rouge::Symbol[:let],
-                bindings,
-                *body.map {|f| compile(ns, lexicals, f)}]
+    [Rouge::Symbol[:let],
+     bindings,
+     *body.map {|f| Rouge::Compiler.compile(ns, lexicals, f)}]
   end
 
   def context(context)

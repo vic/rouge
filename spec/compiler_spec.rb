@@ -9,6 +9,7 @@ describe Rouge::Compiler do
 
   before do
     ns = Rouge[:user]
+    ns.refer Rouge[:"rouge.builtin"]
 
     @compile = lambda do |input|
       form = Rouge::Reader.new(ns, input).lex
@@ -26,7 +27,13 @@ describe Rouge::Compiler do
     }.should raise_exception
 
     lambda {
-      @compile.call("(let [x 8] x)")
+      begin
+        @compile.call("(let [x 8] x)")
+      rescue => e
+        STDOUT.puts e.inspect
+        STDOUT.puts e.backtrace
+        raise
+      end
     }.should_not raise_exception
 
     lambda {

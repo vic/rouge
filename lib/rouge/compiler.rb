@@ -7,10 +7,14 @@ class << Rouge::Compiler
   def compile(ns, lexicals, form)
     case form
     when Rouge::Symbol
+      if form.ns.nil? and lexicals.include?(form.name)
+        return form
+      end
+
       will_new = form.name_s[-1] == ?.
 
       if form.ns.nil?
-        sub = self
+        sub = ns
       else
         sub = Rouge::Namespace[form.ns]
       end
@@ -25,23 +29,31 @@ class << Rouge::Compiler
         i += 1
       end
 
+      # HACK(arlen): this should likely return something compiler-specific,
+      # not just a quote.
       if will_new
         sub = sub.deref if sub.is_a?(Rouge::Var)
-        sub.method(:new)
+        Rouge::Cons[Rouge::Symbol[:quote],
+                    sub.method(:new)]
       else
-        sub
+        Rouge::Cons[Rouge::Symbol[:quote],
+                    sub]
       end
     when Rouge::Cons
-      cons = form.to_a
-      if cons[0].is_a? Rouge::Symbol
-        if lexicals.include? cons[0]
-          Rouge::Cons[cons[0], *cons[1..-1].map {|f| compile(ns, lexicals, f)}]
-        else
-          #TODO...
-        end
+      head, *tail = form.to_a
+
+      head = compile(ns, lexicals, head)
+      if head.is_a?(Rouge::Cons) and head.length == 2 and
+         head[0] == Rouge::Symbol[:quote] and
+         head[1].is_a?(Rouge::Var) and
+         head[1].deref.is_a?(Rouge::Builtin)
+        head, *tail = Rouge::Builtins.send "_compile_#{head[1].deref.inner.name}", ns, lexicals, *tail
       else
-        raise ArgumentError, "wah"
+        STDERR.puts "head: #{head.inspect}"
+        tail = tail.map {|f| compile(ns, lexicals, f)}
       end
+
+      Rouge::Cons[head, *tail]
     else
       form
     end
