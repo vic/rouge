@@ -7,7 +7,7 @@ class << Rouge::Compiler
   def compile(ns, lexicals, form)
     case form
     when Rouge::Symbol
-      if form.ns or lexicals.include?(form.name)
+      if form.ns or lexicals.include?(form.name) or form.name[0] == ?.
         # TODO: cache found ns/var/context or no. of context parents.
         form
       else

@@ -16,9 +16,29 @@ describe Rouge::Builtins do
     end
 
     it "should complain vigorously about letting qualified names" do
+      @ns.set_here :x, nil
       lambda {
-        @context.readeval("(let [user/x 42] user/x)")
+        begin
+        @context.readeval("(let [user.spec/x 42] user.spec/x)")
+        rescue => x
+          STDERR.puts x
+          STDERR.puts x.backtrace
+          raise
+        end
       }.should raise_exception(Rouge::Context::BadBindingError)
+    end
+
+    it "should compile by adding binding names to bindings" do
+      Rouge::Compiler.should_receive(:compile).
+          with(@ns, kind_of(Set), 1) do |ns, lexicals, f|
+        lexicals.should eq Set[:a, :b]
+      end
+
+      Rouge::Builtins._compile_let(
+        @ns, Set.new,
+        [Rouge::Symbol[:a], 1,
+         Rouge::Symbol[:b], 2],
+        1)
     end
   end
 
@@ -26,11 +46,24 @@ describe Rouge::Builtins do
     it "should return the calling context" do
       @context.readeval("(context)").should be @context
     end
+
+    it "should have no special compile function" do
+      Rouge::Builtins.should_not respond_to(:_compile_context)
+    end
   end
 
   describe "quote" do
     it "should prevent evaluation" do
       @context.readeval("(quote lmnop)").should eq @ns.read('lmnop')
+    end
+
+    it "should not compile the argument" do
+      Rouge::Compiler.should_not_receive(:compile).
+          with(@ns, kind_of(Set), Rouge::Symbol[:z])
+
+      Rouge::Builtins._compile_quote(
+          @ns, Set.new,
+          Rouge::Symbol[:z])
     end
   end
 
@@ -70,17 +103,33 @@ describe Rouge::Builtins do
       end
 
       it "should bind rest arguments correctly" do
-        @context.readeval('(fn (y z & rest) [y z rest])').
+        @context.readeval('(fn [y z & rest] [y z rest])').
             call("where", "is", "mordialloc", "gosh").
             should eq @ns.read('["where" "is" ("mordialloc" "gosh")]')
       end
 
       it "should bind block arguments correctly" do
         l = lambda {}
-        @context.readeval('(fn (a | b) [a b])').
+        @context.readeval('(fn [a | b] [a b])').
             call("hello", &l).
             should eq ["hello", l]
       end
+    end
+
+    it "should compile with names bound" do
+      Rouge::Compiler.should_receive(:compile).
+          with(@ns, kind_of(Set), :xyzzy) do |ns, lexicals, f|
+        lexicals.should eq Set[:a, :rest, :block]
+      end
+
+      Rouge::Builtins._compile_fn(
+          @ns, Set.new,
+          [Rouge::Symbol[:a],
+           Rouge::Symbol[:&],
+           Rouge::Symbol[:rest],
+           Rouge::Symbol[:|],
+           Rouge::Symbol[:block]],
+          :xyzzy)
     end
   end
 
@@ -95,6 +144,21 @@ describe Rouge::Builtins do
       subcontext.readeval("(def sarge :b)").
           should eq Rouge::Var.new(:"user.spec", :sarge, :b)
       @context.readeval('sarge').should eq :b
+    end
+
+    it "should not compile the first argument" do
+      Rouge::Compiler.should_not_receive(:compile).
+          with(@ns, kind_of(Set), Rouge::Symbol[:a])
+
+      Rouge::Compiler.should_receive(:compile).
+          with(@ns, kind_of(Set), Rouge::Symbol[:b]) do |ns, lexicals, f|
+        set.should eq Set[:a]
+      end
+
+      Rouge::Builtins._compile_def(
+          @ns, Set.new,
+          Rouge::Symbol[:a],
+          Rouge::Symbol[:b])
     end
   end
 
@@ -114,6 +178,10 @@ describe Rouge::Builtins do
       lambda {
         @context.readeval('(if false (a))')
       }.should_not raise_exception
+    end
+
+    it "should have no special compile function" do
+      Rouge::Builtins.should_not respond_to(:_compile_if)
     end
   end
 
@@ -135,6 +203,10 @@ describe Rouge::Builtins do
       subcontext.set_here :a, a
       subcontext.set_here :b, lambda {7}
       subcontext.readeval('(do (a) (b))').should eq 7
+    end
+
+    it "should have no special compile function" do
+      Rouge::Builtins.should_not respond_to(:_compile_do)
     end
   end
 
@@ -192,6 +264,10 @@ describe Rouge::Builtins do
         Rouge::Namespace[:y].should be Rouge::Namespace[:moop]
       end
     end
+
+    it "should have no special compile function" do
+      Rouge::Builtins.should_not respond_to(:_compile_ns)
+    end
   end
 
   describe "defmacro" do
@@ -248,6 +324,43 @@ describe Rouge::Builtins do
       @context.readeval("(m x)").should eq @ns.read("(a x)")
       @context.readeval("(m x y)").should eq @ns.read("(b x y)")
     end
+
+    describe "compilation" do
+      it "should compile single-arg form with names bound" do
+        Rouge::Compiler.should_receive(:compile).
+            with(@ns, kind_of(Set), :xyzzy) do |ns, lexicals, f|
+          lexicals.should eq Set[:quux, :rest, :block]
+        end
+
+        Rouge::Builtins._compile_defmacro(
+            @ns, Set.new,
+            Rouge::Symbol[:barge],
+            [Rouge::Symbol[:quux],
+             Rouge::Symbol[:&],
+             Rouge::Symbol[:rest],
+             Rouge::Symbol[:|],
+             Rouge::Symbol[:block]],
+            :xyzzy)
+      end
+
+      it "should compile multi-arg form with names bound" do
+        Rouge::Compiler.should_receive(:compile).
+            with(@ns, kind_of(Set), :a1) do |ns, lexicals, f|
+          lexicals.should eq Set[:f]
+        end
+
+        Rouge::Compiler.should_receive(:compile).
+            with(@ns, kind_of(Set), :a2) do |ns, lexicals, f|
+          lexicals.should eq Set[:g]
+        end
+
+        Rouge::Builtins._compile_defmacro(
+            @ns, Set.new,
+            Rouge::Symbol[:barge],
+            Rouge::Cons[[Rouge::Symbol[:f]], :a1],
+            Rouge::Cons[[Rouge::Symbol[:g]], :a2])
+      end
+    end
   end
 
   describe "apply" do
@@ -266,6 +379,10 @@ describe Rouge::Builtins do
       @subcontext.readeval("(apply a 8 9 [1 2 3])").should eq [8, 9, 1, 2, 3]
       @subcontext.readeval("(apply a 8 9 '(1 2 3))").should eq [8, 9, 1, 2, 3]
     end
+
+    it "should have no special compile function" do
+      Rouge::Builtins.should_not respond_to(:_compile_apply)
+    end
   end
 
   describe "var" do
@@ -274,6 +391,10 @@ describe Rouge::Builtins do
       @context.readeval("(var x)").
           should eq Rouge::Var.new(:"user.spec", :x, 42)
     end
+
+    it "should have no special compile function" do
+      Rouge::Builtins.should_not respond_to(:_compile_var)
+    end
   end
 
   describe "throw" do
@@ -281,6 +402,10 @@ describe Rouge::Builtins do
       lambda {
         @context.readeval('(throw (ruby/RuntimeError. "boo"))')
       }.should raise_exception(RuntimeError, "boo")
+    end
+
+    it "should have no special compile function" do
+      Rouge::Builtins.should_not respond_to(:_compile_throw)
     end
   end
 
@@ -380,6 +505,10 @@ describe Rouge::Builtins do
             e))
       ROUGE
     end
+
+    it "should have no special compile function" do
+      Rouge::Builtins.should_not respond_to(:_compile_try)
+    end
   end
 
   describe "destructure" do
@@ -451,6 +580,10 @@ describe Rouge::Builtins do
       #          (println "x:" x "y:" y))
       # x: 5 y: 7
       pending
+    end
+
+    it "should have no special compile function" do
+      Rouge::Builtins.should_not respond_to(:_compile_destructure)
     end
   end
 end

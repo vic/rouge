@@ -41,6 +41,10 @@ class << Rouge::Builtins
     form
   end
 
+  def _compile_quote(ns, lexicals, form)
+    [Rouge::Symbol[:quote], form]
+  end
+
   def fn(context, argv, *body)
     context = Rouge::Context.new(context)
 
@@ -61,6 +65,7 @@ class << Rouge::Builtins
       block = nil
     end
 
+=begin
     # Set initial values in the context so names resolve.
     argv.each.with_index do |arg, i|
       context.set_here(arg.name, nil)
@@ -72,6 +77,7 @@ class << Rouge::Builtins
     body = body.map do |form|
       Rouge::Compiler.compile(context.ns, Set.new, form)
     end
+=end
 
     lambda {|*args, &blockgiven|
       if !rest ? (args.length != argv.length) : (args.length < argv.length)
@@ -96,6 +102,38 @@ class << Rouge::Builtins
     }
   end
 
+  def _compile_fn(ns, lexicals, argv, *body)
+    if argv[-2] == Rouge::Symbol[:&]
+      rest = argv[-1]
+      argv = argv[0...-2]
+    elsif argv[-4] == Rouge::Symbol[:&] and argv[-2] == Rouge::Symbol[:|]
+      rest = argv[-3]
+      argv = argv[0...-4] + argv[-2..-1]
+    else
+      rest = nil
+    end
+
+    if argv[-2] == Rouge::Symbol[:|]
+      block = argv[-1]
+      argv = argv[0...-2]
+    else
+      block = nil
+    end
+
+    lexicals = lexicals.dup
+    argv.each do |arg|
+      lexicals << arg.name
+    end
+    lexicals << rest.name if rest
+    lexicals << block.name if block
+
+    body = body.map do |f|
+      Rouge::Compiler.compile(ns, lexicals, f)
+    end
+
+    [Rouge::Symbol[:fn], argv, *body]
+  end
+
   def def(context, name, *form)
     if name.ns != nil
       raise ArgumentError, "cannot def qualified var"
@@ -109,6 +147,19 @@ class << Rouge::Builtins
     else
       raise ArgumentError, "def called with too many forms #{form.inspect}"
     end
+  end
+
+  def _compile_def(ns, lexicals, name, *form)
+    if name.ns != nil
+      raise ArgumentError, "cannot def qualified var"
+    end
+
+    lexicals = lexicals.dup
+    lexicals << name.name
+
+    [Rouge::Symbol[:def],
+     name,
+     form.map {|f| Rouge::Compiler.compile(ns, lexicals, f)}]
   end
 
   def if(context, test, if_true, if_false=nil)
@@ -191,7 +242,7 @@ class << Rouge::Builtins
               "bad multi-form defmacro component #{args.inspect}"
         end
 
-        if args.index(Rouge::Symbol[:|])
+        if args.index(Rouge::Symbol[:&])
           arity = -1
         else
           arity = args.length
@@ -220,6 +271,34 @@ class << Rouge::Builtins
     end
 
     context.ns.set_here name.name, macro
+  end
+
+  def _compile_defmacro(ns, lexicals, name, *parts)
+    if name.ns
+      raise ArgumentError, "cannot defmacro fully qualified var"
+    end
+
+    if parts[0].is_a? Array
+      args, *body = parts
+      [Rouge::Symbol[:defmacro],
+       name,
+       _compile_fn(ns, lexicals, args, *body)[1..-1]]
+    elsif parts.all? {|part| part.is_a? Rouge::Cons}
+      [Rouge::Symbol[:defmacro],
+       name,
+       parts.map do |cons|
+        args, *body = cons.to_a
+
+        if !args.is_a? Array
+          raise ArgumentError,
+              "bad multi-form defmacro component #{args.inspect}"
+        end
+
+        Rouge::Cons[*_compile_fn(ns, lexicals, args, *body)[1..-1]]
+       end]
+    else
+      raise ArgumentError, "neither single-form defmacro nor multi-form"
+    end
   end
 
   def apply(context, fun, *args)
