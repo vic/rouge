@@ -42,6 +42,7 @@ module Rouge::Compiler
            # TODO
            # Also TODO: compiling function calls with blocks should put the
            # block args in scope. fun.
+           # TODO: actually execute/expand the macro here!
           raise "MACRO"
         else
           tail = tail.map {|f| compile(ns, lexicals, f)}
