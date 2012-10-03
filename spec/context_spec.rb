@@ -118,7 +118,7 @@ describe Rouge::Context do
     end
 
     it "should compile with lexicals from the found context" do
-      context = Rouge::Context.new
+      context = Rouge::Context.new nil
       context.set_here :quux, 4
       context.set_here :bar, 5
 
@@ -230,8 +230,9 @@ describe Rouge::Context do
           *body]
       }]
 
+      @ns.set_here :macro, macro
+
       subcontext = Rouge::Context.new @context
-      subcontext.set_here :macro, macro
       subcontext.set_here :f, lambda {|x,y| x + y}
       subcontext.readeval('(macro bar (f bar bar))').should eq "exampleexample"
     end

@@ -53,6 +53,10 @@ class Rouge::Context
     end
   end
 
+  def lexical_keys
+    @table.keys + (@parent ? @parent.lexical_keys : [])
+  end
+
   #   This readeval post-processes the backtrace.  Accordingly, it should only
   # be called by consumers, and never by Rouge internally itself, lest it
   # catches an exception and processes the backtrace too early.
@@ -69,7 +73,7 @@ class Rouge::Context
       end
 
       begin
-        form = Rouge::Compiler.compile(ns, Set[*@table.keys], form)
+        form = Rouge::Compiler.compile(ns, Set[*lexical_keys], form)
         r = context.eval(form)
       rescue ChangeContextException => cce
         reader.ns = cce.context.ns
@@ -88,6 +92,13 @@ class Rouge::Context
   # Internal use only -- doesn't post-process backtrace.
   def eval(form)
     case form
+    when Rouge::Compiler::Resolved
+      result = form.inner
+      if result.is_a?(Rouge::Var)
+        result.deref
+      else
+        result
+      end
     when Rouge::Symbol
       eval_symbol form
     when Rouge::Cons

@@ -1,18 +1,28 @@
 # encoding: utf-8
 require 'set'
 
-module Rouge::Compiler; end
+module Rouge::Compiler
+  class Resolved
+    def initialize(inner)
+      @inner = inner
+    end
 
-class << Rouge::Compiler
-  def compile(ns, lexicals, form)
+    attr_reader :inner
+  end
+
+  def self.compile(ns, lexicals, form)
     case form
     when Rouge::Symbol
-      if form.ns or lexicals.include?(form.name) or form.name[0] == ?.
+      if form.ns or
+         lexicals.include?(form.name) or
+         form.name[0] == ?. or 
+         (form.name[-1] == ?. and
+            lexicals.include?(form.name[0..-2].to_sym)) or
+         [:|, :&].include?(form.name)
         # TODO: cache found ns/var/context or no. of context parents.
         form
       else
-        ns[form.name] # TODO: cache result
-        form
+        Resolved.new ns[form.name]
       end
     when Rouge::Cons
       head, *tail = form.to_a
@@ -26,7 +36,16 @@ class << Rouge::Compiler
             ns, lexicals, *tail)
       else
         head = compile(ns, lexicals, head)
-        tail = tail.map {|f| compile(ns, lexicals, f)}
+        if head.is_a?(Resolved) and
+           head.inner.is_a?(Rouge::Var) and
+           head.inner.deref.is_a?(Rouge::Macro) and
+           # TODO
+           # Also TODO: compiling function calls with blocks should put the
+           # block args in scope. fun.
+          raise "MACRO"
+        else
+          tail = tail.map {|f| compile(ns, lexicals, f)}
+        end
       end
 
       Rouge::Cons[head, *tail]
