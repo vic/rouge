@@ -57,17 +57,6 @@
   ; XXX NOT SHORT CIRCUITING!
   (.find exprs | [e] e))
 
-(defn = [a b]
-  (let [pre (if (and (sequential? a)
-                     (sequential? b))
-              seq
-              #(do %))]
-    (.== (pre a) (pre b))))
-
-(defn not [bool]
-  (or (= bool nil)
-      (= bool false)))
-
 (defn and [& exprs]
   ; XXX NOT SHORT CIRCUITING!  Also not Clojurish: doesn't return falsey value find.
   (if (.all? exprs | [e] e)
@@ -82,6 +71,17 @@
         (.== (class coll) ruby/Rouge.Cons)
         (.== coll ruby/Rouge.Cons.Empty))
     true))
+
+(defn = [a b]
+  (let [pre (if (and (sequential? a)
+                     (sequential? b))
+              seq
+              #(do %))]
+    (.== (pre a) (pre b))))
+
+(defn not [bool]
+  (or (= bool nil)
+      (= bool false)))
 
 (defn empty? [coll]
   (= 0 (count coll)))

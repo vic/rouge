@@ -17,6 +17,10 @@ class Rouge::Namespace
     @refers = []
   end
 
+  def inspect
+    "#<Rouge::NS #{@name.inspect}, refers #{@refers.map(&:inspect).join(", ")}>"
+  end
+
   def refer(ns)
     if ns.name == @name
       raise RecursiveNamespaceError, "#@name will not refer #{ns.name}"
@@ -108,7 +112,7 @@ class Rouge::Namespace::Ruby
 end
 
 ns = Rouge::Namespace[:"rouge.builtin"]
-Rouge::Builtins.methods(false).each do |m|
+Rouge::Builtins.methods(false).reject {|s| s =~ /^_compile_/}.each do |m|
   ns.set_here m, Rouge::Builtin[Rouge::Builtins.method(m)]
 end
 Rouge::Builtins::SYMBOLS.each do |name, val|

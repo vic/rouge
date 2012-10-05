@@ -24,13 +24,19 @@ describe Rouge::Builtins do
 
     it "should compile by adding binding names to bindings" do
       Rouge::Compiler.should_receive(:compile).
-          with(@ns, kind_of(Set), 1) do |ns, lexicals, f|
-        lexicals.should eq Set[:a, :b]
-      end
+          with(@ns, kind_of(Set), anything) do |ns, lexicals, f|
+        if f == Rouge::Symbol[:c]
+          lexicals.should eq Set[]
+        elsif f == 2
+          lexicals.should eq Set[:a]
+        elsif f == 1
+          lexicals.should eq Set[:a, :b]
+        end
+      end.exactly(3).times
 
       Rouge::Builtins._compile_let(
         @ns, Set.new,
-        [Rouge::Symbol[:a], 1,
+        [Rouge::Symbol[:a], Rouge::Symbol[:c],
          Rouge::Symbol[:b], 2],
         1)
     end

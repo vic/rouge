@@ -21,13 +21,16 @@ class << Rouge::Builtins
 
   def _compile_let(ns, lexicals, bindings, *body)
     lexicals = lexicals.dup
-    bindings.each_slice(2) do |k, v|
+
+    bindings = bindings.each_slice(2).map do |k, v|
       if k.ns
         raise Rouge::Context::BadBindingError,
             "cannot LET qualified name"
       end
+      v = Rouge::Compiler.compile(ns, lexicals, v)
       lexicals << k.name
-    end
+      [k, v]
+    end.flatten(1)
     [Rouge::Symbol[:let],
      bindings,
      *body.map {|f| Rouge::Compiler.compile(ns, lexicals, f)}]
@@ -64,20 +67,6 @@ class << Rouge::Builtins
     else
       block = nil
     end
-
-=begin
-    # Set initial values in the context so names resolve.
-    argv.each.with_index do |arg, i|
-      context.set_here(arg.name, nil)
-    end
-    context.set_here(rest.name, nil) if rest
-    context.set_here(block.name, nil) if block
-
-    # Now we compile everything in the body.
-    body = body.map do |form|
-      Rouge::Compiler.compile(context.ns, Set.new, form)
-    end
-=end
 
     lambda {|*args, &blockgiven|
       if !rest ? (args.length != argv.length) : (args.length < argv.length)
@@ -324,6 +313,11 @@ class << Rouge::Builtins
     context.eval(Rouge::Cons[
         fun,
         *args.map {|a| Rouge::Cons[Rouge::Symbol[:quote], a]}])
+  end
+
+  def var(context, f)
+    # HACK: just so it'll be found when fully qualified.
+    f
   end
 
   def _compile_var(ns, lexicals, symbol)

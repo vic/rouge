@@ -66,6 +66,31 @@ describe Rouge::Compiler do
     x.should_receive(:new).with(1, :z)
     x_new.inner.call(1, :z)
   end
+
+  it "should compile Arrays and Hashes" do
+    lambda {
+      @compile.call("[a]")
+    }.should raise_exception(Rouge::Namespace::VarNotFoundError)
+
+    @ns.set_here :a, :a
+    lambda {
+      @compile.call("[a]")
+    }.should_not raise_exception
+
+    lambda {
+      @compile.call("{b c}")
+    }.should raise_exception(Rouge::Namespace::VarNotFoundError)
+
+    @ns.set_here :b, :b
+    lambda {
+      @compile.call("{b c}")
+    }.should raise_exception(Rouge::Namespace::VarNotFoundError)
+
+    @ns.set_here :c, :c
+    lambda {
+      @compile.call("{b c}")
+    }.should_not raise_exception
+  end
 end
 
 # vim: set sw=2 et cc=80:

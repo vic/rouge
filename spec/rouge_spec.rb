@@ -43,8 +43,14 @@ describe Rouge do
         rescue => e
           STDOUT.puts Term::ANSIColor.red("#{e.class}: #{e.message}")
           STDOUT.puts Term::ANSIColor.red(e.backtrace.join("\n"))
-          r = {:passed => 0, :failed => []}
+          r = {:passed => 0, :failed => [["exception"]]}
         end
+
+        result = RubyProf.stop
+        
+        File.open("prof-#{File.basename file}.html", "w") do |f|
+          RubyProf::GraphHtmlPrinter.new(result)
+              .print(f, :min_percent => 1, :sort_method => :self_time)
 
         total = r[:passed] + r[:failed].length
 
@@ -61,12 +67,6 @@ describe Rouge do
         else
           STDOUT.puts Term::ANSIColor.green(message)
         end
-
-        result = RubyProf.stop
-        
-        File.open("prof-#{File.basename file}.html", "w") do |f|
-          RubyProf::GraphHtmlPrinter.new(result)
-              .print(f, :min_percent => 1, :sort_method => :self_time)
         end
       end
     end

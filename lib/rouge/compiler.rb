@@ -17,27 +17,41 @@ module Rouge::Compiler
       is_new = name[-1] == ?.
       name = name[0..-2].to_sym if is_new
 
-      if form.ns or
-         lexicals.include?(name) or
-         form.name[0] == ?. or 
-         [:|, :&].include?(name)
+      if !form.ns and
+         (lexicals.include?(name) or
+          form.name[0] == ?. or 
+          [:|, :&].include?(name))
         # TODO: cache found ns/var/context or no. of context parents.
         form
       else
-        resolved = ns[name]
+        resolved = form.ns ? Rouge[form.ns] : ns
+
+        lookups = form.name_parts
+        resolved = resolved[lookups[0]]
+        i, count = 1, lookups.length
+
+        while i < count
+          resolved = resolved.deref if resolved.is_a?(Rouge::Var)
+          resolved = resolved.const_get(lookups[i])
+          i += 1
+        end
+
         if is_new
-          klass_var = resolved
+          klass = resolved
+          klass = klass.deref if klass.is_a?(Rouge::Var)
+
           resolved = lambda {|*args, &block|
-            klass_var.deref.new(*args, &block)
+            klass.new(*args, &block)
           }
         end
+
         Resolved.new resolved
       end
     when Rouge::Cons
       head, *tail = form.to_a
 
       if head.is_a?(Rouge::Symbol) and
-         head.ns.nil? and
+         (head.ns.nil? or head.ns == :"rouge.builtin") and
          Rouge::Builtins.respond_to?("_compile_#{head.name}")
         Rouge::Cons[*
           Rouge::Builtins.send(
@@ -50,8 +64,6 @@ module Rouge::Compiler
         if head.is_a?(Resolved) and
            head.inner.is_a?(Rouge::Var) and
            head.inner.deref.is_a?(Rouge::Macro)
-          # Also TODO: compiling function calls with blocks should put the
-          # block args in scope. fun.
           # TODO: backtrace_fix
           compile(ns, lexicals, head.inner.deref.inner.call(*tail))
         else
@@ -80,6 +92,11 @@ module Rouge::Compiler
                     : [])]
         end
       end
+    when Array
+      form.map {|f| compile(ns, lexicals, f)}
+    when Hash
+      Hash[form.map {|k, v| [compile(ns, lexicals, k),
+                             compile(ns, lexicals, v)]}]
     else
       form
     end

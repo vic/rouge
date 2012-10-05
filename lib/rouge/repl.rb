@@ -40,7 +40,12 @@ class << Rouge::REPL
 
       chaining = false
       begin
+        form = Rouge::Compiler.compile(
+          context.ns,
+          Set[*context.lexical_keys],
+          form)
         result = context.eval(form)
+
         Rouge.print(result, STDOUT)
         STDOUT.puts
 

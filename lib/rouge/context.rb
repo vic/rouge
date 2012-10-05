@@ -71,12 +71,13 @@ class Rouge::Context
         return r
       end
 
+      form = Rouge::Compiler.compile(context.ns, Set[*lexical_keys], form)
+
       begin
-        form = Rouge::Compiler.compile(ns, Set[*lexical_keys], form)
         r = context.eval(form)
       rescue ChangeContextException => cce
-        reader.ns = cce.context.ns
         context = cce.context
+        reader.ns = context.ns
       end
     end
   rescue Exception => e
@@ -115,32 +116,11 @@ class Rouge::Context
   def locate(symbol)
     if !symbol.is_a?(Rouge::Symbol)
       raise ArgumentError, "locate not called with R::S"
+    elsif symbol.ns
+      raise ArgumentError, "locate called with NS'd R::S #{symbol}"
     end
 
-    will_new = symbol.name_s[-1] == ?.
-
-    if symbol.ns.nil?
-      sub = self
-    else
-      sub = Rouge::Namespace[symbol.ns]
-    end
-
-    lookups = symbol.name_parts
-    sub = sub[lookups[0]]
-    i, count = 1, lookups.length
-
-    while i < count
-      sub = sub.deref if sub.is_a?(Rouge::Var)
-      sub = sub.const_get(lookups[i])
-      i += 1
-    end
-
-    if will_new
-      sub = sub.deref if sub.is_a?(Rouge::Var)
-      sub.method(:new)
-    else
-      sub
-    end
+    self[symbol.name]
   end
 
   attr_reader :ns
