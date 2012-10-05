@@ -1,5 +1,4 @@
 # encoding: utf-8
-
 require 'rouge/wrappers'
 require 'rouge/namespace'
 
