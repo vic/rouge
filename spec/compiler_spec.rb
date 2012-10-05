@@ -3,10 +3,6 @@ require 'spec_helper'
 require 'rouge'
 
 describe Rouge::Compiler do
-  it "should fail" do
-    raise "blah"
-  end
-
   before do
     ns = Rouge[:user]
     ns.refer Rouge[:"rouge.builtin"]
@@ -17,28 +13,22 @@ describe Rouge::Compiler do
     end
   end
 
-  it "xyz" do
+  it "should compile with respect to locals" do
     lambda {
       @compile.call("(fn [] a)")
-    }.should raise_exception
+    }.should raise_exception(Rouge::Compiler::Error)
 
     lambda {
       @compile.call("q")
-    }.should raise_exception
+    }.should raise_exception(Rouge::Compiler::Error)
 
     lambda {
-      begin
-        @compile.call("(let [x 8] x)")
-      rescue => e
-        STDOUT.puts e.inspect
-        STDOUT.puts e.backtrace
-        raise
-      end
+      @compile.call("(let [x 8] x)")
     }.should_not raise_exception
 
     lambda {
       @compile.call("(let [x 8] y)")
-    }.should raise_exception
+    }.should raise_exception(Rouge::Compiler::Error)
   end
 end
 

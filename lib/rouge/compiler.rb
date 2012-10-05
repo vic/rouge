@@ -10,6 +10,18 @@ module Rouge::Compiler
     attr_reader :inner
   end
 
+  class Error < StandardError
+    def initialize(inner)
+      @inner = inner
+    end
+
+    def to_s
+      "<#{self.class.name}: #{inner.inspect}>"
+    end
+
+    attr_reader :inner
+  end
+
   def self.compile(ns, lexicals, form)
     case form
     when Rouge::Symbol
@@ -39,10 +51,9 @@ module Rouge::Compiler
         if head.is_a?(Resolved) and
            head.inner.is_a?(Rouge::Var) and
            head.inner.deref.is_a?(Rouge::Macro) and
-           # TODO
-           # Also TODO: compiling function calls with blocks should put the
-           # block args in scope. fun.
-           # TODO: actually execute/expand the macro here!
+          # Also TODO: compiling function calls with blocks should put the
+          # block args in scope. fun.
+          # TODO: actually execute/expand the macro here!
           raise "MACRO"
         else
           tail = tail.map {|f| compile(ns, lexicals, f)}
@@ -53,6 +64,8 @@ module Rouge::Compiler
     else
       form
     end
+  rescue => e
+    raise Error.new(e) unless e.is_a?(Error)
   end
 end
 
