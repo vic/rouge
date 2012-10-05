@@ -4,7 +4,7 @@ require 'rouge'
 
 describe Rouge::Builtins do
   before do
-    @ns = Rouge::Namespace.new :"user.spec"
+    @ns = Rouge::Namespace.new(:"user.spec").clear
     @ns.refer Rouge::Namespace[:"rouge.builtin"]
     @context = Rouge::Context.new @ns
   end
@@ -205,12 +205,13 @@ describe Rouge::Builtins do
       @context.readeval(<<-ROUGE).should eq 1
         (do
           (def o (ruby/Rouge.Atom. 1))
-          @o)
+          (.deref o))
       ROUGE
     end
 
-    it "should have no special compile function" do
-      Rouge::Builtins.should_not respond_to(:_compile_do)
+    it "should compile straight-through" do
+      Rouge::Builtins._compile_do(@ns, Set.new, :x, Rouge::Symbol[:y]).
+          should eq [Rouge::Symbol[:do], :x, Rouge::Symbol[:y]]
     end
   end
 

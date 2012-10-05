@@ -4,7 +4,7 @@ require 'rouge'
 
 describe Rouge::Compiler do
   before do
-    @ns = Rouge[:"user.spec"]
+    @ns = Rouge[:"user.spec"].clear
     @ns.refer Rouge[:"rouge.builtin"]
 
     @read = lambda do |input|
@@ -17,7 +17,6 @@ describe Rouge::Compiler do
     end
   end
 
-=begin
   it "should compile with respect to locals" do
     lambda {
       @compile.call("(fn [] a)")
@@ -28,14 +27,22 @@ describe Rouge::Compiler do
     }.should raise_exception(Rouge::Namespace::VarNotFoundError)
 
     lambda {
-      @compile.call("(let [x 8] x)")
+      @compile.call("(let [x 8] x)").
+          should eq @read.call("(let [x 8] x)")
     }.should_not raise_exception
 
     lambda {
       @compile.call("(let [x 8] y)")
     }.should raise_exception(Rouge::Namespace::VarNotFoundError)
+
+    lambda {
+      @compile.call("(let [x 8] ((fn [& b] (b)) | [e] e))")
+    }.should_not raise_exception
+
+    lambda {
+      @compile.call("(let [x 8] ((fn [& b] (b)) | [e] f))")
+    }.should raise_exception(Rouge::Namespace::VarNotFoundError)
   end
-=end
 
   it "should execute macro calls when compiling" do
     @ns.set_here :thingy, Rouge::Macro[lambda {|f|
@@ -45,7 +52,20 @@ describe Rouge::Compiler do
         should eq @read.call("(let [list 'thing] (list 1 2 3))")
   end
 
-  # TODO: recursive compilation of macro calls? or sth.
+  it "should compile inline blocks to fns" do
+    @compile.call("(let [a 'thing] (a | [b] b))").
+        should eq @read.call("(let [a 'thing] (a | (fn [b] b)))")
+  end
+
+  it "should compile X. symbols to procs which call X.new" do
+    x = double("<class>")
+    @ns.set_here :x, x
+    x_new = @compile.call("x.")
+    x_new.should be_an_instance_of Rouge::Compiler::Resolved
+
+    x.should_receive(:new).with(1, :z)
+    x_new.inner.call(1, :z)
+  end
 end
 
 # vim: set sw=2 et cc=80:

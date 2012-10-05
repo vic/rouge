@@ -4,7 +4,7 @@ require 'rouge'
 
 describe Rouge::Reader do
   before do
-    @ns = Rouge[:"user.spec"]
+    @ns = Rouge[:"user.spec"].clear
     @ns.refer Rouge[:"rouge.builtin"]
   end
 

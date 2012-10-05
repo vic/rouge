@@ -179,13 +179,22 @@ class << Rouge::Builtins
 
     while forms.length > 0
       begin
-        r = context.eval(forms.shift)
+        form = Rouge::Compiler.compile(
+          context.ns,
+          Set[*context.lexical_keys],
+          forms.shift)
+
+        r = context.eval(form)
       rescue Rouge::Context::ChangeContextException => cce
         context = cce.context
       end
     end
 
     r
+  end
+
+  def _compile_do(ns, lexicals, *forms)
+    [Rouge::Symbol[:do], *forms]
   end
 
   def ns(context, name, *args)

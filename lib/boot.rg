@@ -53,25 +53,9 @@
 (defn count [coll]
   (.length coll))
 
-(defn not [bool]
-  (or (= bool nil)
-      (= bool false)))
-
 (defn or [& exprs]
   ; XXX NOT SHORT CIRCUITING!
   (.find exprs | [e] e))
-
-(defn and [& exprs]
-  ; XXX NOT SHORT CIRCUITING!  Also not Clojurish: doesn't return falsey value find.
-  (if (.all? exprs | [e] e)
-    (.last (.to_a exprs))))
-
-(defn sequential? [coll]
-  (and
-    (or (.== (class coll) ruby/Array)
-        (.== (class coll) ruby/Rouge.Cons)
-        (.== coll ruby/Rouge.Cons.Empty))
-    true))
 
 (defn = [a b]
   (let [pre (if (and (sequential? a)
@@ -79,6 +63,25 @@
               seq
               #(do %))]
     (.== (pre a) (pre b))))
+
+(defn not [bool]
+  (or (= bool nil)
+      (= bool false)))
+
+(defn and [& exprs]
+  ; XXX NOT SHORT CIRCUITING!  Also not Clojurish: doesn't return falsey value find.
+  (if (.all? exprs | [e] e)
+    (.last (.to_a exprs))))
+
+(defn class [object]
+  (.class object))
+
+(defn sequential? [coll]
+  (and
+    (or (.== (class coll) ruby/Array)
+        (.== (class coll) ruby/Rouge.Cons)
+        (.== coll ruby/Rouge.Cons.Empty))
+    true))
 
 (defn empty? [coll]
   (= 0 (count coll)))
@@ -111,9 +114,6 @@
   (if (= from til)
     ruby/Rouge.Cons.Empty
     (cons from (range (+ 1 from) til))))
-
-(defn class [object]
-  (.class object))
 
 (defn seq? [object]
   (or (= (class object) ruby/Rouge.Cons)

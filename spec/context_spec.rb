@@ -12,7 +12,7 @@ describe Rouge::Context do
     @ab.set_here :root, 80
     @ac.set_here :non, 50
 
-    @spec = Rouge::Namespace[:"user.spec"]
+    @spec = Rouge::Namespace[:"user.spec"].clear
     @spec.refer Rouge::Namespace[:"rouge.builtin"]
     @spec.set_here :tiffany, "wha?"
     @in_spec = Rouge::Context.new @spec

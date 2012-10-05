@@ -53,6 +53,11 @@ class Rouge::Namespace
     Rouge::Reader.new(self, input).lex
   end
 
+  def clear
+    @table = {}
+    self
+  end
+
   attr_reader :name, :refers
 end
 

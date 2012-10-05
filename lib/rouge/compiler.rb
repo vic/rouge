@@ -13,16 +13,25 @@ module Rouge::Compiler
   def self.compile(ns, lexicals, form)
     case form
     when Rouge::Symbol
+      name = form.name
+      is_new = name[-1] == ?.
+      name = name[0..-2].to_sym if is_new
+
       if form.ns or
-         lexicals.include?(form.name) or
+         lexicals.include?(name) or
          form.name[0] == ?. or 
-         (form.name[-1] == ?. and
-            lexicals.include?(form.name[0..-2].to_sym)) or
-         [:|, :&].include?(form.name)
+         [:|, :&].include?(name)
         # TODO: cache found ns/var/context or no. of context parents.
         form
       else
-        Resolved.new ns[form.name]
+        resolved = ns[name]
+        if is_new
+          klass_var = resolved
+          resolved = lambda {|*args, &block|
+            klass_var.deref.new(*args, &block)
+          }
+        end
+        Resolved.new resolved
       end
     when Rouge::Cons
       head, *tail = form.to_a
@@ -46,7 +55,29 @@ module Rouge::Compiler
           # TODO: backtrace_fix
           compile(ns, lexicals, head.inner.deref.inner.call(*tail))
         else
-          Rouge::Cons[head, *tail.map {|f| compile(ns, lexicals, f)}]
+          # Regular function call!
+          if tail.include? Rouge::Symbol[:|]
+            index = tail.index Rouge::Symbol[:|]
+            if tail.length == index + 2
+              # Function.
+              block = compile(ns, lexicals, tail[index + 1])
+            else
+              # Inline block.
+              block = compile(
+                ns, lexicals,
+                Rouge::Cons[Rouge::Symbol[:fn],
+                            *tail[index + 1..-1]])
+            end
+            tail = tail[0...index]
+          else
+            block = nil
+          end
+          Rouge::Cons[
+            head,
+            *tail.map {|f| compile(ns, lexicals, f)},
+            *(block ? [Rouge::Symbol[:|],
+                       block]
+                    : [])]
         end
       end
     else
