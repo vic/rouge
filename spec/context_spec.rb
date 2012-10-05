@@ -131,40 +131,6 @@ describe Rouge::Context do
     end
   end
 
-  describe "the locate method" do
-    it "should find the contextually-bound value for an unqualified symbol" do
-      @in_spec.locate(Rouge::Symbol[:blah]).should eq "code code"
-    end
-
-    it "should find the var in our namespace for an unqualified symbol" do
-      @in_spec.locate(Rouge::Symbol[:tiffany]).
-          should eq Rouge::Var.new(:"user.spec", :tiffany, "wha?")
-    end
-
-    it "should find the var in a referred ns for an unqualified symbol" do
-      v = @in_spec.locate(Rouge::Symbol[:def])
-      v.should be_an_instance_of(Rouge::Var)
-      v.ns.should eq :"rouge.builtin"
-      v.name.should eq :def
-      v.deref.should be_an_instance_of(Rouge::Builtin)
-    end
-
-    it "should find the var in any namespace for a qualified symbol" do
-      v = @in_spec.locate(Rouge::Symbol[:"ruby/Kernel"])
-      v.should be_an_instance_of(Rouge::Var)
-      v.ns.should eq :ruby
-      v.name.should eq :Kernel
-      v.deref.should eq Kernel
-    end
-
-    it "should find the method for a new class instantiation" do
-      m = @in_spec.locate(Rouge::Symbol[:"ruby/String."])
-      m.should be_an_instance_of Method
-      m.receiver.should eq String
-      m.name.should eq :new
-    end
-  end
-
   it "should evaluate quotations to their unquoted form" do
     @context.readeval("'x").should eq @ns.read("x")
     @context.readeval("'':zzy").should eq @ns.read("':zzy")

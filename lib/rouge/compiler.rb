@@ -3,11 +3,11 @@ require 'set'
 
 module Rouge::Compiler
   class Resolved
-    def initialize(inner)
-      @inner = inner
+    def initialize(res)
+      @res = res
     end
 
-    attr_reader :inner
+    attr_reader :res
   end
 
   def self.compile(ns, lexicals, form)
@@ -39,10 +39,7 @@ module Rouge::Compiler
         if is_new
           klass = resolved
           klass = klass.deref if klass.is_a?(Rouge::Var)
-
-          resolved = lambda {|*args, &block|
-            klass.new(*args, &block)
-          }
+          resolved = klass.method(:new)
         end
 
         Resolved.new resolved
@@ -62,10 +59,10 @@ module Rouge::Compiler
 
         # XXX ↓↓↓ This is insane ↓↓↓
         if head.is_a?(Resolved) and
-           head.inner.is_a?(Rouge::Var) and
-           head.inner.deref.is_a?(Rouge::Macro)
+           head.res.is_a?(Rouge::Var) and
+           head.res.deref.is_a?(Rouge::Macro)
           # TODO: backtrace_fix
-          compile(ns, lexicals, head.inner.deref.inner.call(*tail))
+          compile(ns, lexicals, head.res.deref.inner.call(*tail))
         else
           # Regular function call!
           if tail.include? Rouge::Symbol[:|]

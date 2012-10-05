@@ -93,7 +93,7 @@ class Rouge::Context
   def eval(form)
     case form
     when Rouge::Compiler::Resolved
-      result = form.inner
+      result = form.res
       if result.is_a?(Rouge::Var)
         result.deref
       else
@@ -120,7 +120,13 @@ class Rouge::Context
       raise ArgumentError, "locate called with NS'd R::S #{symbol}"
     end
 
-    self[symbol.name]
+    if symbol.name[-1] == ?.
+      lambda {|*args, &block|
+        self[symbol.name[0..-2].intern].new(*args, &block)
+      }
+    else
+      self[symbol.name]
+    end
   end
 
   attr_reader :ns
