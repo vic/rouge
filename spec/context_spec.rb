@@ -9,6 +9,7 @@ describe Rouge::Context do
     @abb = Rouge::Context.new @ab
     @ac = Rouge::Context.new @a
     @a.set_here :root, 42
+    @a.set_here :bah, (@bah = Object.new)
     @ab.set_here :root, 80
     @ac.set_here :non, 50
 
@@ -128,6 +129,16 @@ describe Rouge::Context do
       end
 
       context.readeval("true")
+    end
+  end
+
+  describe "the locate method" do
+    it "should find the method for a new call to a lexical" do
+      arg = double("<arg>")
+      m = @a.locate(Rouge::Symbol[:"bah."])
+      m.should be_an_instance_of Proc
+      @bah.should_receive(:new).with(arg)
+      m.call(arg)
     end
   end
 
