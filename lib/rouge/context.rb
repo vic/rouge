@@ -170,13 +170,6 @@ class Rouge::Context
       backtrace_fix("(rouge):?:builtin: ", form) do
         fun.inner.call self, *form.to_a[1..-1]
       end
-    when Rouge::Macro
-      macro_form = backtrace_fix("(rouge):?:m. expand: ", form) do
-        fun.inner.call(*form.to_a[1..-1])
-      end
-      backtrace_fix("(rouge):?:m. run: ", macro_form) do
-        eval macro_form
-      end
     else
       args = form.to_a[1..-1]
 
