@@ -65,7 +65,11 @@ module Rouge::Compiler
       form
     end
   rescue => e
-    raise Error.new(e) unless e.is_a?(Error)
+    if e.is_a?(Error)
+      raise e
+    else
+      raise Error.new(e)
+    end
   end
 end
 
