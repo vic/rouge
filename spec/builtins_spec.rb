@@ -402,8 +402,11 @@ describe Rouge::Builtins do
           should eq Rouge::Var.new(:"user.spec", :x, 42)
     end
 
-    it "should have no special compile function" do
-      Rouge::Builtins.should_not respond_to(:_compile_var)
+    it "should compile directly to the var" do
+      @ns.set_here :x, 80
+      Rouge::Builtins._compile_var(@ns, Set.new, Rouge::Symbol[:x]).
+          should eq [Rouge::Symbol[:quote],
+                     Rouge::Var.new(:"user.spec", :x, 80)]
     end
   end
 

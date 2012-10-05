@@ -317,8 +317,12 @@ class << Rouge::Builtins
         *args.map {|a| Rouge::Cons[Rouge::Symbol[:quote], a]}])
   end
 
-  def var(context, symbol)
-    context.locate symbol
+  def _compile_var(ns, lexicals, symbol)
+    if symbol.ns
+      [Rouge::Symbol[:quote], Rouge[symbol.ns][symbol.name]]
+    else
+      [Rouge::Symbol[:quote], ns[symbol.name]]
+    end
   end
 
   def throw(context, throwable)
