@@ -55,6 +55,7 @@ describe Rouge::Compiler do
           should eq @read.call("(let [list 'thing] (list 1 2 3))")
     end
   end
+
   describe "symbol lookup" do
     it "should compile X. symbols to procs which call X.new" do
       x = double("<class>")
