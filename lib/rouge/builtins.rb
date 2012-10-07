@@ -48,7 +48,13 @@ class << Rouge::Builtins
     [Rouge::Symbol[:quote], form]
   end
 
-  def fn(context, argv, *body)
+  def fn(context, *args)
+    if args[0].is_a? Rouge::Symbol
+      name = args.shift
+    end
+
+    argv, *body = args
+
     context = Rouge::Context.new(context)
 
     if argv[-2] == Rouge::Symbol[:&]
@@ -74,9 +80,9 @@ class << Rouge::Builtins
           raise ArgumentError,
               "wrong number of arguments (#{args.length} for #{argv.length})"
         rescue ArgumentError => e
-          #orig = e.backtrace.pop
-          #e.backtrace.unshift "(rouge):?:FN call"
-          #e.backtrace.unshift orig
+          orig = e.backtrace.pop
+          e.backtrace.unshift "(rouge):?:FN call (#{name || "<anonymous>"})"
+          e.backtrace.unshift orig
           raise e
         end
       end
@@ -91,7 +97,13 @@ class << Rouge::Builtins
     }
   end
 
-  def _compile_fn(ns, lexicals, argv, *body)
+  def _compile_fn(ns, lexicals, *args)
+    if args[0].is_a? Rouge::Symbol
+      name = args.shift
+    end
+
+    argv, *body = args
+
     original_argv = argv
 
     if argv[-2] == Rouge::Symbol[:&]
@@ -118,11 +130,10 @@ class << Rouge::Builtins
     lexicals << rest.name if rest
     lexicals << block.name if block
 
-    body = body.map do |f|
-      Rouge::Compiler.compile(ns, lexicals, f)
-    end
-
-    [Rouge::Symbol[:fn], original_argv, *body]
+    [Rouge::Symbol[:fn],
+     *(name ? [name] : []),
+     original_argv,
+     *Rouge::Compiler.compile(ns, lexicals, body)]
   end
 
   def def(context, name, *form)

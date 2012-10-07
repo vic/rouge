@@ -116,9 +116,14 @@ describe Rouge::Builtins do
       end
     end
 
+    it "should store its own name" do
+      fn = @context.readeval('(fn lmnop [])')
+      fn.name.should eq :lmnop
+    end
+
     it "should compile with names bound" do
       Rouge::Compiler.should_receive(:compile).
-          with(@ns, kind_of(Set), :xyzzy) do |ns, lexicals, f|
+          with(@ns, kind_of(Set), [:xyzzy]) do |ns, lexicals, f|
         lexicals.should eq Set[:a, :rest, :block]
       end
 
@@ -345,7 +350,7 @@ describe Rouge::Builtins do
     describe "compilation" do
       it "should compile single-arg form with names bound" do
         Rouge::Compiler.should_receive(:compile).
-            with(@ns, kind_of(Set), :xyzzy) do |ns, lexicals, f|
+            with(@ns, kind_of(Set), [:foo]) do |ns, lexicals, f|
           lexicals.should eq Set[:quux, :rest, :block]
         end
 
@@ -357,17 +362,17 @@ describe Rouge::Builtins do
              Rouge::Symbol[:rest],
              Rouge::Symbol[:|],
              Rouge::Symbol[:block]],
-            :xyzzy)
+            :foo)
       end
 
       it "should compile multi-arg form with names bound" do
         Rouge::Compiler.should_receive(:compile).
-            with(@ns, kind_of(Set), :a1) do |ns, lexicals, f|
+            with(@ns, kind_of(Set), [:a1]) do |ns, lexicals, f|
           lexicals.should eq Set[:f]
         end
 
         Rouge::Compiler.should_receive(:compile).
-            with(@ns, kind_of(Set), :a2) do |ns, lexicals, f|
+            with(@ns, kind_of(Set), [:a2]) do |ns, lexicals, f|
           lexicals.should eq Set[:g]
         end
 
