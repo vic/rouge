@@ -220,6 +220,27 @@
             ~then)
           ~else)))))
 
+(defn meta [x]
+  ; TODO
+  nil)
+
+(defn with-meta [x m]
+  ; TODO
+  x)
+
+(defmacro ->
+  ([x] x)
+  ([x form] (if (seq? form)
+              (with-meta `(~(first form) ~x ~@(next form)) (meta form))
+              (list form x)))
+  ([x form & more] `(-> (-> ~x ~form) ~@more)))
+
+(defmacro ->>
+  ([x form] (if (seq? form)
+              (with-meta `(~(first form) ~@(next form)  ~x) (meta form))
+              (list form x)))
+  ([x form & more] `(->> (->> ~x ~form) ~@more)))
+
 (ns rouge.test
   (:use rouge.core ruby))
 

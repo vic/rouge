@@ -71,9 +71,6 @@ class Rouge::Context
         return r
       end
 
-      STDOUT.print "COMPILE: "
-      Rouge::Printer.print form, STDOUT
-      STDOUT.puts
       form = Rouge::Compiler.compile(context.ns, Set[*lexical_keys], form)
 
       begin
