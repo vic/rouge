@@ -1,4 +1,6 @@
 NEXT:
+- tests for (. x y)
+- (ruby/)Time/now ==> Time.now
 - continue decruft Context, shift tests to Compiler as appropriate; revise most
   specs.
 - destructuring (in FN, LET, everywhere else)
@@ -38,7 +40,6 @@ core lang
 - multi-form defn: (defn x ([a] ...) ([a b] ...))
 - seqs
 - atoms (actually multithreaded), refs, agents
-- (. x y)
 - rest of the clojure core API (maybe even in clojure.core ns)
 - clojure-ish IO libraries which expose async IO
 - defprotocol -- looks important! ISeq, ISeqable, ISequential and what have

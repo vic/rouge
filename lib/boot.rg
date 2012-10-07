@@ -241,6 +241,10 @@
               (list form x)))
   ([x form & more] `(->> (->> ~x ~form) ~@more)))
 
+(defmacro .
+  [recv method & args]
+  `(.send ~recv ~(.name method) ~@args))
+
 (ns rouge.test
   (:use rouge.core ruby))
 

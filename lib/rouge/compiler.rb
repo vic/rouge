@@ -14,12 +14,12 @@ module Rouge::Compiler
     case form
     when Rouge::Symbol
       name = form.name
-      is_new = name[-1] == ?.
+      is_new = (name[-1] == ?. and name.length > 1)
       name = name[0..-2].to_sym if is_new
 
       if !form.ns and
          (lexicals.include?(name) or
-          form.name[0] == ?. or 
+          (name[0] == ?. and name.length > 1) or
           [:|, :&].include?(name))
         # TODO: cache found ns/var/context or no. of context parents.
         form

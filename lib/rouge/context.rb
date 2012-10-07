@@ -120,9 +120,9 @@ class Rouge::Context
       raise ArgumentError, "locate called with NS'd R::S #{symbol}"
     end
 
-    if symbol.name[-1] == ?.
+    if symbol.name_s[-1] == ?. and symbol.name_s.length > 1
       lambda {|*args, &block|
-        self[symbol.name[0..-2].intern].new(*args, &block)
+        self[symbol.name_s[0..-2].intern].new(*args, &block)
       }
     else
       self[symbol.name]
@@ -134,7 +134,7 @@ class Rouge::Context
   private
 
   def eval_symbol(form)
-    if !form.ns and form.name_s[0] == ?.
+    if !form.ns and form.name_s[0] == ?. and form.name_s.length > 1
       lambda {|receiver, *args, &block|
         receiver.send(form.name_s[1..-1], *args, &block)
       }
