@@ -151,7 +151,7 @@ describe Rouge::Builtins do
           with(@ns, kind_of(Set), Rouge::Symbol[:a])
 
       Rouge::Compiler.should_receive(:compile).
-          with(@ns, kind_of(Set), Rouge::Symbol[:b]) do |ns, lexicals, f|
+          with(@ns, kind_of(Set), [Rouge::Symbol[:b]]) do |ns, lexicals, f|
         lexicals.should eq Set[:a]
       end
 
@@ -628,8 +628,16 @@ describe Rouge::Builtins do
       pending
     end
 
-    it "should have no special compile function" do
-      Rouge::Builtins.should_not respond_to(:_compile_destructure)
+    it "should compile the value part" do
+      lambda {
+        Rouge::Builtins._compile_destructure(
+            @ns, Set.new, Rouge::Symbol[:z], Rouge::Symbol[:z])
+      }.should raise_exception
+
+      lambda {
+        Rouge::Builtins._compile_destructure(
+            @ns, Set[:y], Rouge::Symbol[:z], Rouge::Symbol[:y])
+      }.should_not raise_exception
     end
   end
 end

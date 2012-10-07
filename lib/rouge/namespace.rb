@@ -18,7 +18,8 @@ class Rouge::Namespace
   end
 
   def inspect
-    "#<Rouge::NS #{@name.inspect}, refers #{@refers.map(&:inspect).join(", ")}>"
+    "#<Rouge::NS #{@name.inspect}, " \
+    "refers #{@refers.map(&:inspect).join(", ")}>"
   end
 
   def refer(ns)

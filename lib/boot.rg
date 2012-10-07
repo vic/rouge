@@ -58,7 +58,8 @@
   (.find exprs | [e] e))
 
 (defn and [& exprs]
-  ; XXX NOT SHORT CIRCUITING!  Also not Clojurish: doesn't return falsey value find.
+  ; XXX NOT SHORT CIRCUITING!
+  ; Also not Clojurish: doesn't return falsey value find.
   (if (.all? exprs | [e] e)
     (.last (.to_a exprs))))
 
@@ -284,4 +285,4 @@
         (swap! *tests-passed* inc)
         true))))
 
-; vim: set ft=clojure:
+; vim: set ft=clojure cc=80:

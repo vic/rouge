@@ -33,7 +33,7 @@ class << Rouge::Builtins
     end.flatten(1)
     [Rouge::Symbol[:let],
      bindings,
-     *body.map {|f| Rouge::Compiler.compile(ns, lexicals, f)}]
+     *Rouge::Compiler.compile(ns, lexicals, body)]
   end
 
   def context(context)
@@ -150,7 +150,7 @@ class << Rouge::Builtins
 
     [Rouge::Symbol[:def],
      name,
-     *form.map {|f| Rouge::Compiler.compile(ns, lexicals, f)}]
+     *Rouge::Compiler.compile(ns, lexicals, form)]
   end
 
   def if(context, test, if_true, if_false=nil)
@@ -415,7 +415,7 @@ class << Rouge::Builtins
 
     form = 
     [Rouge::Symbol[:try],
-     *body.map {|f| Rouge::Compiler.compile(ns, lexicals, f)},
+     *Rouge::Compiler.compile(ns, lexicals, body),
      *catches.reverse.map {|c|
       if !c[:bind].is_a?(Rouge::Symbol) or c[:bind].ns
         raise ArgumentError, "bad catch binding #{c[:bind]}"
@@ -438,6 +438,10 @@ class << Rouge::Builtins
   def destructure(context, parameters, values, evalled=false, r={})
     # TODO: can probably move this elsewhere as a regular function.
     i = 0
+
+    if !parameters.is_a?(Array) and !evalled
+      return {parameters => context.eval(values)}
+    end
     
     unless evalled
       if values[-2] == Rouge::Symbol[:|]
@@ -494,6 +498,12 @@ class << Rouge::Builtins
     end
 
     r
+  end
+
+  def _compile_destructure(ns, lexicals, parameters, values)
+    [Rouge::Symbol[:destructure],
+     parameters,
+     Rouge::Compiler.compile(ns, lexicals, values)]
   end
 end
 

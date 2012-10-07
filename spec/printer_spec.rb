@@ -113,7 +113,8 @@ describe Rouge::Printer do
 
     describe "vars" do
       it "should print (VAR X/Y) as #'X/Y" do
-        Rouge.print(Rouge::Cons[Rouge::Symbol[:var], Rouge::Symbol[:"x/y"]], "").
+        Rouge.print(Rouge::Cons[Rouge::Symbol[:var],
+                                Rouge::Symbol[:"x/y"]], "").
             should eq "#'x/y"
       end
 
