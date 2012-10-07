@@ -1,2 +1,2 @@
 #!/bin/sh
-ruby -I"`dirname $0`/../lib" -rrouge -e'Rouge.repl(ARGV)' "$@"
+ruby -I"`dirname $0`/../lib" -rrouge -e'Rouge.repl(ARGV)' -- "$@"

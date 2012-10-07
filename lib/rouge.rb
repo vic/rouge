@@ -2,6 +2,9 @@
 
 module Rouge; end
 
+start = Time.now
+Rouge.define_singleton_method :start, lambda {start}
+
 class << Rouge
   require 'rouge/wrappers'
   require 'rouge/symbol'
