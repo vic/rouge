@@ -35,8 +35,9 @@
 
 (testing "macroexpand"
   (is (= 6 (let [f #(* % 2)]
-             (defmacro a [x] `(f ~x))
-             (macroexpand '(a 3))))))
+             (do
+               (defmacro a [x] `(f ~x))
+               (macroexpand '(a 3)))))))
 
 (testing "var passing"
   (is (= #'my-var (do

@@ -146,15 +146,8 @@
 (defn < [a b]
   (.< a b))
 
-(defn macroexpand [form]
-  (if (or (not (seq? form))
-          (= (count form) 0))
-    form
-    (do
-      (puts "form: " (pr-str form))
-      (puts "(first form): " (pr-str (first form)))
-      (puts "(.inner (first form)): " (pr-str (.inner (first form))))
-      ((.inner (first form)) (rest form)))))
+(defmacro macroexpand [form]
+  `(.compile ruby/Rouge.Compiler (.ns (context)) (ruby/Set.) ~form))
 
 (defn push-thread-bindings [map]
   (.push ruby/Rouge.Var map))
