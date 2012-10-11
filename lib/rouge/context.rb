@@ -184,6 +184,8 @@ class Rouge::Context
   end
 
   def backtrace_fix name, form, &block
+    return block.call
+
     begin
       block.call
     rescue Exception => e

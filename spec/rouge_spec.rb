@@ -51,6 +51,7 @@ describe Rouge do
         File.open("prof-#{File.basename file}.html", "w") do |f|
           RubyProf::GraphHtmlPrinter.new(result)
               .print(f, :min_percent => 1, :sort_method => :self_time)
+        end
 
         total = r[:passed] + r[:failed].length
 
@@ -63,10 +64,9 @@ describe Rouge do
           raise RuntimeError,
               "#{r[:failed].length} failed " +
               "case#{r[:failed].length == 1 ? "" : "s"} in #{file}:\n" +
-              r[:failed].map {|e| "  - #{e.join(" -> ")}"}.join("\n")
+              r[:failed].map {|el| "  - #{el.join(" -> ")}"}.join("\n")
         else
           STDOUT.puts Term::ANSIColor.green(message)
-        end
         end
       end
     end

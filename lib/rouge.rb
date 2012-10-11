@@ -9,6 +9,7 @@ class << Rouge
   require 'rouge/wrappers'
   require 'rouge/symbol'
   require 'rouge/cons'
+  require 'rouge/seq'
   require 'rouge/reader'
   require 'rouge/printer'
   require 'rouge/context'

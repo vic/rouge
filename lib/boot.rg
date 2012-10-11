@@ -4,27 +4,25 @@
       :author "Arlen Christian Mart Cuss"}
   rouge.core)
 
-(def seq (fn [coll]
-           ; XXX right now this just coerces to a Cons
-           (let [s (apply .[] ruby/Rouge.Cons (.to_a coll))]
-             (if (.== s ruby/Rouge.Cons.Empty)
-               nil
-               s))))
+(def seq
+  (fn seq [coll] (.seq ruby/Rouge.Seq coll)))
 
-(def concat (fn [& lists]
+  #_(fn [coll]
+      ; XXX right now this just coerces to a Cons
+      (let [s (apply .[] ruby/Rouge.Cons (.to_a coll))]
+        (if (.== s ruby/Rouge.Cons.Empty)
+          nil
+          s)))
+
+(def concat (fn concat [& lists]
               ; XXX lazy seq
               (seq (.inject (.map lists | .to_a) | .+))))
 
-(def list (fn [& elements]
+(def list (fn list [& elements]
             elements))
 
 (defmacro defn [name args & body]
-  `(def ~name (fn ~args ~@body)))
-
-(defmacro when [cond & body]
-  `(if ~cond
-     (do
-       ~@body)))
+  `(def ~name (fn ~name ~args ~@body)))
 
 (defn vector [& args]
   (.to_a args))
@@ -32,9 +30,19 @@
 (defn reduce [f coll]
   (.inject coll | f))
 
+(defmacro lazy-seq [& body]
+  `(ruby/Rouge.LazySeq. (fn [] ~@body)))
+
+(defmacro when [cond & body]
+  `(if ~cond
+     (do
+       ~@body)))
+
 (defn map [f coll]
-  ; XXX lazy seq
-  (.map coll | f))
+  (lazy-seq
+    (let [s (seq coll)]
+      (when s
+        (cons (f (first s)) (map f (rest s)))))))
 
 (defn str [& args]
   (let [args (map .to_s args)]
