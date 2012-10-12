@@ -41,6 +41,16 @@ See [boot.rg](https://github.com/unnali/rouge/blob/master/lib/boot.rg),
          (finally
            (pop-thread-bindings)))))
 
+What about in Rails?
+
+    $ r c -- -I../rouge/lib -rrouge
+    Loading development environment (Rails 3.2.6)
+    1.9.3p194 :002 > Rouge::REPL.repl []
+    user=> (.where ruby/Content {:id 1})
+      Content Load (0.7ms)  SELECT "contents".* FROM "contents" WHERE "contents"."id" = 1
+    [#<Content id: 1, content_group_id: 1, name: "welcome", content: "blah blah", created_at: "2012-08-26 11:30:50", updated_at: "2012-08-26 11:50:27", order: nil>]
+    user=>
+
 ## TODO
 
 See [TODO](https://github.com/unnali/rouge/blob/master/TODO), but big ones
