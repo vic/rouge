@@ -2,6 +2,18 @@
 
 Ruby + Clojure = Rouge.
 
+## quickstart
+
+Rouge is not yet mature enough to have an installer or distributions.  Just
+clone the source and run the `rouge` script to start:
+
+    git clone git://github.com/unnali/rouge
+    cd rouge
+    bundle install
+    bin/rouge
+
+You'll see the `user=>` prompt.  Enjoy!
+
 ## example
 
 See [boot.rg](https://github.com/unnali/rouge/blob/master/lib/boot.rg),
